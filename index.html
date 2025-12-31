@@ -2,152 +2,243 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: Cafe Mission</title>
+<title>WHISKER BYTES: Endless Cafe</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
-  html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', Courier, monospace; }
-  canvas { display: block; }
-  #overlay { position: fixed; inset: 0; background: rgba(107, 62, 46, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 20px; text-align: center; color: white; }
-  .title { font-size: 2rem; font-weight: bold; margin-bottom: 10px; color: #ffc0cb; text-shadow: 2px 2px #4a2c2a; }
-  .char-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-  .char-btn { background: #fff; border: 3px solid #6b3e2e; border-radius: 15px; padding: 10px; cursor: pointer; color: #6b3e2e; }
-  .char-btn img { width: 60px; height: 60px; object-fit: contain; }
-  #controls { position: fixed; bottom: 0; left: 0; width: 100%; height: 100px; background: #4a2c2a; display: none; justify-content: center; align-items: center; gap: 20px; z-index: 100; }
-  button { font-size: 30px; width: 70px; height: 70px; border-radius: 15px; border: none; background: white; touch-action: manipulation; }
-  #stats { position: fixed; top: 10px; left: 20px; font-size: 20px; color: #4a2c2a; font-weight: bold; z-index: 100; display: none; }
+  :root { --dark-wood: #4a2c2a; --pink: #ffc0cb; }
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', Courier, monospace; position: fixed; width: 100%; height: 100%; }
+  canvas { display: block; touch-action: none; }
+  
+  /* UI OVERLAYS */
+  #overlay { position: fixed; inset: 0; background: rgba(74, 44, 42, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; text-align: center; }
+  .title { font-size: 2.2rem; color: var(--pink); text-shadow: 2px 2px #000; margin-bottom: 20px; }
+  .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: var(--dark-wood); font-weight: bold; }
+  .btn-select img { width: 80px; height: 80px; object-fit: contain; display: block; }
+
+  #stats { position: fixed; top: 10px; left: 10px; z-index: 100; display: none; }
+  #meter-wrap { width: 150px; height: 15px; background: rgba(255,255,255,0.5); border: 2px solid var(--dark-wood); border-radius: 10px; overflow: hidden; margin-top: 5px; }
+  #sushi-bar { width: 0%; height: 100%; background: var(--pink); transition: width 0.3s; }
+
+  #controls { position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; background: var(--dark-wood); display: none; justify-content: space-around; align-items: center; z-index: 500; }
+  .ctrl-btn { width: 65px; height: 65px; border-radius: 15px; border: none; background: white; font-size: 28px; touch-action: manipulation; }
+  #meow-btn { background: var(--pink); }
+
+  #msg-box { position: fixed; top: 50px; left: 50%; transform: translateX(-50%); background: white; border: 2px solid var(--dark-wood); padding: 5px 15px; border-radius: 20px; display: none; font-weight: bold; }
 </style>
 </head>
 <body>
 
 <div id="overlay">
   <div class="title">WHISKER BYTES</div>
-  <p>SELECT YOUR CAT</p>
+  <p>CHOOSE YOUR CAT</p>
   <div class="char-grid">
-    <div class="char-btn" onclick="selectChar('mochi')"><img src="mochi_idle.png"><p>Mochi</p></div>
-    <div class="char-btn" onclick="selectChar('jinx')"><img src="jinx_idle.png"><p>Jinx</p></div>
+    <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
+    <div class="btn-select" onclick="startGame('jinx')"><img src="jinx_idle.png">JINX</div>
   </div>
 </div>
 
-<div id="stats">SUSHI COLLECTED: <span id="scoreVal">0</span></div>
+<div id="stats">
+  <b>SUSHI: <span id="scoreVal">0</span></b>
+  <div id="meter-wrap"><div id="sushi-bar"></div></div>
+</div>
+<div id="msg-box"></div>
+
 <canvas id="game"></canvas>
 
 <div id="controls">
-  <button id="left">⬅️</button>
-  <button id="jump">⬆️</button>
-  <button id="right">➡️</button>
-  <button onclick="location.reload()">🎬</button>
+  <button class="ctrl-btn" id="btn-left">⬅️</button>
+  <button class="ctrl-btn" id="btn-jump">⬆️</button>
+  <button class="ctrl-btn" id="btn-right">➡️</button>
+  <button class="ctrl-btn" id="meow-btn" onclick="meow()">📢</button>
+  <button class="ctrl-btn" onclick="saveGame()">💾</button>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-
-let gameState = "START", cameraX = 0, score = 0;
-const worldWidth = 3000;
-const ROAD_H = 100; 
-let groundY;
-
+const ROAD_H = 100;
+let groundY, cameraX = 0, score = 0, gameState = "START";
+let worldWidth = 3000;
+let bgPattern = new Image();
 const catImg = new Image();
-function selectChar(cat) {
+
+// Game Objects
+let honeycombs = [], sushi = [], ghostTrail = [];
+const player = { x: 500, y: 0, vy: 0, jumping: false, dir: 1, speed: 7, dashTimer: 0, jumpCount: 0 };
+const customer = { x: 1200, y: 350, name: "Alice", msg: "Waiting for coffee... ☕", timer: 0, done: false };
+
+// Input
+let keys = { left: false, right: false, jump: false };
+let lastTap = { dir: null, time: 0 };
+
+function startGame(cat) {
   catImg.src = cat + "_idle.png";
+  bgPattern.src = 'IMG_2480.jpeg';
   document.getElementById('overlay').style.display = 'none';
   document.getElementById('controls').style.display = 'flex';
   document.getElementById('stats').style.display = 'block';
-  gameState = "PLAY";
+  gameState = "CAFE";
+  initWorld();
+  loadGame(); // Load previous progress if exists
 }
 
-// Background Pattern
-const bgPattern = new Image();
-bgPattern.src = 'IMG_2480.jpeg';
-
-// Generate Designer Layout
-const honeycombs = Array.from({length: 10}, () => ({ x: Math.random() * worldWidth, y: 150 + Math.random() * 200 }));
-const sushi = Array.from({length: 15}, () => ({ x: Math.random() * worldWidth, type: ["🍣","🍤","🍙"][Math.floor(Math.random()*3)], collected: false }));
-
-const player = { x: 500, y: 0, vy: 0, jumping: false, dir: 1, speed: 6 };
+function initWorld() {
+  honeycombs = Array.from({length: 8}, () => ({ x: Math.random() * worldWidth, y: 250 + Math.random() * 200 }));
+  sushi = Array.from({length: 12}, () => ({ x: Math.random() * worldWidth, type: ["🍣","🍤","🍙"][Math.floor(Math.random()*3)], collected: false }));
+}
 
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  groundY = canvas.height - ROAD_H - 100;
+  groundY = canvas.height - ROAD_H - 120;
   player.y = groundY;
 }
 window.addEventListener("resize", resize); resize();
 
-let keys = { left: false, right: false, jump: false };
+// Button Binding
 function bind(id, k) {
   const btn = document.getElementById(id);
-  btn.ontouchstart = (e) => { e.preventDefault(); keys[k] = true; };
-  btn.ontouchend = (e) => { e.preventDefault(); keys[k] = false; };
+  btn.ontouchstart = (e) => {
+    e.preventDefault();
+    keys[k] = true;
+    let now = Date.now();
+    if(k === lastTap.dir && (now - lastTap.time) < 250) player.dashTimer = 15;
+    lastTap = { dir: k, time: now };
+  };
+  btn.ontouchend = () => { keys[k] = false; };
 }
-bind("left", "left"); bind("right", "right"); bind("jump", "jump");
+bind("btn-left", "left"); bind("btn-right", "right"); bind("btn-jump", "jump");
+
+function meow() {
+  player.meowTimer = 60;
+  let d = Math.abs(player.x - customer.x);
+  if(d < 200) customer.timer += 40; // Bonus for meowing near NPC
+}
 
 function update() {
-  if (gameState !== "PLAY") return;
+  if (gameState === "START") return;
 
-  if (keys.left) { player.x -= player.speed; player.dir = -1; }
-  if (keys.right) { player.x += player.speed; player.dir = 1; }
+  // Movement Logic
+  let speed = (player.dashTimer > 0) ? 20 : player.speed;
+  if (player.dashTimer > 0) {
+    player.dashTimer--;
+    ghostTrail.push({x: player.x, y: player.y, dir: player.dir, a: 0.5});
+  }
+  if (ghostTrail.length > 5) ghostTrail.shift();
+  ghostTrail.forEach(g => g.a -= 0.05);
+
+  if (keys.left) { player.x -= speed; player.dir = -1; }
+  if (keys.right) { player.x += speed; player.dir = 1; }
   
-  // Jump logic
-  if (keys.jump && !player.jumping) { player.vy = -18; player.jumping = true; }
-  player.vy += 0.8; 
-  player.y += player.vy;
+  // Jump/Gravity
+  if (keys.jump) {
+    if (!player.jumping) { player.vy = -18; player.jumping = true; player.jumpCount = 1; }
+    else if (player.jumpCount === 1) { player.vy = -14; player.jumpCount = 2; }
+    keys.jump = false;
+  }
+  player.vy += 0.8; player.y += player.vy;
+  if (player.y > groundY) { player.y = groundY; player.vy = 0; player.jumping = false; player.jumpCount = 0; }
 
-  if (player.y > groundY) { player.y = groundY; player.vy = 0; player.jumping = false; }
-
-  // Loop world
+  // Endless Loop
   if (player.x < 0) player.x = worldWidth;
   if (player.x > worldWidth) player.x = 0;
 
-  // Sushi collection
+  cameraX = player.x - canvas.width / 2;
+
+  // Score/Sushi
   sushi.forEach(s => {
-    if(!s.collected && Math.abs(player.x - s.x) < 40 && Math.abs(player.y - groundY) < 50) {
+    if(!s.collected && Math.abs(player.x - s.x) < 50 && Math.abs(player.y - groundY) < 50) {
       s.collected = true; score++;
-      document.getElementById('scoreVal').innerText = score;
+      updateUI();
     }
   });
 
-  cameraX = player.x - canvas.width / 2;
+  // NPC Interaction
+  let dToNpc = Math.sqrt((player.x - customer.x)**2 + (player.y - customer.y)**2);
+  if(dToNpc < 150 && !customer.done) {
+    customer.timer++;
+    if(customer.timer >= 180) { customer.done = true; score += 10; updateUI(); }
+  }
+  
+  if(score >= 30 && gameState === "CAFE") {
+    document.getElementById('msg-box').style.display = "block";
+    document.getElementById('msg-box').innerText = "DOOR UNLOCKED! FIND THE EXIT ➡️";
+    if(player.x > 2800) enterAdoption();
+  }
 }
 
-function drawHex(x, y) {
-  ctx.fillStyle = "#4a2c2a";
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    ctx.lineTo(x + 50 * Math.cos(i * Math.PI / 3), y + 50 * Math.sin(i * Math.PI / 3));
-  }
-  ctx.closePath(); ctx.fill();
+function updateUI() {
+  document.getElementById('scoreVal').innerText = score;
+  document.getElementById('sushi-bar').style.width = Math.min((score/30)*100, 100) + "%";
+}
+
+function enterAdoption() {
+  gameState = "ADOPTION";
+  bgPattern.src = 'IMG_2475.jpeg';
+  player.x = 200;
+  document.getElementById('msg-box').innerText = "ADOPTION OFFICE: PURR FOR THE AGENT!";
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (gameState === "START") return;
-
-  // Draw Background (Seamless Loop)
-  const bgX = -(cameraX * 0.5) % canvas.width;
+  
+  // BG
+  let bgX = -(cameraX * 0.4) % canvas.width;
   ctx.drawImage(bgPattern, bgX, 0, canvas.width, canvas.height);
   ctx.drawImage(bgPattern, bgX + canvas.width, 0, canvas.width, canvas.height);
 
-  // Draw Floor
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, groundY + 80, canvas.width, 200);
-  ctx.strokeStyle = "#4a2c2a"; ctx.lineWidth = 5;
-  ctx.strokeRect(-10, groundY + 80, canvas.width + 20, 5);
+  // Floor
+  ctx.fillStyle = "white"; ctx.fillRect(0, groundY + 80, canvas.width, 300);
+  ctx.strokeStyle = "var(--dark-wood)"; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(0, groundY + 80); ctx.lineTo(canvas.width, groundY + 80); ctx.stroke();
 
-  // Draw Items (relative to camera)
-  honeycombs.forEach(h => drawHex(h.x - cameraX, h.y));
-  sushi.forEach(s => {
-    if(!s.collected) {
-      ctx.font = "30px serif";
-      ctx.fillText(s.type, s.x - cameraX, groundY + 70);
-    }
+  // Draw Items
+  honeycombs.forEach(h => {
+    ctx.fillStyle = "var(--dark-wood)";
+    ctx.beginPath();
+    for(let i=0; i<6; i++) ctx.lineTo(h.x-cameraX + 50*Math.cos(i*Math.PI/3), h.y + 50*Math.sin(i*Math.PI/3));
+    ctx.closePath(); ctx.fill();
   });
 
-  // Draw Player
+  sushi.forEach(s => { if(!s.collected) ctx.fillText(s.type, s.x - cameraX - 15, groundY + 70); });
+
+  // NPC
+  ctx.font = "50px serif";
+  ctx.fillText("👩‍🦱", customer.x - cameraX - 25, customer.y);
+  if(customer.timer > 0 && !customer.done) {
+    ctx.beginPath(); ctx.arc(customer.x-cameraX, customer.y-60, 20, 0, (customer.timer/180)*Math.PI*2);
+    ctx.strokeStyle = "pink"; ctx.lineWidth = 5; ctx.stroke();
+  }
+
+  // Ghost Trail
+  ghostTrail.forEach(g => {
+    ctx.save(); ctx.globalAlpha = g.a; ctx.translate(g.x-cameraX, g.y);
+    if(g.dir === -1) ctx.scale(-1, 1);
+    ctx.drawImage(catImg, -45, 0, 90, 90); ctx.restore();
+  });
+
+  // Player
   ctx.save();
-  if (player.dir === -1) { ctx.translate(player.x - cameraX + 40, 0); ctx.scale(-1, 1); ctx.drawImage(catImg, 0, player.y, 80, 80); }
-  else { ctx.drawImage(catImg, player.x - cameraX - 40, player.y, 80, 80); }
+  ctx.translate(player.x - cameraX, player.y);
+  if(player.dir === -1) ctx.scale(-1, 1);
+  ctx.drawImage(catImg, -45, 0, 90, 90);
   ctx.restore();
+}
+
+function saveGame() {
+  const data = { score, gameState, cat: catImg.src };
+  localStorage.setItem("WhiskerBytesSave", JSON.stringify(data));
+  alert("Progress Saved! 💾");
+}
+
+function loadGame() {
+  const saved = localStorage.getItem("WhiskerBytesSave");
+  if(saved) {
+    const data = JSON.parse(saved);
+    score = data.score; updateUI();
+  }
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
