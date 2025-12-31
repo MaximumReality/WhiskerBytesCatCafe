@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: STICKY FIX</title>
+<title>WHISKER BYTES: CLEAN UI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -67,8 +67,7 @@
             <h2>🐾 Whisker Bytes</h2>
             <p><strong>Created by</strong><br>Lori Kaye Sifuentes</p>
             <p><strong>Customer Sprites Inspired By</strong><br>Luna & Stella 💖</p>
-            <p><strong>Dev Note</strong><br>Whisker Bytes was made with love and HTML magic. Thank you for visiting—paws up! 🐾</p>
-            <p class="soft">Made with love, cats, and imagination.</p>
+            <p><strong>Dev Note</strong><br>Whisker Bytes was made with love and HTML magic. Paws up! 🐾</p>
         </div>
     </div>
 </div>
@@ -124,6 +123,7 @@ function triggerPopup(amt) {
 function openCredits() {
     const content = document.getElementById("credits-scroller");
     const today = new Date();
+    // Only show New Year Banner if it's actually NYE
     if(today.getMonth() === 11 && today.getDate() === 31) document.getElementById('ny-banner').style.display='block';
     content.style.animation = "none"; void content.offsetWidth; 
     content.style.animation = "scrollCredits 15s linear forwards"; 
@@ -142,7 +142,6 @@ window.startGame = function(catId) {
     player.traits.luckBonus = (catId === 'jinx') ? 0.15 : 0;
     player.cookTime = (catId === 'mochi') ? 40 : 80;
 
-    // RAISED TABLE AREA
     const tableY = canvas.height - (SAFE_BOTTOM_PADDING + 60);
 
     furniture = [
@@ -201,16 +200,13 @@ function update() {
     if (!gameActive) return;
     const BOT_LIMIT = canvas.height - SAFE_BOTTOM_PADDING;
     
-    // Strict Movement Logic
     if (!kitchen.active) {
         if (keys.up) player.y -= player.speed;
         else if (keys.down) player.y += player.speed;
-        
         if (keys.left) { player.x -= player.speed; player.facing = -1; }
         else if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
     
-    // Hard Collisions
     player.y = Math.max(FLOOR_TOP + 30, Math.min(BOT_LIMIT, player.y));
     player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
 
@@ -221,7 +217,9 @@ function update() {
 
     gameMinutes += 0.1;
     if (gameMinutes >= 1200 && !isRushHour) { isRushHour = true; document.getElementById('rushTag').style.display = 'inline'; }
-    if(gameMinutes >= 1260) { gameActive = false; localStorage.setItem("whiskerBytesHigh", highScore); openCredits(); return; }
+    
+    // END OF SHIFT: Just stop game, no auto-popup.
+    if(gameMinutes >= 1260) { gameActive = false; localStorage.setItem("whiskerBytesHigh", highScore); return; }
 
     if (Math.random() < (isRushHour ? 0.015 : 0.005)) spawnCustomer();
     
