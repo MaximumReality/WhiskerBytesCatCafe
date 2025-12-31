@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: CLEAN COUNTER</title>
+<title>WHISKER BYTES: TRASH DUTY</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; }
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
     canvas { display: block; touch-action: none; background: var(--floor); width: 100vw; height: 100vh; }
     
-    #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2480.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; }
+    /* WELCOME SCREEN - USES IMG_2475.jpeg */
+    #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; }
     #overlay::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
     .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 10; }
     .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; }
@@ -63,6 +64,7 @@ const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540;
 let playerHolding = null, tvActive = false, criticActive = false;
 let payEffect = { active: false, x: 0, y: 0, t: "" };
+let trashCount = 0; // New Trash Tracker
 const keys = { up: false, down: false, left: false, right: false };
 
 const catImg = new Image(), bgImg = new Image();
@@ -76,7 +78,7 @@ let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: n
 function startGame(catId) {
     player.name = catId;
     catImg.src = catId + '_idle.png';
-    bgImg.src = 'IMG_2480.jpeg';
+    bgImg.src = 'IMG_2480.jpeg'; // CAFE WALLPAPER
     player.speed = (catId === 'gingerella') ? 8 : 5;
     player.cookTime = (catId === 'mochi') ? 45 : 90;
 
@@ -106,13 +108,30 @@ function interact() {
     furniture.forEach(f => {
         let d = Math.hypot(player.x - f.x, player.y - f.y);
         if (d < 70) {
-            if (f.type === "TRASH" && playerHolding) {
-                playerHolding = null; score -= 5;
-                document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
-                payEffect = { active: true, x: f.x, y: f.y, t: "-5", life: 30 };
+            // Trash Logic
+            if (f.type === "TRASH") {
+                if (playerHolding === "🥡") { // Emptying full bag
+                    playerHolding = null; trashCount = 0; f.e = "🗑️";
+                    document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
+                } else if (playerHolding && trashCount < 5) {
+                    playerHolding = null; score -= 5; trashCount++;
+                    if(trashCount >= 5) f.e = "🥡"; // Mark as full
+                    document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
+                    payEffect = { active: true, x: f.x, y: f.y, t: "-5", life: 30 };
+                } else if (trashCount >= 5 && !playerHolding) {
+                    playerHolding = "🥡"; f.e = "⭕"; // Pick up bag
+                    document.getElementById('holdingTxt').innerText = "Holding: Full Trash";
+                }
                 return;
             }
-            if (f.type === "STATION") {
+            // Window Disposal (Dump bag)
+            if (f.type === "WINDOW" && playerHolding === "🥡") {
+                playerHolding = null; trashCount = 0;
+                document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
+                // Reset trash can icon
+                let bin = furniture.find(t => t.type === "TRASH"); if(bin) bin.e = "🗑️";
+            }
+            if (f.type === "STATION" && playerHolding !== "🥡") {
                 kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item;
             }
             if (f.type === "TV") tvActive = !tvActive;
@@ -159,7 +178,6 @@ function update() {
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    // WALL vs FLOOR Logic
     if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 240);
     ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 240, canvas.width, canvas.height-240);
     ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 235, canvas.width, 10);
