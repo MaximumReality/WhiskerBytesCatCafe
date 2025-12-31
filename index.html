@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: DIRECTION FIX</title>
+<title>WHISKER BYTES: STAFF MANUAL EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -17,14 +17,14 @@
     .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; font-size: 13px; font-weight: bold; }
     .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
 
-    #credits { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; }
-    .credits-box { background: #fff8f2; border: 4px solid var(--wood); border-radius: 18px; width: 85%; max-width: 320px; height: 350px; text-align: center; color: #4a2c2a; position: relative; overflow: hidden; }
-    .credits-content { position: absolute; left: 0; width: 100%; bottom: -110%; }
-    @keyframes scrollCredits { 0% { bottom: -110%; } 100% { bottom: 100%; } }
-    .close-credits { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    .credits-box { background: #fff8f2; border: 4px solid var(--wood); border-radius: 18px; width: 85%; max-width: 320px; height: 350px; text-align: center; color: #4a2c2a; position: relative; overflow: hidden; padding: 20px; }
+    .credits-content { position: absolute; left: 0; width: 100%; bottom: -110%; padding: 0 20px; box-sizing: border-box; }
+    
+    @keyframes scrollBox { 0% { bottom: -110%; } 100% { bottom: 100%; } }
+    .close-btn { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
 
     #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 13px; }
-    
     #day-over { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 20px 40px; border: 4px solid var(--gold); border-radius: 20px; font-size: 24px; font-weight: bold; z-index: 8000; display: none; text-align: center; box-shadow: 0 10px 0 #2d1b1a; }
 
     @keyframes sparkle {
@@ -55,20 +55,38 @@
         <div onpointerdown="startGame('luna')" class="btn-select"><img src="luna_idle.png">LUNA<br>Speed+</div>
         <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">JINX<br>Luck+</div>
     </div>
-    <div style="margin-top:20px; font-size:14px; color: white; text-decoration: underline; cursor: pointer;" onclick="openCredits()">🐾 Credits</div>
+    <div style="margin-top:20px; font-size:14px; color: white;">
+        <span style="text-decoration: underline; cursor: pointer;" onclick="openModal('instructions')">📖 How to Play</span> 
+        &nbsp; | &nbsp; 
+        <span style="text-decoration: underline; cursor: pointer;" onclick="openModal('credits')">🐾 Credits</span>
+    </div>
 </div>
 
 <div id="day-over">🐾 SHIFT OVER!<br><span style="font-size:16px;">See you tomorrow!</span></div>
 
-<div id="credits">
+<div id="credits-modal" class="modal-overlay">
     <div class="credits-box">
-        <button class="close-credits" onclick="closeCredits()">✕</button>
+        <button class="close-btn" onclick="closeModal('credits-modal')">✕</button>
         <div class="credits-content" id="credits-scroller">
             <h1 id="ny-banner" style="display:none; color:var(--rush);">✨ HAPPY NEW YEAR! ✨</h1>
             <h2>🐾 Whisker Bytes</h2>
             <p><strong>Created by</strong><br>Lori Kaye Sifuentes</p>
             <p><strong>Customer Sprites Inspired By</strong><br>Luna & Stella 💖</p>
-            <p><strong>Dev Note</strong><br>Whisker Bytes was made with love and HTML magic. Paws up! 🐾</p>
+            <p><strong>Dev Note</strong><br>Made with love and HTML magic.</p>
+        </div>
+    </div>
+</div>
+
+<div id="instructions-modal" class="modal-overlay">
+    <div class="credits-box">
+        <button class="close-btn" onclick="closeModal('instructions-modal')">✕</button>
+        <div class="credits-content" id="instruction-scroller">
+            <h2 style="color:var(--wood);">📖 Staff Manual</h2>
+            <p><strong>1. Move</strong><br>Use arrows to walk around.</p>
+            <p><strong>2. Cook</strong><br>Stand by a station & tap <strong>MEOW</strong>.</p>
+            <p><strong>3. Serve</strong><br>Deliver the order to the customer at the table.</p>
+            <p><strong>4. Clean</strong><br>Use the 🗑️ to clear your paws.</p>
+            <p><strong>5. Rush Hour</strong><br>Stay fast at 8:00 PM for extra tips!</p>
         </div>
     </div>
 </div>
@@ -112,35 +130,29 @@ const WALL_HEIGHT = 160;
 const FLOOR_TOP = 160;
 const SAFE_BOTTOM_PADDING = 160;
 
-function triggerPopup(amt) {
-    const el = document.createElement('div');
-    el.className = 'score-popup';
-    el.innerText = '+' + amt;
-    el.style.left = player.x + 'px'; el.style.top = (player.y - 40) + 'px';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 800);
+function openModal(type) {
+    const modalId = type === 'credits' ? 'credits-modal' : 'instructions-modal';
+    const scrollerId = type === 'credits' ? 'credits-scroller' : 'instruction-scroller';
+    const scroller = document.getElementById(scrollerId);
+    
+    if(type === 'credits') {
+        const today = new Date();
+        if(today.getMonth() === 11 && today.getDate() === 31) document.getElementById('ny-banner').style.display='block';
+    }
+
+    document.getElementById(modalId).style.display = 'flex';
+    scroller.style.animation = "none"; void scroller.offsetWidth; 
+    scroller.style.animation = `scrollBox ${type === 'credits' ? '15s' : '10s'} linear forwards`;
 }
 
-function openCredits() {
-    const content = document.getElementById("credits-scroller");
-    const today = new Date();
-    if(today.getMonth() === 11 && today.getDate() === 31) document.getElementById('ny-banner').style.display='block';
-    content.style.animation = "none"; void content.offsetWidth; 
-    content.style.animation = "scrollCredits 15s linear forwards"; 
-    document.getElementById('credits').style.display = 'flex';
-}
-
-function closeCredits() { document.getElementById('credits').style.display = 'none'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
 window.startGame = function(catId) {
     if (gameActive) return;
     catImg.src = catId + '_idle.png';
     bgImg.src = 'IMG_2480.jpeg'; 
-    
-    // ORIENTATION FIX: Mochi faces Right (1), everyone else faces Left (-1)
     player.baseFacing = (catId === 'mochi') ? 1 : -1;
     player.facing = player.baseFacing;
-
     player.speed = (catId === 'luna') ? 8 : 5;
     player.traits.tipBonus = (catId === 'gingerella') ? 20 : 0;
     player.traits.patienceBonus = (catId === 'mochi') ? 30 : 0;
@@ -206,14 +218,10 @@ function interact() {
 function update() {
     if (!gameActive) return;
     const BOT_LIMIT = canvas.height - SAFE_BOTTOM_PADDING;
-    
     if (!kitchen.active) {
-        if (keys.up) player.y -= player.speed;
-        else if (keys.down) player.y += player.speed;
-        if (keys.left) { player.x -= player.speed; player.facing = -1; }
-        else if (keys.right) { player.x += player.speed; player.facing = 1; }
+        if (keys.up) player.y -= player.speed; else if (keys.down) player.y += player.speed;
+        if (keys.left) { player.x -= player.speed; player.facing = -1; } else if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
-    
     player.y = Math.max(FLOOR_TOP + 35, Math.min(BOT_LIMIT, player.y));
     player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
 
@@ -224,22 +232,13 @@ function update() {
 
     gameMinutes += 0.1;
     if (gameMinutes >= 1200 && !isRushHour) { isRushHour = true; document.getElementById('rushTag').style.display = 'inline'; }
-    if(gameMinutes >= 1260) { 
-        gameActive = false; 
-        localStorage.setItem("whiskerBytesHigh", highScore); 
-        document.getElementById('day-over').style.display = 'block';
-        return; 
-    }
+    if(gameMinutes >= 1260) { gameActive = false; localStorage.setItem("whiskerBytesHigh", highScore); document.getElementById('day-over').style.display = 'block'; return; }
 
     if (Math.random() < (isRushHour ? 0.015 : 0.005)) spawnCustomer();
-    
     let boost = (tvActive && radioActive) ? 0.02 : (tvActive || radioActive) ? 0.03 : 0.07;
     customers.forEach(c => { c.patience -= boost; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
-
-    if (radioActive && Math.random() < 0.05) {
-        musicNotes.push({ x: 50, y: 300, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
-    }
+    if (radioActive && Math.random() < 0.05) musicNotes.push({ x: 50, y: 300, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
     musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i, 1); });
     if(tvActive) toonFrame = (toonFrame + 0.05) % 2;
 }
@@ -250,41 +249,23 @@ function draw() {
     ctx.fillStyle = isRushHour ? "rgba(255, 0, 127, 0.1)" : "#d2b48c";
     ctx.fillRect(0, FLOOR_TOP, canvas.width, canvas.height - FLOOR_TOP);
     ctx.fillStyle = "#5d4037"; ctx.fillRect(0, FLOOR_TOP - 5, canvas.width, 10);
-    
     furniture.forEach(f => {
-        if((f.type === "RADIO" && radioActive) || (f.type === "TV" && tvActive)) {
-            ctx.shadowBlur = 15; ctx.shadowColor = "gold";
-        }
+        if((f.type === "RADIO" && radioActive) || (f.type === "TV" && tvActive)) { ctx.shadowBlur = 15; ctx.shadowColor = "gold"; }
         ctx.font = "38px Arial"; ctx.fillText(f.e, f.x-19, f.y+15);
         ctx.shadowBlur = 0;
-        if(f.type === "TV" && tvActive) {
-            ctx.fillStyle = "black"; ctx.font = "8px Arial";
-            ctx.fillText(Math.floor(toonFrame) === 0 ? "^.^" : "-.-", f.x-8, f.y+5);
-        }
         if(f.type === "STATION") { ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 8); }
     });
-
-    musicNotes.forEach(n => {
-        ctx.fillStyle = `rgba(212, 175, 55, ${n.life/50})`;
-        ctx.font = "20px Arial"; ctx.fillText(n.char, n.x, n.y);
-    });
-
     customers.forEach(c => {
         if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
         ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+30, c.y-30, 18, 0, 7); ctx.fill();
         ctx.fillStyle="black"; ctx.font="18px Arial"; ctx.fillText(c.order, c.x+21, c.y-24);
         ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
     });
-
-    ctx.save(); 
-    ctx.translate(player.x, player.y);
-    // SMART FLIP: If the current direction doesn't match the image's original facing, flip it.
+    ctx.save(); ctx.translate(player.x, player.y);
     if(player.facing !== player.baseFacing) ctx.scale(-1, 1);
     if(catImg.complete) ctx.drawImage(catImg, -35, -35, 70, 70);
     ctx.restore();
-
     if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-35, player.y-55, (kitchen.timer/player.cookTime)*70, 8); }
-    document.getElementById('scoreVal').innerText = score;
     let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
     document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
 }
@@ -298,6 +279,12 @@ function spawnCustomer() {
         if (isC) criticActive = true;
         customers.push({ x: chair.x, y: chair.y, chair: chair, order: menu[Math.floor(Math.random() * menu.length)], patience: 100 + player.traits.patienceBonus, isCritic: isC, img: isC ? criticImg : (Math.random()>0.5?f1:f2) });
     }
+}
+
+function triggerPopup(amt) {
+    const el = document.createElement('div'); el.className = 'score-popup'; el.innerText = '+' + amt;
+    el.style.left = player.x + 'px'; el.style.top = (player.y - 40) + 'px';
+    document.body.appendChild(el); setTimeout(() => el.remove(), 800);
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
