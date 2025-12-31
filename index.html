@@ -3,96 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Whisker Bytes: Side-Scroller</title>
+  <title>Whisker Bytes: Honeycomb Lounge</title>
   <style>
     :root {
-      --brown: #6b3e2e;
-      --shelf-color: rgba(255, 255, 255, 0.4);
+      --dark-wood: #4a2c2a;
+      --light-wood: #6b3e2e;
+      --shelf-accent: #d2b48c;
     }
 
     html, body {
       margin: 0; padding: 0;
       width: 100%; height: 100%;
       overflow: hidden; position: fixed;
+    }
+
+    /* Scrolling Viewport */
+    #viewport {
+      width: 100vw; height: 100vh;
+      overflow-x: auto; overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
       background-color: #f7d2c4;
     }
 
-    /* THE CAMERA: A window that hides the extra width */
-    #viewport {
-      width: 100vw;
-      height: 100vh;
-      overflow-x: auto; /* Allows side-scrolling on iPhone */
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* THE ROOM: Twice as wide as the screen */
     #room {
-      width: 200vw; 
+      width: 250vw; /* Extra long room for more decor */
       height: 100%;
-      background-image: url('IMG_2480.jpeg');
-      background-repeat: repeat-x;
+      background: url('IMG_2480.jpeg') repeat-x;
       background-size: contain;
       position: relative;
     }
 
-    /* MOBILE-SAFE FLOOR: Also 200% wide */
-    #floor-scroll {
+    /* THE HONEYCOMB HEXAGON SHELVES */
+    .honeycomb {
       position: absolute;
-      bottom: 0;
-      width: 200vw;
-      height: 20%;
-      background: white;
-      border-top: 5px solid var(--brown);
+      width: 120px;
+      height: 104px;
+      background-color: var(--dark-wood);
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
       display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+      z-index: 20;
+    }
+    
+    /* Inner "Carved" look */
+    .honeycomb::after {
+      content: '';
+      width: 90%; height: 90%;
+      background: rgba(0,0,0,0.2);
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
     }
 
-    .tile {
-      flex: 0 0 10%; /* 10% of viewport width per tile */
-      height: 100%;
-      background-size: cover;
-    }
-
-    .tile:nth-child(odd) { background-image: url('tile1.png'); }
-    .tile:nth-child(even) { background-image: url('tile2.png'); }
-
-    /* Interactive Elements */
-    .shelf {
+    /* FLAT WOODEN STEPS */
+    .wood-step {
       position: absolute;
-      background: var(--shelf-color);
-      height: 14px;
-      border-radius: 15px;
-      border: 1px solid white;
+      background: linear-gradient(to bottom, var(--light-wood), var(--dark-wood));
+      height: 12px;
+      border-radius: 4px;
+      border-bottom: 3px solid rgba(0,0,0,0.3);
       z-index: 20;
     }
 
+    /* MOBILE-SAFE FLOOR */
+    #floor-scroll {
+      position: absolute;
+      bottom: 0; width: 250vw; height: 18%;
+      background: #fff; border-top: 6px solid var(--dark-wood);
+      display: flex; z-index: 100;
+    }
+
+    .tile { flex: 0 0 8%; height: 100%; background-size: cover; }
+    .tile:nth-child(odd) { background-image: url('tile1.png'); }
+    .tile:nth-child(even) { background-image: url('tile2.png'); }
+
+    /* The Cats */
     .cat {
       position: absolute;
-      width: 100px;
-      height: 100px;
+      width: 90px; height: 90px;
       z-index: 150;
-      transition: all 0.6s ease-out;
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
     }
-
     .cat img { width: 100%; height: 100%; object-fit: contain; }
 
-    /* UI locked to the screen, not the scrolling room */
-    #ui-fixed {
-      position: fixed;
-      bottom: 22%;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      z-index: 1000;
+    /* UI FIXED TO SCREEN */
+    #ui {
+      position: fixed; bottom: 20%; width: 100%;
+      display: flex; justify-content: center; gap: 10px; z-index: 1000;
     }
-
     button {
-      padding: 10px 15px;
-      border-radius: 20px;
-      border: 2px solid var(--brown);
-      background: rgba(255,255,255,0.9);
-      font-weight: bold;
+      padding: 10px 18px; border-radius: 20px;
+      border: 2px solid var(--dark-wood);
+      background: #fff; font-weight: bold; font-family: inherit;
     }
   </style>
 </head>
@@ -100,49 +103,56 @@
 
   <div id="viewport">
     <div id="room">
-      <div class="shelf" style="top: 25%; left: 10%; width: 150px;" onclick="pounce('10%', '25%')"></div>
-      <div class="shelf" style="top: 50%; left: 30%; width: 150px;" onclick="pounce('30%', '50%')"></div>
       
-      <div class="shelf" style="top: 20%; left: 110%; width: 150px;" onclick="pounce('110%', '20%')"></div>
-      <div class="shelf" style="top: 45%; left: 150%; width: 150px;" onclick="pounce('150%', '45%')"></div>
+      <div class="honeycomb" style="top: 15%; left: 10%;" onclick="pounce(10, 15, true)"></div>
+      <div class="wood-step" style="top: 40%; left: 5%; width: 80px;" onclick="pounce(5, 40, false)"></div>
+      <div class="wood-step" style="top: 55%; left: 15%; width: 80px;" onclick="pounce(15, 55, false)"></div>
 
-      <div id="main-cat" class="cat" style="left: 15%; top: 78%;">
+      <div class="honeycomb" style="top: 25%; left: 110%;" onclick="pounce(110, 25, true)"></div>
+      <div class="honeycomb" style="top: 25%; left: 135%;" onclick="pounce(135, 25, true)"></div>
+      <div class="wood-step" style="top: 60%; left: 120%; width: 120px;" onclick="pounce(120, 60, false)"></div>
+
+      <div class="wood-step" style="top: 30%; left: 210%; width: 100px;" onclick="pounce(210, 30, false)"></div>
+      <div class="honeycomb" style="top: 50%; left: 220%;" onclick="pounce(220, 50, true)"></div>
+
+      <div id="active-cat" class="cat" style="left: 10%; top: 75%;">
         <img src="mochi_idle.png" id="cat-img">
       </div>
 
-      <div id="floor-scroll">
-        </div>
+      <div id="floor-scroll"></div>
     </div>
   </div>
 
-  <div id="ui-fixed">
-    <button onclick="scrollToArea(0)">Left Side</button>
-    <button onclick="scrollToArea(1)">Right Side</button>
-    <button onclick="pounce('50%', '78%')">Down 🐾</button>
+  <div id="ui">
+    <button onclick="changeCat('mochi_idle.png')">Mochi</button>
+    <button onclick="changeCat('jinx_idle.png')">Jinx</button>
+    <button onclick="pounce(10, 75, false)">Floor 🐾</button>
   </div>
 
   <script>
-    // Create tiles for the 200% width floor
+    // Build long floor
     const floor = document.getElementById('floor-scroll');
-    for(let i=0; i<20; i++) {
+    for(let i=0; i<32; i++) {
       const t = document.createElement('div');
       t.className = 'tile';
       floor.appendChild(t);
     }
 
-    function pounce(x, y) {
-      const cat = document.getElementById('main-cat');
-      cat.style.left = x;
-      cat.style.top = (parseInt(y) - 10) + "%";
+    function pounce(x, y, isHex) {
+      const cat = document.getElementById('active-cat');
+      cat.style.left = x + "vw";
+      
+      // If it's a hex, center the cat inside. If a step, sit on top.
+      if(isHex) {
+        cat.style.top = (y + 1) + "%";
+        cat.style.left = (x + 1) + "vw";
+      } else {
+        cat.style.top = (y - 9) + "%";
+      }
     }
 
-    function scrollToArea(side) {
-      const view = document.getElementById('viewport');
-      const width = window.innerWidth;
-      view.scrollTo({
-        left: side * width,
-        behavior: 'smooth'
-      });
+    function changeCat(src) {
+      document.getElementById('cat-img').src = src;
     }
   </script>
 </body>
