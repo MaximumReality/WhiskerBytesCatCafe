@@ -32,7 +32,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    #cat-animation img {
+    #cat-animation img, #feeder-animation img, #hide-seek-animation img {
       display: block;
       margin: 10px auto;
     }
@@ -42,7 +42,6 @@
       body { font-size: 14px; }
       header { padding: 10px; }
       section { margin: 20px; padding: 10px; }
-      #cat-feeder, #cat-lounge-games { flex-direction: column; }
       button { width: 100%; margin-top: 5px; }
     }
     @media only screen and (max-width: 480px) {
@@ -107,27 +106,46 @@
     <div id="cat-animation" style="height:100px; margin-top:10px;"></div>
   </section>
 
+  <!-- Virtual Cat Feeder -->
+  <section id="cat-feeder">
+    <h2>Feed Our Feline Friends!</h2>
+    <button id="feed-btn">Dispense Treats</button>
+    <div id="feeder-animation"></div>
+  </section>
+
+  <!-- Hide-and-Seek Game -->
+  <section id="hide-seek">
+    <h2>Play Hide-and-Seek!</h2>
+    <button id="hide-seek-btn">Start Game</button>
+    <div id="hide-seek-animation"></div>
+  </section>
+
+  <!-- Azul-style AI Chat Section -->
+  <section id="azul-chat">
+    <h2>Chat with Azul the Cat!</h2>
+    <div id="chat-window" style="border:1px solid #ccc; height:200px; overflow-y:auto; padding:5px; background:#fefefe;"></div>
+    <input type="text" id="chat-input" placeholder="Ask Azul something..." style="width:80%;">
+    <button id="chat-send">Send</button>
+  </section>
+
   <script>
-    // Adoption Button
+    // --- Adoption Scripts ---
     document.getElementById("adopt-btn").addEventListener("click", function() {
       const info = document.getElementById("adoption-info");
       info.style.display = (info.style.display === "none") ? "block" : "none";
     });
-
-    // Adoption Form Submission
     document.getElementById("submit-adoption").addEventListener("click", function(e){
       e.preventDefault();
       document.getElementById("submission-message").style.display = "block";
     });
 
-    // Cat Stats
+    // --- Cat Interaction Game ---
     const cats = {
       Mochi: { hunger: 50, happiness: 50, energy: 50 },
       Luna: { hunger: 50, happiness: 50, energy: 50 },
       Jinx: { hunger: 50, happiness: 50, energy: 50 },
       Gingerella: { hunger: 50, happiness: 50, energy: 50 }
     };
-
     const catSelect = document.getElementById("cat-select");
     const catStatus = document.getElementById("cat-status");
     const catAnimation = document.getElementById("cat-animation");
@@ -191,6 +209,47 @@
 
     updateStatus(catSelect.value);
     catSelect.addEventListener("change", ()=>updateStatus(catSelect.value));
+
+    // --- Virtual Cat Feeder ---
+    document.getElementById("feed-btn").addEventListener("click", function() {
+      const feederAnim = document.getElementById("feeder-animation");
+      feederAnim.innerHTML = "<img src='images/treats.gif' width='100px'>";
+      setTimeout(()=>{ feederAnim.innerHTML=""; }, 2000);
+    });
+
+    // --- Hide-and-Seek Game ---
+    document.getElementById("hide-seek-btn").addEventListener("click", function() {
+      const hideSeekDiv = document.getElementById("hide-seek-animation");
+      hideSeekDiv.innerHTML = "<img src='images/hiding-cat.gif' width='100px'>";
+      setTimeout(()=>{ hideSeekDiv.innerHTML = "<img src='images/found-cat.gif' width='100px'>"; }, 3000);
+    });
+
+    // --- Azul Chatbot Simulation ---
+    const chatWindow = document.getElementById("chat-window");
+    const chatInput = document.getElementById("chat-input");
+    const chatSend = document.getElementById("chat-send");
+
+    const azulResponses = {
+      hello: "Tilts head thoughtfully. Hello, curious mind! What adventure shall we explore today?",
+      javascript: "Purrs! JavaScript makes websites interactive. Want to create a simple game or learn events?",
+      math: "Math is like cat hair—everywhere! What’s tangling your whiskers today?",
+      default: "Purrs curiously. I don’t quite know that yet, but I’m eager to explore with you!"
+    };
+
+    chatSend.addEventListener("click", ()=>{
+      const userText = chatInput.value.trim();
+      if(!userText) return;
+      chatWindow.innerHTML += `<div><strong>You:</strong> ${userText}</div>`;
+      chatInput.value = "";
+      let response = azulResponses.default;
+      for(const key in azulResponses){
+        if(userText.toLowerCase().includes(key)){
+          response = azulResponses[key];
+        }
+      }
+      chatWindow.innerHTML += `<div><strong>Azul:</strong> ${response}</div>`;
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    });
   </script>
 </body>
 </html>
