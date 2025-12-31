@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: COZY TV EDITION</title>
+<title>WHISKER BYTES: FINAL STABILIZATION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
-    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --tv-glow: rgba(255, 255, 0, 0.4); }
+    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; }
     * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
     canvas { display: block; background: #3d2b1f; width: 100vw; height: 100vh; }
@@ -66,8 +66,8 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540;
-let playerHolding = null, trashLevel = 0, tvActive = false, sparkleAlpha = 0;
-let floatingTips = [];
+let playerHolding = null, trashLevel = 0, tvActive = false, radioActive = false, sparkleAlpha = 0;
+let floatingTips = [], musicNotes = [];
 
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), f3 = new Image();
@@ -93,6 +93,7 @@ window.startGame = function(catId) {
         {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
         {x: 320, y: 200, type: "TRASH", e: "🗑️"},
         {x: 40, y: 200, type: "WINDOW", e: "🪟"},
+        {x: 50, y: midY, type: "RADIO", e: "📻"},
         {x: canvas.width - 50, y: midY, type: "TV", e: "📺"},
         {x: canvas.width / 2, y: midY, type: "TABLE", e: "🟫"},
         {x: canvas.width / 2 - 65, y: midY, type: "CHAIR", e: "🪑", occupied: false},
@@ -113,6 +114,7 @@ function interact() {
             if (f.type === "TRASH" && playerHolding) { playerHolding = null; trashLevel += 25; }
             if (f.type === "WINDOW" && trashLevel >= 100) { trashLevel = 0; }
             if (f.type === "TV") tvActive = !tvActive;
+            if (f.type === "RADIO") radioActive = !radioActive;
         }
     });
     customers.forEach(c => {
@@ -158,6 +160,8 @@ function update() {
     });
 
     if (trashLevel >= 100) sparkleAlpha = (Math.sin(Date.now()/100) + 1) / 2;
+    if (radioActive && Math.random() < 0.03) musicNotes.push({ x: 60, y: 300, vx: Math.random()-0.5, vy: -1, life: 100 });
+    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i,1); });
     floatingTips.forEach((t, i) => { t.y -= 1; t.life--; if(t.life <= 0) floatingTips.splice(i,1); });
 }
 
@@ -165,46 +169,40 @@ function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
     if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
     
-    // Draw Floor Tiles
+    // RESTORED: DUAL TONE FLOOR
     const ts = 60;
     for(let x=0; x<canvas.width; x+=ts) {
         for(let y=160; y<canvas.height; y+=ts) {
-            ctx.fillStyle = (x+y)/ts%2===0 ? "#d2b48c" : "#c1a37b";
+            ctx.fillStyle = (Math.floor(x/ts) + Math.floor(y/ts)) % 2 === 0 ? "#d2b48c" : "#c1a37b";
             ctx.fillRect(x, y, ts, ts);
         }
     }
 
-    // Draw Furniture
+    // DRAW FURNITURE
     furniture.forEach(f => {
         if(f.type === "STATION") { ctx.fillStyle = "#5d4037"; ctx.fillRect(f.x-40, f.y+20, 80, 15); }
         
-        // Cozy TV Logic
         if(f.type === "TV" && tvActive) {
             ctx.shadowBlur = 15; ctx.shadowColor = "yellow";
             ctx.fillStyle = "black"; ctx.fillRect(f.x-25, f.y-20, 50, 40);
             ctx.shadowBlur = 0;
             ctx.font = "20px Arial"; ctx.fillText("🐱", f.x-11, f.y+8);
-        } else if (f.type === "TV") {
+        } else if (f.type === "WINDOW" && trashLevel >= 100) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${sparkleAlpha})`; ctx.fillRect(f.x-25, f.y-25, 50, 50);
             ctx.font = "35px Arial"; ctx.fillText(f.e, f.x-17, f.y+15);
         } else {
             ctx.font = "35px Arial"; ctx.fillText(f.e, f.x-17, f.y+15);
-        }
-
-        if(f.type === "WINDOW" && trashLevel >= 100) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${sparkleAlpha})`; ctx.fillRect(f.x-25, f.y-25, 50, 50);
         }
     });
 
-    // Draw Customers
+    // DRAW CUSTOMERS
     customers.forEach(c => {
-        if(c.img.complete && c.img.naturalWidth > 0) {
-            ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
-        } else {
-            ctx.fillStyle = c.isCritic ? "gold" : "#888";
-            ctx.beginPath(); ctx.arc(c.x, c.y, 25, 0, Math.PI*2); ctx.fill();
-        }
+        if(c.img.complete && c.img.naturalWidth > 0) { ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60); }
+        else { ctx.fillStyle = c.isCritic ? "gold" : "#888"; ctx.beginPath(); ctx.arc(c.x, c.y, 25, 0, Math.PI*2); ctx.fill(); }
+        // Thought Bubbles
         ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(c.x+25, c.y-35, 18, 0, Math.PI*2); ctx.fill();
         ctx.font = "16px Arial"; ctx.fillText(c.order, c.x+17, c.y-30);
+        // Patience Bar
         ctx.fillStyle = "red"; ctx.fillRect(c.x-20, c.y+35, (c.patience/(player.power==='jinx'?1500:1000))*40, 5);
     });
 
@@ -215,6 +213,7 @@ function draw() {
         ctx.fillStyle="yellow"; ctx.font="bold 18px Arial"; ctx.fillText("✨ READY!", player.x-35, player.y-55);
     }
     
+    musicNotes.forEach(n => { ctx.fillStyle="black"; ctx.fillText("♪", n.x, n.y); });
     floatingTips.forEach(t => { ctx.fillStyle="green"; ctx.font="bold 16px Arial"; ctx.fillText(t.text, t.x-15, t.y); });
 
     document.getElementById('scoreVal').innerText = score;
