@@ -2,23 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: Cozy Cafe</title>
+<title>WHISKER BYTES</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; }
-  html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', Courier, monospace; width: 100%; height: 100%; position: fixed; }
-  canvas { display: block; touch-action: none; background: #e9e9e9; }
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', monospace; width: 100%; height: 100%; position: fixed; }
+  canvas { display: block; touch-action: none; }
   
   #overlay { position: fixed; inset: 0; background: rgba(74, 44, 42, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; text-align: center; }
-  #logo-img { width: 220px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--pink); }
+  #logo-img { width: 180px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--pink); }
   .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
   .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #4a2c2a; font-weight: bold; }
-  .btn-select img { width: 70px; height: 70px; display: block; margin: 0 auto 5px; }
+  .btn-select img { width: 60px; height: 60px; display: block; margin: 0 auto 5px; }
 
-  #stats { position: fixed; top: 10px; left: 10px; z-index: 100; display: none; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 10px; border: 2px solid var(--wood); }
-  #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; gap: 15px; z-index: 500; }
-  .ctrl-btn { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 30px; touch-action: manipulation; box-shadow: 0 4px #888; }
-  .ctrl-btn:active { transform: translateY(4px); box-shadow: none; }
+  #stats { position: fixed; top: 10px; left: 10px; z-index: 100; display: none; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; border: 2px solid var(--wood); font-size: 14px; }
+  #controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 10px; z-index: 500; }
+  .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .ctrl-btn { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; touch-action: manipulation; box-shadow: 0 4px #888; }
+  .ctrl-btn:active { transform: translateY(3px); box-shadow: none; }
 </style>
 </head>
 <body>
@@ -31,20 +32,18 @@
   </div>
 </div>
 
-<div id="stats">
-  <b>CATS FED: <span id="scoreVal">0</span>/25</b>
-</div>
+<div id="stats"><b>SUSHI BOWL: <span id="scoreVal">0</span>/25</b></div>
 
 <canvas id="game"></canvas>
 
 <div id="controls">
-  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+  <div class="d-pad">
     <div></div><button class="ctrl-btn" id="up">⬆️</button><div></div>
     <button class="ctrl-btn" id="left">⬅️</button>
     <button class="ctrl-btn" id="down">⬇️</button>
     <button class="ctrl-btn" id="right">➡️</button>
   </div>
-  <button class="ctrl-btn" style="background:var(--pink); margin-top: 10px;" onclick="meow()">📢</button>
+  <button class="ctrl-btn" style="background:var(--pink); width: 80px;" onclick="meow()">📢</button>
 </div>
 
 <script>
@@ -54,17 +53,8 @@ let score = 0, gameState = "START";
 const catImg = new Image();
 const bgPattern = new Image();
 
-// Top-Down Player
-const player = { x: 0, y: 0, speed: 5, dir: 1, width: 80, height: 80 };
-
-// Cafe Elements
-const furniture = [
-  { x: 100, y: 100, w: 150, h: 60, type: "☕", label: "Counter" },
-  { x: 400, y: 300, w: 80, h: 80, type: "🪑", label: "Table" },
-  { x: 150, y: 400, w: 100, h: 60, type: "🛋️", label: "Sofa" }
-];
-
-const npc = { x: 420, y: 310, emoji: "👩‍🦱", dress: "👗" };
+const player = { x: 0, y: 0, speed: 4, dir: 1, meowing: 0 };
+const npc = { x: 0, y: 0, happy: 0 };
 let sushiBowls = [];
 
 function startGame(cat) {
@@ -79,8 +69,8 @@ function startGame(cat) {
 
 function spawnSushi() {
   sushiBowls = Array.from({length: 25}, () => ({
-    x: 50 + Math.random() * (canvas.width - 100),
-    y: 150 + Math.random() * (canvas.height - 250),
+    x: 40 + Math.random() * (canvas.width - 80),
+    y: 120 + Math.random() * (canvas.height - 240),
     collected: false
   }));
 }
@@ -90,10 +80,12 @@ function resize() {
   canvas.height = window.innerHeight;
   player.x = canvas.width / 2;
   player.y = canvas.height / 2;
+  // Position lady in the upper-right area but fully on-screen
+  npc.x = canvas.width - 100;
+  npc.y = 150;
 }
 window.addEventListener("resize", resize); resize();
 
-// Movement Input
 const keys = { up: false, down: false, left: false, right: false };
 function bind(id, k) {
   const btn = document.getElementById(id);
@@ -103,104 +95,66 @@ function bind(id, k) {
 bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right");
 
 function meow() {
-  player.meowing = 30;
-  // Check if near NPC for heart effect
-  if(Math.abs(player.x - npc.x) < 100 && Math.abs(player.y - npc.y) < 100) {
-    npc.happy = 60;
-  }
+  player.meowing = 40;
+  if(Math.abs(player.x - npc.x) < 80 && Math.abs(player.y - npc.y) < 80) npc.happy = 60;
 }
 
 function update() {
   if (gameState !== "PLAYING") return;
-
   if (keys.up) player.y -= player.speed;
   if (keys.down) player.y += player.speed;
   if (keys.left) { player.x -= player.speed; player.dir = -1; }
   if (keys.right) { player.x += player.speed; player.dir = 1; }
 
-  // Screen Bounds
-  player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
-  player.y = Math.max(120, Math.min(canvas.height - 100, player.y));
+  player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
+  player.y = Math.max(110, Math.min(canvas.height - 110, player.y));
 
-  // Collect Sushi
   sushiBowls.forEach(s => {
-    if(!s.collected && Math.abs(player.x - s.x) < 40 && Math.abs(player.y - s.y) < 40) {
-      s.collected = true;
-      score++;
+    if(!s.collected && Math.abs(player.x - s.x) < 35 && Math.abs(player.y - s.y) < 35) {
+      s.collected = true; score++;
       document.getElementById('scoreVal').innerText = score;
     }
   });
 }
 
 function draw() {
-  // 1. Draw Floor Tiles
-  ctx.fillStyle = "#d2b48c"; 
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Floor
+  ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Draw basic grid lines for tiles
-  ctx.strokeStyle = "rgba(0,0,0,0.05)";
-  for(let i=0; i<canvas.width; i+=50) {
-    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-  }
-  for(let j=0; j<canvas.height; j+=50) {
-    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
-  }
+  // Grid Tiles
+  ctx.strokeStyle = "rgba(0,0,0,0.08)";
+  for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+  for(let j=0; j<canvas.height; j+=40) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
 
-  // 2. Draw Walls/Top Border (using your tea wallpaper)
-  ctx.drawImage(bgPattern, 0, 0, canvas.width, 100);
-  ctx.fillStyle = "rgba(74, 44, 42, 0.5)";
-  ctx.fillRect(0, 95, canvas.width, 5);
+  // Wallpaper Border
+  ctx.drawImage(bgPattern, 0, 0, canvas.width, 90);
 
-  // 3. Draw Furniture
-  furniture.forEach(f => {
-    ctx.font = "50px Arial";
-    ctx.fillText(f.type, f.x, f.y);
-  });
-
-  // 4. Draw NPC
+  // NPC Lady
   ctx.font = "40px Arial";
-  ctx.fillText(npc.dress, npc.x, npc.y + 30);
-  ctx.fillText(npc.emoji, npc.x, npc.y);
-  if(npc.happy > 0) {
-    ctx.fillText("❤️", npc.x + 20, npc.y - 30);
-    npc.happy--;
-  }
+  ctx.fillText("👗", npc.x - 20, npc.y + 35);
+  ctx.fillText("👩‍🦱", npc.x - 20, npc.y);
+  if(npc.happy > 0) { ctx.fillText("❤️", npc.x, npc.y - 40); npc.happy--; }
 
-  // 5. Draw Sushi
-  sushiBowls.forEach(s => {
-    if(!s.collected) {
-      ctx.font = "25px Arial";
-      ctx.fillText("🍱", s.x, s.y);
-    }
-  });
+  // Sushi
+  sushiBowls.forEach(s => { if(!s.collected) { ctx.font = "24px Arial"; ctx.fillText("🍱", s.x - 12, s.y); } });
 
-  // 6. Draw Player (Fixed Jinx Direction)
+  // Jinx/Mochi Fixed Direction
   ctx.save();
   ctx.translate(player.x, player.y);
-  // If moving left, flip the cat horizontally
-  if(player.dir === -1) {
-    ctx.scale(-1, 1);
-  }
-  // Draw centered
+  if(player.dir === -1) ctx.scale(-1, 1); 
+  // Drawing at -40, -40 ensures the cat flips exactly around its center
   ctx.drawImage(catImg, -40, -40, 80, 80);
   ctx.restore();
 
   if(player.meowing > 0) {
-    ctx.font = "bold 14px Arial";
-    ctx.fillStyle = "white";
-    ctx.fillText("MEOW! 🐾", player.x + 20, player.y - 40);
+    ctx.font = "bold 14px Arial"; ctx.fillStyle = "white";
+    ctx.fillText("MEOW! 🐾", player.x + 25, player.y - 35);
     player.meowing--;
   }
-
-  requestAnimationFrame(draw);
 }
 
-function loop() {
-  update();
-}
-setInterval(loop, 1000/60);
-draw();
-
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+loop();
 </script>
 </body>
 </html>
