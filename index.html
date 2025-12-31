@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: JINX EDITION</title>
+<title>WHISKER BYTES: HIGH SCORE EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; }
@@ -14,7 +14,7 @@
     .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 6000; margin-top: 20px; }
     .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; font-size: 14px; font-weight: bold; }
     .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
-    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; }
+    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 14px; }
     #ui-right { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
     .ui-btn { background: var(--pink); border: 2px solid white; padding: 10px 15px; font-weight: bold; border-radius: 8px; }
     #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 8px; z-index: 1000; }
@@ -35,8 +35,8 @@
 </div>
 
 <div id="stats">
-    ⭐ <span id="scoreVal">0</span> | 🕒 <span id="timeVal">9:00 AM</span><br>
-    <span id="holdingTxt" style="color: #8b4513;">🐾 Empty Paws</span>
+    ⭐ <span id="scoreVal">0</span> | 🏆 BEST: <span id="highVal">0</span><br>
+    🕒 <span id="timeVal">9:00 AM</span> | <span id="holdingTxt" style="color: #8b4513;">🐾 Empty</span>
 </div>
 
 <div id="ui-right"><button class="ui-btn" onclick="location.reload()">🏠 HOME</button></div>
@@ -64,6 +64,10 @@ f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
 const player = { x: 200, y: 450, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
+// HIGH SCORE LOGIC
+let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
+document.getElementById('highVal').innerText = highScore;
+
 window.startGame = function(catId) {
     if (gameActive) return;
     catImg.src = catId + '_idle.png';
@@ -72,10 +76,9 @@ window.startGame = function(catId) {
     player.speed = (catId === 'luna') ? 8 : 5;
     player.traits.tipBonus = (catId === 'gingerella') ? 20 : 0;
     player.traits.patienceBonus = (catId === 'mochi') ? 30 : 0;
-    player.traits.luckBonus = (catId === 'jinx') ? 0.15 : 0; // Jinx Luck Logic
+    player.traits.luckBonus = (catId === 'jinx') ? 0.15 : 0;
     player.cookTime = (catId === 'mochi') ? 40 : 80;
 
-    // STATION POSITION (y: 320) - Moved down so cat can walk around/to them
     furniture = [
         {x: 100, y: 320, type: "STATION", item: "☕", e: "☕"},
         {x: 180, y: 320, type: "STATION", item: "🍪", e: "🍪"},
@@ -83,7 +86,7 @@ window.startGame = function(catId) {
         {x: 340, y: 320, type: "TRASH", e: "🗑️"},
         {x: 50,  y: 320, type: "WINDOW", e: "🪟"}, 
         {x: canvas.width - 50, y: 320, type: "RADIO", e: "📻"},
-        {x: canvas.width / 2, y: 140, type: "TV", e: "📺"}, // Stays on wall
+        {x: canvas.width / 2, y: 140, type: "TV", e: "📺"},
         {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
         {x: canvas.width / 2, y: 550, type: "TABLE", e: "🟫"},
         {x: canvas.width / 2 - 65, y: 550, type: "CHAIR", e: "🪑", occupied: false},
@@ -110,7 +113,7 @@ function interact() {
             if (f.type === "STATION" && playerHolding !== "🥡") { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
             if (f.type === "TV") tvActive = !tvActive;
             if (f.type === "RADIO") f.e = (f.e === "📻") ? "🎵" : "📻";
-            document.getElementById('holdingTxt').innerText = playerHolding ? "Holding: " + playerHolding : "🐾 Empty Paws";
+            document.getElementById('holdingTxt').innerText = playerHolding ? playerHolding : "🐾 Empty";
         }
     });
 
@@ -120,7 +123,7 @@ function interact() {
             playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
             if(c.isCritic) criticActive = false;
-            document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
+            document.getElementById('holdingTxt').innerText = "🐾 Empty";
 
             if(score >= 300 && !unlockedCake) {
                 furniture.push({x: 420, y: 320, type: "STATION", item: "🍰", e: "🍰"});
@@ -145,16 +148,21 @@ function update() {
         kitchen.timer--;
         if (kitchen.timer <= 0) {
             kitchen.active = false; playerHolding = kitchen.item;
-            document.getElementById('holdingTxt').innerText = "Holding: " + playerHolding;
+            document.getElementById('holdingTxt').innerText = playerHolding;
         }
     }
 
     gameMinutes += 0.1;
 
-    // DAY COMPLETE LOGIC (18:00 = 6:00 PM)
     if(gameMinutes >= 1080) {
         gameActive = false;
-        alert("Day Complete! 🐾 Final Score: " + score);
+        // Update High Score at end of day
+        if(score > highScore) {
+            localStorage.setItem("whiskerBytesHigh", score);
+            alert("New Record! 🐾 " + score);
+        } else {
+            alert("Day Complete! Score: " + score);
+        }
         location.reload();
     }
 
@@ -210,11 +218,13 @@ function spawnCustomer() {
     let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
     if (chair) {
         chair.occupied = true;
-        // JINX LUCK BONUS
         let isC = !criticActive && Math.random() < (0.2 + player.traits.luckBonus);
-        if (isC) criticActive = true;
+        if (isC) {
+            criticActive = true;
+            // JINX ALERT!
+            if (player.traits.luckBonus > 0) alert("✨ Jinx’s luck draws a famous critic!");
+        }
         
-        // DYNAMIC MENU
         let menu = ["☕", "🍪", "🍼"];
         if(unlockedCake) menu.push("🍰");
         
