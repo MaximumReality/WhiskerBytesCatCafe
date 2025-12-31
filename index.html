@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: CAT-TOON TV</title>
+<title>WHISKER BYTES: VIEWPORT FIX</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -40,9 +40,11 @@
 
     #ui-right { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
     .ui-btn { background: var(--pink); border: 2px solid white; padding: 8px 12px; font-weight: bold; border-radius: 8px; font-size: 12px; }
-    #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 8px; z-index: 1000; }
-    .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .ctrl-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid var(--wood); background: white; font-size: 28px; display: flex; align-items: center; justify-content: center; }
+    
+    /* CONTROL POSITIONING */
+    #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 5px; z-index: 1000; background: rgba(255,255,255,0.3); border-radius: 20px; padding: 5px; }
+    .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .ctrl-btn { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
 <body>
@@ -88,7 +90,7 @@
         <button class="ctrl-btn" id="down">⬇️</button>
         <button class="ctrl-btn" id="right">➡️</button>
     </div>
-    <button class="ctrl-btn" id="action-btn" style="width:160px; border-radius: 35px; background:var(--pink);" onpointerdown="interact()">📢 MEOW</button>
+    <button class="ctrl-btn" id="action-btn" style="width:140px; border-radius: 35px; background:var(--pink);" onpointerdown="interact()">📢 MEOW</button>
 </div>
 
 <script>
@@ -101,11 +103,16 @@ const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), criticImg = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
 
-const player = { x: 200, y: 450, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
+const player = { x: 200, y: 400, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
 let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
 document.getElementById('highVal').innerText = highScore;
+
+// SCREEN BOUNDARIES FOR THE NEW VIEWPORT
+const WALL_HEIGHT = 180;
+const FLOOR_TOP = 180;
+const SAFE_BOTTOM_PADDING = 180; // Space for controls
 
 function createFirework(x, y) {
     const colors = ['#ff007f', '#00e5ff', '#ffff00', '#ffffff'];
@@ -144,17 +151,18 @@ window.startGame = function(catId) {
     player.traits.luckBonus = (catId === 'jinx') ? 0.15 : 0;
     player.cookTime = (catId === 'mochi') ? 40 : 80;
 
+    // Adjusted Y-coordinates for the raised floor
     furniture = [
-        {x: 100, y: 320, type: "STATION", item: "☕", e: "☕"},
-        {x: 180, y: 320, type: "STATION", item: "🍪", e: "🍪"},
-        {x: 260, y: 320, type: "STATION", item: "🍼", e: "🍼"},
-        {x: 340, y: 320, type: "TRASH", e: "🗑️"},
-        {x: 50,  y: 320, type: "WINDOW", e: "🪟"}, 
-        {x: 60, y: canvas.height - 80, type: "RADIO", e: "📻"},
-        {x: canvas.width - 60, y: 550, type: "TV", e: "📺"},
-        {x: canvas.width / 2, y: 550, type: "TABLE", e: "🟫"},
-        {x: canvas.width / 2 - 65, y: 550, type: "CHAIR", e: "🪑", occupied: false},
-        {x: canvas.width / 2 + 65, y: 550, type: "CHAIR", e: "🪑", occupied: false}
+        {x: 100, y: 220, type: "STATION", item: "☕", e: "☕"},
+        {x: 180, y: 220, type: "STATION", item: "🍪", e: "🍪"},
+        {x: 260, y: 220, type: "STATION", item: "🍼", e: "🍼"},
+        {x: 340, y: 220, type: "TRASH", e: "🗑️"},
+        {x: 50,  y: 220, type: "WINDOW", e: "🪟"}, 
+        {x: 50, y: canvas.height - (SAFE_BOTTOM_PADDING + 20), type: "RADIO", e: "📻"},
+        {x: canvas.width - 50, y: canvas.height - (SAFE_BOTTOM_PADDING + 20), type: "TV", e: "📺"},
+        {x: canvas.width / 2, y: canvas.height - (SAFE_BOTTOM_PADDING + 20), type: "TABLE", e: "🟫"},
+        {x: canvas.width / 2 - 60, y: canvas.height - (SAFE_BOTTOM_PADDING + 20), type: "CHAIR", e: "🪑", occupied: false},
+        {x: canvas.width / 2 + 60, y: canvas.height - (SAFE_BOTTOM_PADDING + 20), type: "CHAIR", e: "🪑", occupied: false}
     ];
 
     document.getElementById('overlay').style.display = 'none';
@@ -191,7 +199,7 @@ function interact() {
                 document.getElementById('highVal').classList.add('sparkle-active');
             }
             if(score >= 300 && !unlockedCake) {
-                furniture.push({x: 420, y: 320, type: "STATION", item: "🍰", e: "🍰"});
+                furniture.push({x: 420, y: 220, type: "STATION", item: "🍰", e: "🍰"});
                 unlockedCake = true;
             }
         }
@@ -200,13 +208,15 @@ function interact() {
 
 function update() {
     if (!gameActive) return;
-    const TOP = 280, BOT = canvas.height - 50;
+    const BOT_LIMIT = canvas.height - SAFE_BOTTOM_PADDING;
+    
     if (!kitchen.active) {
         if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
         if (keys.left) { player.x -= player.speed; player.facing = -1; }
         if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
-    player.y = Math.max(TOP, Math.min(BOT, player.y));
+    
+    player.y = Math.max(FLOOR_TOP + 40, Math.min(BOT_LIMIT, player.y));
     player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
 
     if (kitchen.active) {
@@ -220,13 +230,12 @@ function update() {
 
     if (Math.random() < (isRushHour ? 0.015 : 0.005)) spawnCustomer();
     
-    // Patience logic
     let boost = (tvActive && radioActive) ? 0.02 : (tvActive || radioActive) ? 0.03 : 0.07;
     customers.forEach(c => { c.patience -= boost; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 
     if (radioActive && Math.random() < 0.05) {
-        musicNotes.push({ x: 60, y: canvas.height - 100, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
+        musicNotes.push({ x: 50, y: canvas.height - (SAFE_BOTTOM_PADDING + 40), vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
     }
     musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i, 1); });
     
@@ -235,28 +244,31 @@ function update() {
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 280);
+    
+    // Draw Shortened Wall
+    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, WALL_HEIGHT);
+    
+    // Draw Raised Floor
     ctx.fillStyle = isRushHour ? "rgba(255, 0, 127, 0.1)" : "#d2b48c";
-    ctx.fillRect(0, 280, canvas.width, canvas.height-280);
-    ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 275, canvas.width, 10);
+    ctx.fillRect(0, FLOOR_TOP, canvas.width, canvas.height - FLOOR_TOP);
+    
+    // Kitchen Counter Line
+    ctx.fillStyle = "#5d4037"; ctx.fillRect(0, FLOOR_TOP - 5, canvas.width, 10);
     
     furniture.forEach(f => {
         if((f.type === "RADIO" && radioActive) || (f.type === "TV" && tvActive)) {
             ctx.shadowBlur = 15; ctx.shadowColor = "gold";
         }
-        ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
+        ctx.font = "40px Arial"; ctx.fillText(f.e, f.x-20, f.y+15);
         ctx.shadowBlur = 0;
 
-        // The Toon Screen!
         if(f.type === "TV" && tvActive) {
-            ctx.fillStyle = "rgba(255,255,255,0.1)"; // Flicker
+            ctx.fillStyle = "rgba(255,255,255,0.1)"; 
             ctx.fillRect(f.x-10, f.y-5, 20, 15);
-            ctx.fillStyle = "black"; ctx.font = "10px Arial";
-            let eye = Math.floor(toonFrame) === 0 ? "^.^" : "-.-"; 
-            ctx.fillText(eye, f.x-8, f.y+5);
+            ctx.fillStyle = "black"; ctx.font = "8px Arial";
+            ctx.fillText(Math.floor(toonFrame) === 0 ? "^.^" : "-.-", f.x-8, f.y+5);
         }
-
-        if(f.type === "STATION") { ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 10); }
+        if(f.type === "STATION") { ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 8); }
     });
 
     musicNotes.forEach(n => {
@@ -267,13 +279,13 @@ function draw() {
     customers.forEach(c => {
         if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
         ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+30, c.y-30, 18, 0, 7); ctx.fill();
-        ctx.fillStyle="black"; ctx.font="20px Arial"; ctx.fillText(c.order, c.x+20, c.y-23);
+        ctx.fillStyle="black"; ctx.font="18px Arial"; ctx.fillText(c.order, c.x+21, c.y-24);
         ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
     });
 
     ctx.save(); ctx.translate(player.x, player.y);
     if(player.facing === -1) ctx.scale(-1, 1);
-    if(catImg.complete) ctx.drawImage(catImg, -40, -40, 80, 80);
+    if(catImg.complete) ctx.drawImage(catImg, -35, -35, 70, 70);
     ctx.restore();
 
     particles.forEach((p, i) => {
@@ -282,7 +294,8 @@ function draw() {
         if (p.life <= 0) particles.splice(i, 1);
     });
 
-    if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-40, player.y-60, (kitchen.timer/player.cookTime)*80, 8); }
+    if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-35, player.y-55, (kitchen.timer/player.cookTime)*70, 8); }
+    
     document.getElementById('scoreVal').innerText = score;
     let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
     document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
