@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: TV EDITION</title>
+<title>WHISKER BYTES: FULL ART EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
     :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; --gold: #ffd700; }
@@ -75,10 +75,17 @@
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
+// ART ASSETS
+const catImg = new Image();
+const bgImg = new Image();
+const f1 = new Image(); f1.src = 'friend1.png';
+const f2 = new Image(); f2.src = 'friend2.png';
+const criticImg = new Image(); criticImg.src = 'critic.png';
+
 let score = 0, currentDay = 1, gameMinutes = 540, dayServed = 0, dayActive = false;
-let playerHolding = null, tvActive = false, tickerX = 100, criticActive = false, criticApologized = false;
-let unlocked = ["☕", "🍪", "🍼"], pawPrints = [], dingEffect = {active: false}, heartEffect = {active: false};
-const catImg = new Image(), bgImg = new Image();
+let playerHolding = null, tvActive = false, tickerX = 150, criticActive = false, criticApologized = false;
+let unlocked = ["☕", "🍪", "🍼"], dingEffect = {active: false}, heartEffect = {active: false};
 const player = { x: 100, y: 300, speed: 5, facing: 1, name: "", cookTime: 60 };
 let customers = [], furniture = [];
 const keys = {up:0, down:0, left:0, right:0};
@@ -88,7 +95,7 @@ function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
 function startGame(catId) {
     player.name = catId;
     catImg.src = catId + "_idle.png";
-    bgImg.src = 'img_2480.jpeg';
+    bgImg.src = 'img_2480.jpeg'; 
     player.speed = (catId === 'gingerella') ? 8 : 5;
     player.cookTime = (catId === 'mochi') ? 35 : 60;
     
@@ -106,7 +113,8 @@ function startGame(catId) {
     document.getElementById('controls').style.display = 'flex';
     document.getElementById('stats').style.display = 'block';
     document.getElementById('ui-right').style.display = 'flex';
-    dayActive = true; loop();
+    dayActive = true; 
+    loop();
 }
 
 let kitchen = { active: false, t: 0, item: null };
@@ -114,7 +122,6 @@ let kitchen = { active: false, t: 0, item: null };
 function interact() {
     if(kitchen.active) return;
 
-    // Check Furniture
     furniture.forEach(f => {
         let d = Math.hypot(player.x-f.x, player.y-f.y);
         if(d < 60) {
@@ -125,7 +132,6 @@ function interact() {
         }
     });
 
-    // Check Customers (Delivery or Apology)
     customers.forEach(c => {
         if(Math.hypot(player.x-c.x, player.y-c.y) < 70) {
             if(playerHolding === c.order) {
@@ -149,7 +155,6 @@ function update() {
     gameMinutes += 0.2;
     if(gameMinutes >= 1080) endDay();
 
-    // Movement
     if(!kitchen.active) {
         let spd = player.speed;
         if(keys.up) player.y -= spd; if(keys.down) player.y += spd;
@@ -157,10 +162,8 @@ function update() {
         if(keys.right) { player.x += spd; player.facing = 1; }
     }
 
-    // Luna Automation
     if(player.name === 'luna' && criticActive && !tvActive) { tvActive = true; vibrate(30); }
 
-    // Kitchen Logic
     if(kitchen.active) {
         kitchen.t--;
         if(kitchen.t <= 0) {
@@ -171,7 +174,6 @@ function update() {
         }
     }
 
-    // Customer Patience
     customers.forEach(c => {
         let decay = c.isCritic ? 0.15 : 0.08;
         if(tvActive) decay *= 0.5;
@@ -189,16 +191,18 @@ function update() {
 }
 
 function draw() {
-    ctx.fillStyle = "#d2b48c"; ctx.fillRect(0,0,canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 1. Draw Background Art
+    ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
     
-    // TV Glow
+    // 2. TV Glow
     if(tvActive) {
         ctx.fillStyle = "rgba(135, 206, 250, 0.2)";
         ctx.beginPath(); ctx.moveTo(canvas.width/2-50, 70); ctx.lineTo(canvas.width/2+50, 70);
         ctx.lineTo(canvas.width/2+120, 300); ctx.lineTo(canvas.width/2-120, 300); ctx.fill();
     }
 
-    // Furniture
+    // 3. Furniture
     ctx.font = "40px Arial";
     furniture.forEach(f => {
         ctx.fillText(f.e, f.x-20, f.y+15);
@@ -209,24 +213,25 @@ function draw() {
         }
     });
 
-    // Ticker
+    // 4. TV News Ticker
     if(tvActive) {
         tickerX -= 2; if(tickerX < -300) tickerX = 150;
         ctx.fillStyle="white"; ctx.font="bold 10px Arial";
-        ctx.fillText("NEWS: PROFIT "+(dayServed*50)+" | HI: "+score, canvas.width/2-40 + tickerX, 60);
+        ctx.fillText("BREAKING: PROFIT "+(dayServed*50)+" | HI SCORE: "+score, canvas.width/2-40 + tickerX, 60);
     }
 
-    // Customers
+    // 5. Draw Customer Sprites
     customers.forEach(c => {
-        ctx.fillText(c.isCritic ? "🤵" : "👶", c.x-20, c.y+15);
+        ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
+        // Order Bubble
         ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+25, c.y-25, 15, 0, 7); ctx.fill();
         ctx.fillStyle="black"; ctx.font="14px Arial";
         ctx.fillText(c.patience < 25 ? "😡" : c.order, c.x+18, c.y-20);
         // Patience Bar
-        ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+25, c.patience*0.4, 4);
+        ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 4);
     });
 
-    // Effects
+    // 6. Effects (Ding/Heart)
     if(dingEffect.active) {
         ctx.fillStyle="gold"; ctx.font="bold 20px Arial"; ctx.fillText("DING! 🛎️", dingEffect.x-30, dingEffect.y);
         dingEffect.life--; if(dingEffect.life<=0) dingEffect.active=false;
@@ -236,7 +241,7 @@ function draw() {
         heartEffect.y--; heartEffect.life--; if(heartEffect.life<=0) heartEffect.active=false;
     }
 
-    // Player
+    // 7. Player Sprite
     ctx.save(); ctx.translate(player.x, player.y);
     if(player.facing === -1) ctx.scale(-1,1);
     ctx.drawImage(catImg, -40, -40, 80, 80); ctx.restore();
@@ -250,7 +255,14 @@ function spawnCustomer() {
         chair.occupied = true;
         let isC = !criticActive && Math.random() < 0.2;
         if(isC) criticActive = true;
-        customers.push({x:chair.x, y:chair.y-10, chair:chair, order:unlocked[Math.floor(Math.random()*unlocked.length)], patience:100, isCritic:isC});
+        
+        let randomFriend = Math.random() > 0.5 ? f1 : f2;
+        customers.push({
+            x: chair.x, y: chair.y-10, chair: chair, 
+            img: isC ? criticImg : randomFriend,
+            order: unlocked[Math.floor(Math.random()*unlocked.length)], 
+            patience: 100, isCritic: isC
+        });
     }
 }
 
