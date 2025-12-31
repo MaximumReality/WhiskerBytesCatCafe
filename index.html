@@ -7,32 +7,29 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>
   :root { --dark-wood: #4a2c2a; --pink: #ffc0cb; }
-  html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', Courier, monospace; position: fixed; width: 100%; height: 100%; }
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', Courier, monospace; width: 100%; height: 100%; position: fixed; }
   canvas { display: block; touch-action: none; }
   
-  /* UI OVERLAYS */
   #overlay { position: fixed; inset: 0; background: rgba(74, 44, 42, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; text-align: center; }
-  .title { font-size: 2.2rem; color: var(--pink); text-shadow: 2px 2px #000; margin-bottom: 20px; }
-  .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: var(--dark-wood); font-weight: bold; }
-  .btn-select img { width: 80px; height: 80px; object-fit: contain; display: block; }
+  #logo-img { width: 220px; margin-bottom: 20px; border-radius: 10px; }
+  .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+  .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: var(--dark-wood); font-weight: bold; font-size: 14px; }
+  .btn-select img { width: 70px; height: 70px; object-fit: contain; display: block; margin: 0 auto 5px; }
 
-  #stats { position: fixed; top: 10px; left: 10px; z-index: 100; display: none; }
-  #meter-wrap { width: 150px; height: 15px; background: rgba(255,255,255,0.5); border: 2px solid var(--dark-wood); border-radius: 10px; overflow: hidden; margin-top: 5px; }
+  #stats { position: fixed; top: 10px; left: 10px; z-index: 100; display: none; color: var(--dark-wood); }
+  #meter-wrap { width: 120px; height: 12px; background: rgba(0,0,0,0.1); border: 2px solid var(--dark-wood); border-radius: 10px; overflow: hidden; }
   #sushi-bar { width: 0%; height: 100%; background: var(--pink); transition: width 0.3s; }
 
-  #controls { position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; background: var(--dark-wood); display: none; justify-content: space-around; align-items: center; z-index: 500; }
-  .ctrl-btn { width: 65px; height: 65px; border-radius: 15px; border: none; background: white; font-size: 28px; touch-action: manipulation; }
+  #controls { position: fixed; bottom: 0; left: 0; width: 100%; height: 85px; background: var(--dark-wood); display: none; justify-content: space-around; align-items: center; z-index: 500; }
+  .ctrl-btn { width: 60px; height: 60px; border-radius: 12px; border: none; background: white; font-size: 24px; touch-action: manipulation; }
   #meow-btn { background: var(--pink); }
-
-  #msg-box { position: fixed; top: 50px; left: 50%; transform: translateX(-50%); background: white; border: 2px solid var(--dark-wood); padding: 5px 15px; border-radius: 20px; display: none; font-weight: bold; }
+  #msg-box { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: white; border: 2px solid var(--dark-wood); padding: 8px 15px; border-radius: 20px; display: none; font-weight: bold; color: var(--dark-wood); z-index: 600; font-size: 12px; text-align: center;}
 </style>
 </head>
 <body>
 
 <div id="overlay">
-  <div class="title">WHISKER BYTES</div>
-  <p>CHOOSE YOUR CAT</p>
+  <img src="whiskerbytes.png" id="logo-img">
   <div class="char-grid">
     <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
     <div class="btn-select" onclick="startGame('jinx')"><img src="jinx_idle.png">JINX</div>
@@ -58,18 +55,14 @@
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-const ROAD_H = 100;
-let groundY, cameraX = 0, score = 0, gameState = "START";
-let worldWidth = 3000;
+let groundY, cameraX = 0, score = 0, gameState = "START", worldWidth = 3500;
 let bgPattern = new Image();
 const catImg = new Image();
 
-// Game Objects
 let honeycombs = [], sushi = [], ghostTrail = [];
-const player = { x: 500, y: 0, vy: 0, jumping: false, dir: 1, speed: 7, dashTimer: 0, jumpCount: 0 };
-const customer = { x: 1200, y: 350, name: "Alice", msg: "Waiting for coffee... ☕", timer: 0, done: false };
+const player = { x: 400, y: 0, vy: 0, jumping: false, dir: 1, speed: 7, dashTimer: 0, jumpCount: 0, meowTimer: 0 };
+const npc = { x: 1500, y: 0, timer: 0, done: false, msg: "Waiting for treats..." };
 
-// Input
 let keys = { left: false, right: false, jump: false };
 let lastTap = { dir: null, time: 0 };
 
@@ -81,28 +74,26 @@ function startGame(cat) {
   document.getElementById('stats').style.display = 'block';
   gameState = "CAFE";
   initWorld();
-  loadGame(); // Load previous progress if exists
 }
 
 function initWorld() {
-  honeycombs = Array.from({length: 8}, () => ({ x: Math.random() * worldWidth, y: 250 + Math.random() * 200 }));
-  sushi = Array.from({length: 12}, () => ({ x: Math.random() * worldWidth, type: ["🍣","🍤","🍙"][Math.floor(Math.random()*3)], collected: false }));
+  honeycombs = Array.from({length: 12}, (_, i) => ({ x: 400 + (i * 400), y: 250 + Math.random() * 200 }));
+  sushi = Array.from({length: 15}, () => ({ x: Math.random() * worldWidth, type: ["🍣","🍤","🍙"][Math.floor(Math.random()*3)], collected: false }));
+  npc.y = 350; // Align with platforms
 }
 
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  groundY = canvas.height - ROAD_H - 120;
+  groundY = canvas.height - 180;
   player.y = groundY;
 }
 window.addEventListener("resize", resize); resize();
 
-// Button Binding
 function bind(id, k) {
   const btn = document.getElementById(id);
   btn.ontouchstart = (e) => {
-    e.preventDefault();
-    keys[k] = true;
+    e.preventDefault(); keys[k] = true;
     let now = Date.now();
     if(k === lastTap.dir && (now - lastTap.time) < 250) player.dashTimer = 15;
     lastTap = { dir: k, time: now };
@@ -113,59 +104,52 @@ bind("btn-left", "left"); bind("btn-right", "right"); bind("btn-jump", "jump");
 
 function meow() {
   player.meowTimer = 60;
-  let d = Math.abs(player.x - customer.x);
-  if(d < 200) customer.timer += 40; // Bonus for meowing near NPC
+  if(Math.abs(player.x - npc.x) < 200) npc.timer += 40;
 }
 
 function update() {
   if (gameState === "START") return;
 
-  // Movement Logic
-  let speed = (player.dashTimer > 0) ? 20 : player.speed;
+  let speed = (player.dashTimer > 0) ? 18 : player.speed;
   if (player.dashTimer > 0) {
     player.dashTimer--;
-    ghostTrail.push({x: player.x, y: player.y, dir: player.dir, a: 0.5});
+    ghostTrail.push({x: player.x, y: player.y, dir: player.dir, a: 0.6});
   }
-  if (ghostTrail.length > 5) ghostTrail.shift();
-  ghostTrail.forEach(g => g.a -= 0.05);
+  if (ghostTrail.length > 8) ghostTrail.shift();
+  ghostTrail.forEach(g => { g.a -= 0.05; });
 
   if (keys.left) { player.x -= speed; player.dir = -1; }
   if (keys.right) { player.x += speed; player.dir = 1; }
   
-  // Jump/Gravity
   if (keys.jump) {
-    if (!player.jumping) { player.vy = -18; player.jumping = true; player.jumpCount = 1; }
+    if (!player.jumping) { player.vy = -17; player.jumping = true; player.jumpCount = 1; }
     else if (player.jumpCount === 1) { player.vy = -14; player.jumpCount = 2; }
     keys.jump = false;
   }
   player.vy += 0.8; player.y += player.vy;
   if (player.y > groundY) { player.y = groundY; player.vy = 0; player.jumping = false; player.jumpCount = 0; }
 
-  // Endless Loop
   if (player.x < 0) player.x = worldWidth;
   if (player.x > worldWidth) player.x = 0;
 
   cameraX = player.x - canvas.width / 2;
 
-  // Score/Sushi
   sushi.forEach(s => {
-    if(!s.collected && Math.abs(player.x - s.x) < 50 && Math.abs(player.y - groundY) < 50) {
-      s.collected = true; score++;
-      updateUI();
+    if(!s.collected && Math.abs(player.x - s.x) < 40 && Math.abs(player.y - groundY) < 50) {
+      s.collected = true; score++; updateUI();
     }
   });
 
-  // NPC Interaction
-  let dToNpc = Math.sqrt((player.x - customer.x)**2 + (player.y - customer.y)**2);
-  if(dToNpc < 150 && !customer.done) {
-    customer.timer++;
-    if(customer.timer >= 180) { customer.done = true; score += 10; updateUI(); }
+  if(Math.abs(player.x - npc.x) < 150 && Math.abs(player.y - npc.y) < 100 && !npc.done) {
+    npc.timer++;
+    if(npc.timer >= 180) { npc.done = true; score += 10; updateUI(); }
   }
-  
+
   if(score >= 30 && gameState === "CAFE") {
-    document.getElementById('msg-box').style.display = "block";
-    document.getElementById('msg-box').innerText = "DOOR UNLOCKED! FIND THE EXIT ➡️";
-    if(player.x > 2800) enterAdoption();
+    let msg = document.getElementById('msg-box');
+    msg.style.display = "block";
+    msg.innerText = "ADOPTION OFFICE UNLOCKED! RUN TO THE END ➡️";
+    if(player.x > worldWidth - 200) enterAdoption();
   }
 }
 
@@ -182,67 +166,65 @@ function enterAdoption() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#f7d2c4"; ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // BG
+  // BG Parallax
   let bgX = -(cameraX * 0.4) % canvas.width;
   ctx.drawImage(bgPattern, bgX, 0, canvas.width, canvas.height);
   ctx.drawImage(bgPattern, bgX + canvas.width, 0, canvas.width, canvas.height);
 
   // Floor
   ctx.fillStyle = "white"; ctx.fillRect(0, groundY + 80, canvas.width, 300);
-  ctx.strokeStyle = "var(--dark-wood)"; ctx.lineWidth = 5;
-  ctx.beginPath(); ctx.moveTo(0, groundY + 80); ctx.lineTo(canvas.width, groundY + 80); ctx.stroke();
+  ctx.strokeStyle = "#4a2c2a"; ctx.lineWidth = 4;
+  ctx.strokeRect(-5, groundY + 80, canvas.width + 10, 2);
 
-  // Draw Items
+  // Honeycombs
   honeycombs.forEach(h => {
-    ctx.fillStyle = "var(--dark-wood)";
-    ctx.beginPath();
-    for(let i=0; i<6; i++) ctx.lineTo(h.x-cameraX + 50*Math.cos(i*Math.PI/3), h.y + 50*Math.sin(i*Math.PI/3));
-    ctx.closePath(); ctx.fill();
+    ctx.save(); ctx.translate(h.x - cameraX, h.y);
+    ctx.fillStyle = "#4a2c2a"; ctx.beginPath();
+    for(let i=0; i<6; i++) ctx.lineTo(50*Math.cos(i*Math.PI/3), 50*Math.sin(i*Math.PI/3));
+    ctx.closePath(); ctx.fill(); ctx.restore();
   });
 
+  // Sushi
+  ctx.font = "30px Arial";
   sushi.forEach(s => { if(!s.collected) ctx.fillText(s.type, s.x - cameraX - 15, groundY + 70); });
 
-  // NPC
-  ctx.font = "50px serif";
-  ctx.fillText("👩‍🦱", customer.x - cameraX - 25, customer.y);
-  if(customer.timer > 0 && !customer.done) {
-    ctx.beginPath(); ctx.arc(customer.x-cameraX, customer.y-60, 20, 0, (customer.timer/180)*Math.PI*2);
-    ctx.strokeStyle = "pink"; ctx.lineWidth = 5; ctx.stroke();
+  // NPC (The "Floating Head" fix - added a body!)
+  ctx.font = "40px Arial";
+  let nx = npc.x - cameraX;
+  ctx.fillText("👩‍🦱", nx - 20, npc.y); 
+  ctx.fillText("👗", nx - 20, npc.y + 40); // Added a "body" emoji so she's not just a head
+
+  if(npc.timer > 0 && !npc.done) {
+    ctx.strokeStyle = "pink"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(nx, npc.y - 40, 20, 0, (npc.timer/180)*Math.PI*2);
+    ctx.stroke();
   }
 
-  // Ghost Trail
-  ghostTrail.forEach(g => {
-    ctx.save(); ctx.globalAlpha = g.a; ctx.translate(g.x-cameraX, g.y);
-    if(g.dir === -1) ctx.scale(-1, 1);
-    ctx.drawImage(catImg, -45, 0, 90, 90); ctx.restore();
+  // Cat Render (Ghost + Main)
+  [...ghostTrail, {x: player.x, y: player.y, dir: player.dir, a: 1}].forEach(p => {
+    ctx.save(); ctx.globalAlpha = p.a;
+    ctx.translate(p.x - cameraX, p.y);
+    if(p.dir === -1) ctx.scale(-1, 1);
+    ctx.drawImage(catImg, -45, 0, 90, 90);
+    ctx.restore();
   });
 
-  // Player
-  ctx.save();
-  ctx.translate(player.x - cameraX, player.y);
-  if(player.dir === -1) ctx.scale(-1, 1);
-  ctx.drawImage(catImg, -45, 0, 90, 90);
-  ctx.restore();
-}
-
-function saveGame() {
-  const data = { score, gameState, cat: catImg.src };
-  localStorage.setItem("WhiskerBytesSave", JSON.stringify(data));
-  alert("Progress Saved! 💾");
-}
-
-function loadGame() {
-  const saved = localStorage.getItem("WhiskerBytesSave");
-  if(saved) {
-    const data = JSON.parse(saved);
-    score = data.score; updateUI();
+  if(player.meowTimer > 0) {
+    player.meowTimer--;
+    ctx.fillStyle = "white"; ctx.font = "bold 12px Arial";
+    ctx.fillText("MEOW! 🐾", player.x - cameraX + 30, player.y);
   }
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
 loop();
+
+function saveGame() {
+  localStorage.setItem("WhiskerSave", JSON.stringify({score, gameState}));
+  alert("Progress Saved! 💾");
+}
 </script>
 </body>
 </html>
