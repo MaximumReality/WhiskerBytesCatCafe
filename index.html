@@ -2,44 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: MASTER EDITION</title>
+<title>WHISKER BYTES: COZY CAFE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
-    :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; --gold: #ffd700; }
-    html, body { margin: 0; padding: 0; overflow: hidden; background: #222; font-family: 'Courier New', monospace; width: 100%; height: 100%; position: fixed; }
-    canvas { display: block; touch-action: none; background: #d2b48c; }
+    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; }
+    body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
+    canvas { display: block; touch-action: none; background: var(--floor); width: 100vw; height: 100vh; }
     
-    /* WELCOME SCREEN ARTWORK FIX */
-    #overlay { 
-        position: fixed; inset: 0; 
-        background-image: url('img_2480.jpeg'); 
-        background-size: cover; background-position: center;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; 
-        z-index: 5000; color: white; text-align: center; 
-    }
-    #overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
+    #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2480.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; }
+    #overlay::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: -1; }
+    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 10; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; }
+    .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
 
-    #results-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; display: none; }
-    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #4a2c2a; font-weight: bold; cursor: pointer; }
-    .btn-select img { width: 60px; height: 60px; display: block; margin: 0 auto 5px; }
-    
-    #shop-menu { position: fixed; top: 0; right: -280px; width: 240px; height: 100%; background: white; border-left: 5px solid var(--wood); z-index: 4000; transition: 0.3s; padding: 20px; color: #4a2c2a; overflow-y: auto; }
-    #shop-menu.open { right: 0; }
-    
-    #stats { position: fixed; top: 10px; left: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; border: 2px solid var(--wood); font-size: 12px; display: none; }
-    #ui-right { position: fixed; top: 10px; right: 10px; z-index: 1001; display: flex; gap: 5px; display: none; }
-    .ui-btn { background: var(--pink); border: 2px solid white; border-radius: 5px; padding: 8px; font-weight: bold; color: #4a2c2a; cursor: pointer; }
+    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); display: none; z-index: 100; font-weight: bold; }
+    #ui-right { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
+    .ui-btn { background: var(--pink); border: 2px solid white; padding: 10px 15px; font-weight: bold; border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
 
-    #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 5px; z-index: 1000; }
-    .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-    .ctrl-btn { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; touch-action: manipulation; }
+    #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 8px; z-index: 1000; }
+    .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ctrl-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid var(--wood); background: white; font-size: 28px; display: flex; align-items: center; justify-content: center; touch-action: none; }
 </style>
 </head>
 <body>
 
 <div id="overlay">
-    <h1 style="text-shadow: 2px 2px 5px black;">WHISKER BYTES</h1>
+    <h1>WHISKER BYTES</h1>
+    <p>Select your Cat Barista:</p>
     <div class="char-grid">
         <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
         <div class="btn-select" onclick="startGame('gingerella')"><img src="gingerella_idle.png">GINGER</div>
@@ -48,26 +37,13 @@
     </div>
 </div>
 
-<div id="shop-menu">
-    <h3>CAT CAFE SHOP</h3>
-    <button class="ui-btn" onclick="buyTable()">🟫 Buy Table (200)</button><br><br>
-    <button class="ui-btn" onclick="toggleShop()">⬅ BACK</button>
-</div>
-
-<div id="results-overlay">
-    <h1 id="closing-text">CLOSING TIME...</h1>
-    <p>Daily Profit: <span id="res-profit">0</span></p>
-    <button class="ui-btn" onclick="nextDay()">START NEXT DAY</button>
-</div>
-
 <div id="stats">
-    <b>DAY <span id="dayVal">1</span></b> | <span id="timeVal">9:00 AM</span><br>
-    <b>⭐ <span id="scoreVal">0</span></b><br>
-    <span id="holdingTxt" style="color:brown">Empty Paws</span>
+    ⭐ <span id="scoreVal">0</span> | 🕒 <span id="timeVal">9:00 AM</span><br>
+    <span id="holdingTxt" style="color: #8b4513;">🐾 Empty Paws</span>
 </div>
 
 <div id="ui-right">
-    <button class="ui-btn" onclick="toggleShop()">🛒 SHOP</button>
+    <button class="ui-btn" onclick="location.reload()">🏠 HOME</button>
 </div>
 
 <canvas id="game"></canvas>
@@ -79,180 +55,162 @@
         <button class="ctrl-btn" id="down">⬇️</button>
         <button class="ctrl-btn" id="right">➡️</button>
     </div>
-    <button class="ctrl-btn" id="action-btn" style="width:100px; background:var(--pink);" onclick="interact()">📢</button>
+    <button class="ctrl-btn" id="action-btn" style="width:160px; border-radius: 35px; background:var(--pink);" onpointerdown="interact()">📢 MEOW</button>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+let gameActive = false, score = 0, gameMinutes = 540;
+let playerHolding = null, tvActive = false, criticActive = false;
+let payEffect = { active: false, x: 0, y: 0, t: "" };
+const keys = { up: false, down: false, left: false, right: false };
 
 const catImg = new Image(), bgImg = new Image();
 const f1 = new Image(); f1.src = 'friend1.png';
 const f2 = new Image(); f2.src = 'friend2.png';
 const criticImg = new Image(); criticImg.src = 'critic.png';
 
-let score = 0, currentDay = 1, gameMinutes = 540, dayServed = 0, dayActive = false;
-let playerHolding = null, tvActive = false, tickerX = 150, criticActive = false, criticApologized = false;
-let unlocked = ["☕", "🍪", "🍼"], dingEffect = {active: false}, heartEffect = {active: false}, dimAlpha = 0;
-const player = { x: 100, y: 300, speed: 5, facing: 1, name: "", cookTime: 60 };
-let customers = [], furniture = [];
-const keys = {up:0, down:0, left:0, right:0};
-
-function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+const player = { x: 200, y: 350, speed: 5, name: "", facing: 1, isNapping: false };
+let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
 function startGame(catId) {
     player.name = catId;
-    catImg.src = catId + "_idle.png";
-    bgImg.src = 'img_2480.jpeg'; 
+    catImg.src = catId + '_idle.png';
+    bgImg.src = 'IMG_2480.jpeg'; // MATCHED CAPS
     player.speed = (catId === 'gingerella') ? 8 : 5;
-    player.cookTime = (catId === 'mochi') ? 35 : 60;
-    
+    player.cookTime = (catId === 'mochi') ? 45 : 90;
+
     furniture = [
-        {x:60, y:150, type:"COUNTER", item:"☕", e:"🏪"},
-        {x:120, y:150, type:"COUNTER", item:"🍪", e:"🏪"},
-        {x:180, y:150, type:"COUNTER", item:"🍼", e:"🏪"},
-        {x:canvas.width/2, y:70, type:"TV", e:"📺"},
-        {x:canvas.width/2, y:canvas.height/2+50, type:"TABLE", e:"🟫", solid:true},
-        {x:canvas.width/2-60, y:canvas.height/2+50, type:"CHAIR", e:"🪑"},
-        {x:canvas.width/2+60, y:canvas.height/2+50, type:"CHAIR", e:"🪑"}
+        {x: 80, y: 120, type: "STATION", item: "☕", e: "☕"},
+        {x: 160, y: 120, type: "STATION", item: "🍪", e: "🍪"},
+        {x: 240, y: 120, type: "STATION", item: "🍼", e: "🍼"},
+        {x: canvas.width - 60, y: 80, type: "RADIO", e: "📻"},
+        {x: 60, y: 80, type: "WINDOW", e: "🖼️"},
+        {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
+        {x: canvas.width/2, y: 80, type: "TV", e: "📺"},
+        {x: canvas.width/2, y: 350, type: "TABLE", e: "🟫"},
+        {x: canvas.width/2 - 65, y: 350, type: "CHAIR", e: "🪑", occupied: false},
+        {x: canvas.width/2 + 65, y: 350, type: "CHAIR", e: "🪑", occupied: false}
     ];
-    
+
     document.getElementById('overlay').style.display = 'none';
-    document.getElementById('controls').style.display = 'flex';
     document.getElementById('stats').style.display = 'block';
-    document.getElementById('ui-right').style.display = 'flex';
-    dayActive = true; loop();
+    document.getElementById('ui-right').style.display = 'block';
+    document.getElementById('controls').style.display = 'flex';
+    gameActive = true;
+    loop();
 }
 
 function interact() {
-    if(kitchen.active) return;
     furniture.forEach(f => {
-        if(Math.hypot(player.x-f.x, player.y-f.y) < 60) {
-            if(f.type === "COUNTER" && !playerHolding) { kitchen.active = true; kitchen.t = player.cookTime; kitchen.item = f.item; }
-            if(f.type === "TV") { tvActive = !tvActive; f.e = tvActive ? "🎞️" : "📺"; vibrate(30); }
+        let d = Math.hypot(player.x - f.x, player.y - f.y);
+        if (d < 70) {
+            if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
+            if (f.type === "TV") tvActive = !tvActive;
+            if (f.type === "RADIO") f.e = (f.e === "📻") ? "🎵" : "📻";
         }
     });
+
     customers.forEach(c => {
-        if(Math.hypot(player.x-c.x, player.y-c.y) < 70) {
-            if(playerHolding === c.order) {
-                score += c.isCritic ? 500 : 60; dayServed++;
-                playerHolding = null; c.chair.occupied = false;
-                customers = customers.filter(cust => cust !== c);
-                if(c.isCritic) { criticActive = false; criticApologized = false; }
-                vibrate(50);
-            } else if (c.isCritic && !criticApologized && !playerHolding) {
-                c.patience = 100; criticApologized = true;
-                heartEffect = { active: true, x: c.x, y: c.y-40, life: 60 };
-                vibrate([40, 40, 40]);
-            }
+        if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
+            score += c.isCritic ? 500 : 50;
+            payEffect = { active: true, x: c.x, y: c.y, t: Math.random() > 0.5 ? "💳" : "💵", life: 40 };
+            playerHolding = null; c.chair.occupied = false;
+            customers = customers.filter(cust => cust !== c);
+            if(c.isCritic) criticActive = false;
+            document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
+            if(navigator.vibrate) navigator.vibrate(50);
         }
     });
 }
-
-let kitchen = { active: false, t: 0, item: null };
 
 function update() {
-    if(!dayActive) return;
-    gameMinutes += 0.2;
-    if(gameMinutes >= 1080) { dayActive = false; triggerClosing(); }
+    if (!gameActive) return;
+    
+    // Check for Napping
+    let onBed = furniture.find(f => f.type === "BED" && Math.hypot(player.x - f.x, player.y - f.y) < 40);
+    player.isNapping = !!onBed;
 
-    if(!kitchen.active) {
-        if(keys.up) player.y -= player.speed; if(keys.down) player.y += player.speed;
-        if(keys.left) { player.x -= player.speed; player.facing = -1; }
-        if(keys.right) { player.x += player.speed; player.facing = 1; }
+    if (!kitchen.active) {
+        if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
+        if (keys.left) { player.x -= player.speed; player.facing = -1; }
+        if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
-    if(player.name === 'luna' && criticActive && !tvActive) tvActive = true;
 
-    if(kitchen.active) {
-        kitchen.t--;
-        if(kitchen.t <= 0) {
-            playerHolding = kitchen.item; kitchen.active = false;
-            dingEffect = { active: true, x: player.x, y: player.y - 80, life: 40 };
-            vibrate(50);
+    if (kitchen.active) {
+        kitchen.timer--;
+        if (kitchen.timer <= 0) {
+            kitchen.active = false; playerHolding = kitchen.item;
+            document.getElementById('holdingTxt').innerText = "Holding: " + playerHolding;
         }
     }
-    customers.forEach(c => {
-        let decay = tvActive ? (c.isCritic ? 0.07 : 0.04) : (c.isCritic ? 0.15 : 0.08);
-        c.patience -= decay;
-        if(c.patience <= 0) { c.chair.occupied = false; customers = customers.filter(cust => cust !== c); if(c.isCritic) criticActive = false; }
-    });
-    if(Math.random() < 0.005) spawnCustomer();
-}
 
-function triggerClosing() {
-    let fade = setInterval(() => {
-        dimAlpha += 0.05;
-        if(dimAlpha >= 1) {
-            clearInterval(fade);
-            document.getElementById('res-profit').innerText = dayServed * 50;
-            document.getElementById('results-overlay').style.display = 'flex';
-        }
-    }, 50);
-}
-
-function draw() {
-    ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    if(tvActive) {
-        ctx.fillStyle = "rgba(135, 206, 250, 0.2)";
-        ctx.beginPath(); ctx.moveTo(canvas.width/2-50, 70); ctx.lineTo(canvas.width/2+120, 300); ctx.lineTo(canvas.width/2-120, 300); ctx.fill();
-    }
-    ctx.font = "40px Arial";
-    furniture.forEach(f => {
-        ctx.fillText(f.e, f.x-20, f.y+15);
-        if(f.type === "TV" && tvActive) {
-            ctx.fillStyle="black"; ctx.fillRect(f.x-25, f.y-15, 50, 30);
-            ctx.font="15px Arial"; ctx.fillText("🐱🎤", f.x-15, f.y+5); ctx.font="40px Arial";
-        }
-    });
-    if(tvActive) {
-        tickerX -= 2; if(tickerX < -300) tickerX = 150;
-        ctx.fillStyle="white"; ctx.font="bold 10px Arial";
-        ctx.fillText("PROFIT: "+(dayServed*50)+" | HI: "+score, canvas.width/2-40 + tickerX, 60);
-    }
-    customers.forEach(c => {
-        ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
-        ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+25, c.y-25, 15, 0, 7); ctx.fill();
-        ctx.fillStyle="black"; ctx.font="14px Arial"; ctx.fillText(c.patience < 25 ? "😡" : c.order, c.x+18, c.y-20);
-        ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 4);
-    });
-    if(dingEffect.active) { ctx.fillStyle="gold"; ctx.font="bold 20px Arial"; ctx.fillText("DING! 🛎️", dingEffect.x-30, dingEffect.y); dingEffect.life--; }
-    if(heartEffect.active) { ctx.font="30px Arial"; ctx.fillText("💖", heartEffect.x-15, heartEffect.y--); heartEffect.life--; }
-
-    ctx.save(); ctx.translate(player.x, player.y); if(player.facing === -1) ctx.scale(-1,1);
-    ctx.drawImage(catImg, -40, -40, 80, 80); ctx.restore();
-
-    if(dimAlpha > 0) { ctx.fillStyle = `rgba(0,0,0,${dimAlpha})`; ctx.fillRect(0,0,canvas.width, canvas.height); }
-    document.getElementById('scoreVal').innerText = score;
-    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
-    document.getElementById('timeVal').innerText = (h>12?h-12:h)+":"+(m<10?'0'+m:m)+(h>=12?'PM':'AM');
+    gameMinutes += player.isNapping ? 0.5 : 0.1;
+    if (Math.random() < 0.005) spawnCustomer();
+    customers.forEach(c => { c.patience -= tvActive ? 0.03 : 0.07; });
+    customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 }
 
 function spawnCustomer() {
     let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
-    if(chair) {
+    if (chair) {
         chair.occupied = true;
         let isC = !criticActive && Math.random() < 0.2;
-        if(isC) criticActive = true;
-        customers.push({ x: chair.x, y: chair.y-10, chair: chair, img: isC ? criticImg : (Math.random()>0.5?f1:f2), order: unlocked[Math.floor(Math.random()*unlocked.length)], patience: 100, isCritic: isC });
+        if (isC) criticActive = true;
+        customers.push({ x: chair.x, y: chair.y, chair: chair, order: ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)], patience: 100, isCritic: isC, img: isC ? criticImg : (Math.random()>0.5?f1:f2) });
     }
 }
 
-function nextDay() {
-    currentDay++; gameMinutes=540; dayServed=0; dayActive=true; customers=[]; dimAlpha=0;
-    furniture.forEach(f=>f.occupied=false);
-    document.getElementById('results-overlay').style.display='none';
-    document.getElementById('dayVal').innerText = currentDay;
+function draw() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    
+    // Kitchen Counter Visual
+    ctx.fillStyle = "#4e342e"; ctx.fillRect(40, 130, 240, 15);
+
+    furniture.forEach(f => {
+        ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
+    });
+
+    customers.forEach(c => {
+        if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
+        ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+30, c.y-30, 18, 0, 7); ctx.fill();
+        ctx.fillStyle="black"; ctx.font="20px Arial"; ctx.fillText(c.order, c.x+20, c.y-23);
+        ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
+    });
+
+    // Player
+    ctx.save(); ctx.translate(player.x, player.y);
+    if(player.facing === -1) ctx.scale(-1, 1);
+    if(player.isNapping) ctx.rotate(Math.PI/2);
+    if(catImg.complete) ctx.drawImage(catImg, -40, -40, 80, 80);
+    ctx.restore();
+
+    if(kitchen.active) {
+        ctx.fillStyle="lime"; ctx.fillRect(player.x-40, player.y-60, (kitchen.timer/player.cookTime)*80, 8);
+    }
+    if(payEffect.active) {
+        ctx.font="30px Arial"; ctx.fillText(payEffect.t, payEffect.x, payEffect.y--);
+        payEffect.life--; if(payEffect.life<=0) payEffect.active=false;
+    }
+
+    document.getElementById('scoreVal').innerText = score;
+    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
+    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
-function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener("resize", resize); resize();
-function bind(id, k) {
-    let b = document.getElementById(id);
-    b.ontouchstart = (e) => { e.preventDefault(); keys[k] = 1; };
-    b.ontouchend = () => keys[k] = 0;
-}
-bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right");
+
+window.onload = () => {
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const btns = ["up","down","left","right"];
+    btns.forEach(id => {
+        let b = document.getElementById(id);
+        b.onpointerdown = (e) => { e.preventDefault(); keys[id] = true; };
+        b.onpointerup = (e) => { e.preventDefault(); keys[id] = false; };
+    });
+};
 </script>
 </body>
 </html>
