@@ -45,6 +45,82 @@
     #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 8px; z-index: 1000; }
     .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .ctrl-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid var(--wood); background: white; font-size: 28px; display: flex; align-items: center; justify-content: center; }
+<style>
+    /* ... (rest of your styles) ... */
+
+    /* LOGO OVERLAY - FIXED */
+    #logo-header {
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 45%;
+        background: url('whiskerbytes.png') center/contain no-repeat;
+        z-index: 5001;
+        /* THIS IS THE MAGIC LINE: */
+        pointer-events: none; 
+    }
+
+    .char-grid { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 15px; 
+        position: relative; 
+        z-index: 6000; /* Higher than the logo */
+        margin-top: 20px; 
+        touch-action: manipulation;
+    }
+
+    .btn-select { 
+        background: white; 
+        border: 3px solid var(--pink); 
+        border-radius: 15px; 
+        padding: 10px; 
+        color: #333; 
+        cursor: pointer;
+        /* Makes it feel like a real button click */
+        active: transform: scale(0.95);
+    }
+</style>
+
+<div id="overlay">
+    <div id="logo-header"></div> 
+    <div class="char-grid">
+        <div class="btn-select" onpointerdown="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
+        <div class="btn-select" onpointerdown="startGame('gingerella')"><img src="gingerella_idle.png">GINGER</div>
+        <div class="btn-select" onpointerdown="startGame('luna')"><img src="luna_idle.png">LUNA</div>
+        <div class="btn-select" onpointerdown="startGame('jinx')"><img src="jinx_idle.png">JINX</div>
+    </div>
+</div>
+
+<script>
+    // Ensure the startGame function is globally accessible
+    window.startGame = function(catId) {
+        // Prevent double-firing
+        if (gameActive) return;
+        
+        // Character Setup
+        player.name = catId;
+        catImg.src = catId + '_idle.png';
+        bgImg.src = 'IMG_2480.jpeg';
+        
+        player.speed = (catId === 'gingerella') ? 8 : 5;
+        player.cookTime = (catId === 'mochi') ? 45 : 90;
+
+        // Visual transition
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('stats').style.display = 'block';
+        document.getElementById('ui-right').style.display = 'block';
+        document.getElementById('controls').style.display = 'flex';
+        
+        gameActive = true;
+        // Start the loop
+        requestAnimationFrame(loop);
+        
+        // Haptic feedback for the button press
+        if (navigator.vibrate) navigator.vibrate(20);
+    }
+</script>
 </style>
 </head>
 <body>
