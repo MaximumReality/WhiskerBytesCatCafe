@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: NO-STICK EDITION</title>
+<title>WHISKER BYTES: COZY CAFE EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
     * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
-    canvas { display: block; touch-action: none; background: var(--floor); width: 100vw; height: 100vh; }
+    canvas { display: block; touch-action: none; background: #3d2b1f; width: 100vw; height: 100vh; }
     
     #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 5000; color: white; text-align: center; padding-bottom: 50px; }
     #logo-header { position: absolute; top: 0; left: 0; width: 100%; height: 45%; background: url('whiskerbytes.png') center/contain no-repeat; z-index: 5001; pointer-events: none; }
@@ -50,7 +50,7 @@
         <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">JINX</div>
     </div>
     <div class="menu-bar">
-        <span class="link-item" style="color: var(--pink);" onclick="openModal('manual')">📖 How to Play</span> 
+        <span class="link-item" style="color: var(--pink);" onclick="openModal('manual')">📖 Staff Manual</span> 
         <span style="color:white;"> | </span> 
         <span class="link-item" style="color: var(--gold);" onclick="openModal('credits')">🐾 Credits</span>
     </div>
@@ -64,7 +64,7 @@
             <p><strong>1. Move</strong><br>Use arrows to walk around.</p>
             <p><strong>2. Prepare</strong><br>Stand at ☕, 🍪, or 🍼 and tap <strong>MEOW</strong>.</p>
             <p><strong>3. Serve</strong><br>Deliver the order to the customer at the table.</p>
-            <p><strong>4. Cleanup</strong><br>Use the 🗑️ to clear your paws.</p>
+            <p><strong>4. Tech</strong><br>Tap <strong>MEOW</strong> near the Radio/TV to turn them on!</p>
         </div>
     </div>
 </div>
@@ -104,7 +104,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540;
-let playerHolding = null;
+let playerHolding = null, tvActive = false, radioActive = false, musicNotes = [], toonFrame = 0;
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png';
 
@@ -161,23 +161,21 @@ window.startGame = function(catId) {
 function interact() {
     if(!gameActive) return;
     furniture.forEach(f => {
-        if (Math.hypot(player.x - f.x, player.y - f.y) < 70) {
+        if (Math.hypot(player.x - f.x, player.y - f.y) < 75) {
             if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
             if (f.type === "TRASH") { playerHolding = null; document.getElementById('holdingTxt').innerText = "🐾 Empty"; }
+            if (f.type === "RADIO") radioActive = !radioActive;
+            if (f.type === "TV") tvActive = !tvActive;
         }
     });
 
     customers.forEach(c => {
-        if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
+        if (Math.hypot(player.x - c.x, player.y - c.y) < 85 && playerHolding === c.order) {
             let gain = 60 + player.traits.tipBonus;
             score += gain; triggerPopup(gain);
             playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
-            if (score > highScore) { 
-                highScore = score; 
-                document.getElementById('highVal').innerText = highScore;
-                localStorage.setItem("whiskerBytesHigh", highScore);
-            }
+            if (score > highScore) { highScore = score; document.getElementById('highVal').innerText = highScore; localStorage.setItem("whiskerBytesHigh", highScore); }
             document.getElementById('holdingTxt').innerText = "🐾 Empty";
         }
     });
@@ -213,20 +211,40 @@ function update() {
     customers.forEach(c => { c.patience -= 0.05; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 
-    // STRICT WALL LIMITS
-    player.y = Math.max(220, Math.min(canvas.height - 200, player.y));
-    player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
+    // NO-STICK BOUNDARIES
+    if (player.y < 225) { player.y = 227; }
+    if (player.y > canvas.height - 210) { player.y = canvas.height - 212; }
+    if (player.x < 30) { player.x = 32; }
+    if (player.x > canvas.width - 30) { player.x = canvas.width - 32; }
+
+    if (radioActive && Math.random() < 0.05) musicNotes.push({ x: 50, y: 300, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
+    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i, 1); });
+    if(tvActive) toonFrame = (toonFrame + 0.1) % 2;
 }
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
     if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
-    ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 160, canvas.width, canvas.height - 160);
+    
+    // TILE FLOOR
+    const tileSize = 60;
+    for(let x=0; x<canvas.width; x+=tileSize) {
+        for(let y=160; y<canvas.height; y+=tileSize) {
+            ctx.fillStyle = ((x+y)/tileSize % 2 === 0) ? "#d2b48c" : "#c1a37b";
+            ctx.fillRect(x, y, tileSize, tileSize);
+            ctx.strokeStyle = "rgba(0,0,0,0.05)"; ctx.strokeRect(x,y,tileSize,tileSize);
+        }
+    }
     
     furniture.forEach(f => {
+        if((f.type === "RADIO" && radioActive) || (f.type === "TV" && tvActive)) { ctx.shadowBlur = 10; ctx.shadowColor = "gold"; }
         ctx.font = "38px Arial"; ctx.fillText(f.e, f.x-19, f.y+15);
+        ctx.shadowBlur = 0;
         if(f.type === "STATION") { ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 8); }
+        if(f.type === "TV" && tvActive) { ctx.fillStyle="rgba(135,206,235,0.3)"; ctx.fillRect(f.x-20, f.y-20, 40, 30); }
     });
+
+    musicNotes.forEach(n => { ctx.fillStyle="black"; ctx.font="16px Arial"; ctx.fillText(n.char, n.x, n.y); });
 
     customers.forEach(c => {
         if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
