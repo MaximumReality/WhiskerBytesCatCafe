@@ -2,21 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: HIGH SCORE EDITION</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WHISKER BYTES: LORI KAYE EDITION</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; }
-    * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+    
+    * { 
+        -webkit-touch-callout: none; 
+        -webkit-user-select: none; 
+        user-select: none; 
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation; 
+    }
+
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
     canvas { display: block; touch-action: none; background: var(--floor); width: 100vw; height: 100vh; }
-    #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 5000; color: white; text-align: center; padding-bottom: 50px; }
+    
+    #overlay { 
+        position: fixed; inset: 0; 
+        background: #4a2c2a url('IMG_2475.jpeg') center/cover; 
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
+        z-index: 5000; color: white; text-align: center; padding-bottom: 50px; 
+    }
+
     #logo-header { position: absolute; top: 0; left: 0; width: 100%; height: 45%; background: url('whiskerbytes.png') center/contain no-repeat; z-index: 5001; pointer-events: none; }
+    
     .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 6000; margin-top: 20px; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; font-size: 14px; font-weight: bold; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; font-size: 13px; font-weight: bold; }
     .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
-    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 14px; }
+
+    /* SCROLLING CREDITS STYLING */
+    #credits { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    
+    .credits-box { 
+        background: #fff8f2; 
+        border: 4px solid var(--wood); 
+        border-radius: 18px; 
+        width: 85%; 
+        max-width: 320px; 
+        height: 350px; /* Viewport height */
+        text-align: center; 
+        color: #4a2c2a; 
+        position: relative; 
+        overflow: hidden; 
+    }
+
+    .credits-content {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        bottom: -100%;
+    }
+
+    @keyframes scrollCredits {
+        0% { bottom: -100%; }
+        100% { bottom: 100%; }
+    }
+
+    .credits-content h2 { color: #5d4037; margin-bottom: 10px; }
+    .credits-content p { margin: 15px 20px; line-height: 1.5; font-size: 14px; }
+    .credits-content .soft { font-size: 12px; opacity: 0.7; font-style: italic; }
+    
+    .close-credits { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
+
+    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 13px; }
     #ui-right { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
-    .ui-btn { background: var(--pink); border: 2px solid white; padding: 10px 15px; font-weight: bold; border-radius: 8px; }
+    .ui-btn { background: var(--pink); border: 2px solid white; padding: 8px 12px; font-weight: bold; border-radius: 8px; font-size: 12px; }
+
     #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 8px; z-index: 1000; }
     .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .ctrl-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid var(--wood); background: white; font-size: 28px; display: flex; align-items: center; justify-content: center; }
@@ -32,6 +84,20 @@
         <div class="btn-select" onpointerdown="startGame('luna')"><img src="luna_idle.png">LUNA<br>Speed+</div>
         <div class="btn-select" onpointerdown="startGame('jinx')"><img src="jinx_idle.png">JINX<br>Luck+</div>
     </div>
+    <div style="margin-top:20px; font-size:14px; color: white; text-decoration: underline; cursor: pointer;" onclick="openCredits()">🐾 Credits</div>
+</div>
+
+<div id="credits">
+    <div class="credits-box">
+        <button class="close-credits" onclick="closeCredits()">✕</button>
+        <div class="credits-content" id="credits-scroller">
+            <h2>🐾 Whisker Bytes</h2>
+            <p><strong>Created by</strong><br>Lori Kaye Sifuentes</p>
+            <p><strong>Customer Sprites Inspired By</strong><br>Luna & Stella 💖</p>
+            <p><strong>Dev Note</strong><br>Whisker Bytes was made from a few quiet ideas and HTML magic. Thank you for visiting—paws up for staying a while. 🐾</p>
+            <p class="soft">Made with love, cats, and imagination.</p>
+        </div>
+    </div>
 </div>
 
 <div id="stats">
@@ -39,7 +105,7 @@
     🕒 <span id="timeVal">9:00 AM</span> | <span id="holdingTxt" style="color: #8b4513;">🐾 Empty</span>
 </div>
 
-<div id="ui-right"><button class="ui-btn" onclick="location.reload()">🏠 HOME</button></div>
+<div id="ui-right"><button class="ui-btn" onclick="location.reload()">▶ NEW DAY</button></div>
 <canvas id="game"></canvas>
 
 <div id="controls">
@@ -56,7 +122,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
-let playerHolding = null, tvActive = false, criticActive = false, trashCount = 0;
+let playerHolding = null, tvActive = false, criticActive = false;
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), criticImg = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
@@ -64,15 +130,23 @@ f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
 const player = { x: 200, y: 450, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
-// HIGH SCORE LOGIC
 let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
 document.getElementById('highVal').innerText = highScore;
+
+function openCredits() {
+    const content = document.getElementById("credits-scroller");
+    content.style.animation = "none"; 
+    void content.offsetWidth; 
+    content.style.animation = "scrollCredits 15s linear forwards"; 
+    document.getElementById('credits').style.display = 'flex';
+}
+
+function closeCredits() { document.getElementById('credits').style.display = 'none'; }
 
 window.startGame = function(catId) {
     if (gameActive) return;
     catImg.src = catId + '_idle.png';
     bgImg.src = 'IMG_2480.jpeg'; 
-    
     player.speed = (catId === 'luna') ? 8 : 5;
     player.traits.tipBonus = (catId === 'gingerella') ? 20 : 0;
     player.traits.patienceBonus = (catId === 'mochi') ? 30 : 0;
@@ -104,15 +178,9 @@ window.startGame = function(catId) {
 function interact() {
     furniture.forEach(f => {
         if (Math.hypot(player.x - f.x, player.y - f.y) < 70) {
-            if (f.type === "TRASH") {
-                if (playerHolding === "🥡") { playerHolding = null; trashCount = 0; f.e = "🗑️"; }
-                else if (playerHolding && trashCount < 5) { playerHolding = null; score -= 5; trashCount++; if(trashCount >= 5) f.e = "🥡"; }
-                else if (trashCount >= 5 && !playerHolding) { playerHolding = "🥡"; f.e = "⭕"; }
-            }
-            if (f.type === "WINDOW" && playerHolding === "🥡") { playerHolding = null; trashCount = 0; let bin = furniture.find(t => t.type === "TRASH"); if(bin) bin.e = "🗑️"; }
-            if (f.type === "STATION" && playerHolding !== "🥡") { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
+            if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
+            if (f.type === "TRASH") playerHolding = null;
             if (f.type === "TV") tvActive = !tvActive;
-            if (f.type === "RADIO") f.e = (f.e === "📻") ? "🎵" : "📻";
             document.getElementById('holdingTxt').innerText = playerHolding ? playerHolding : "🐾 Empty";
         }
     });
@@ -124,7 +192,6 @@ function interact() {
             customers = customers.filter(cust => cust !== c);
             if(c.isCritic) criticActive = false;
             document.getElementById('holdingTxt').innerText = "🐾 Empty";
-
             if(score >= 300 && !unlockedCake) {
                 furniture.push({x: 420, y: 320, type: "STATION", item: "🍰", e: "🍰"});
                 unlockedCake = true;
@@ -146,24 +213,14 @@ function update() {
 
     if (kitchen.active) {
         kitchen.timer--;
-        if (kitchen.timer <= 0) {
-            kitchen.active = false; playerHolding = kitchen.item;
-            document.getElementById('holdingTxt').innerText = playerHolding;
-        }
+        if (kitchen.timer <= 0) { kitchen.active = false; playerHolding = kitchen.item; document.getElementById('holdingTxt').innerText = playerHolding; }
     }
 
     gameMinutes += 0.1;
-
     if(gameMinutes >= 1080) {
         gameActive = false;
-        // Update High Score at end of day
-        if(score > highScore) {
-            localStorage.setItem("whiskerBytesHigh", score);
-            alert("New Record! 🐾 " + score);
-        } else {
-            alert("Day Complete! Score: " + score);
-        }
-        location.reload();
+        if(score > highScore) { localStorage.setItem("whiskerBytesHigh", score); }
+        openCredits(); 
     }
 
     if (Math.random() < 0.005) spawnCustomer();
@@ -176,21 +233,11 @@ function draw() {
     if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 280);
     ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 280, canvas.width, canvas.height-280);
     ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 275, canvas.width, 10);
-
-    if(criticActive) {
-        ctx.fillStyle = "rgba(255, 0, 0, 0.05)";
-        ctx.fillRect(0,0,canvas.width, canvas.height);
-    }
+    if(criticActive) { ctx.fillStyle = "rgba(255, 0, 0, 0.05)"; ctx.fillRect(0,0,canvas.width, canvas.height); }
 
     furniture.forEach(f => {
         ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
-        if(f.type === "STATION" || f.type === "TRASH") {
-            ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 10);
-        }
-        if(f.type === "TV" && tvActive) {
-            ctx.fillStyle = "black"; ctx.fillRect(f.x - 25, f.y - 15, 50, 30);
-            ctx.font = "16px Arial"; ctx.fillText("🐱🎤", f.x - 15, f.y + 5);
-        }
+        if(f.type === "STATION") { ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 10); }
     });
 
     customers.forEach(c => {
@@ -205,9 +252,7 @@ function draw() {
     if(catImg.complete) ctx.drawImage(catImg, -40, -40, 80, 80);
     ctx.restore();
 
-    if(kitchen.active) {
-        ctx.fillStyle="lime"; ctx.fillRect(player.x-40, player.y-60, (kitchen.timer/player.cookTime)*80, 8);
-    }
+    if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-40, player.y-60, (kitchen.timer/player.cookTime)*80, 8); }
 
     document.getElementById('scoreVal').innerText = score;
     let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
@@ -221,20 +266,11 @@ function spawnCustomer() {
         let isC = !criticActive && Math.random() < (0.2 + player.traits.luckBonus);
         if (isC) {
             criticActive = true;
-            // JINX ALERT!
             if (player.traits.luckBonus > 0) alert("✨ Jinx’s luck draws a famous critic!");
         }
-        
         let menu = ["☕", "🍪", "🍼"];
         if(unlockedCake) menu.push("🍰");
-        
-        customers.push({ 
-            x: chair.x, y: chair.y, chair: chair, 
-            order: menu[Math.floor(Math.random() * menu.length)], 
-            patience: 100 + player.traits.patienceBonus, 
-            isCritic: isC, 
-            img: isC ? criticImg : (Math.random()>0.5?f1:f2) 
-        });
+        customers.push({ x: chair.x, y: chair.y, chair: chair, order: menu[Math.floor(Math.random() * menu.length)], patience: 100 + player.traits.patienceBonus, isCritic: isC, img: isC ? criticImg : (Math.random()>0.5?f1:f2) });
     }
 }
 
@@ -242,8 +278,7 @@ function loop() { update(); draw(); if(gameActive) requestAnimationFrame(loop); 
 
 window.onload = () => {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    const btns = ["up","down","left","right"];
-    btns.forEach(id => {
+    ["up","down","left","right"].forEach(id => {
         let b = document.getElementById(id);
         b.addEventListener('pointerdown', (e) => { e.preventDefault(); keys[id] = true; }, { passive: false });
         b.addEventListener('pointerup', (e) => { e.preventDefault(); keys[id] = false; }, { passive: false });
