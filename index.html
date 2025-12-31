@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES</title>
+<title>WHISKER BYTES: Luna's Cafe</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; }
@@ -19,20 +19,20 @@
   #controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 10px; z-index: 500; }
   .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .ctrl-btn { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; touch-action: manipulation; box-shadow: 0 4px #888; }
-  .ctrl-btn:active { transform: translateY(3px); box-shadow: none; }
 </style>
 </head>
 <body>
 
 <div id="overlay">
   <img src="whiskerbytes.png" id="logo-img">
+  <p>WELCOME TO THE CAFE</p>
   <div class="char-grid">
     <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
-    <div class="btn-select" onclick="startGame('jinx')"><img src="jinx_idle.png">JINX</div>
+    <div class="btn-select" onclick="startGame('luna')"><img src="luna_idle.png">LUNA</div>
   </div>
 </div>
 
-<div id="stats"><b>RESOURCES: <span id="scoreVal">0</span></b><br><small>Place chairs near tables to serve!</small></div>
+<div id="stats"><b>RESOURCES: <span id="scoreVal">0</span></b></div>
 
 <canvas id="game"></canvas>
 
@@ -53,35 +53,38 @@ let score = 0, gameState = "START";
 const catImg = new Image();
 const bgPattern = new Image();
 
-const player = { x: 0, y: 0, speed: 4, dir: 1, meowing: 0 };
+// DIRECTION FIX: Set to 1 if your PNG faces Right, -1 if it faces Left
+let spriteFacing = 1; 
+
+const player = { x: 0, y: 0, speed: 5, dir: 1, meowing: 0 };
 let furniture = [];
 let customers = [];
 
 function startGame(cat) {
   catImg.src = cat + "_idle.png";
   bgPattern.src = 'IMG_2480.jpeg'; 
+  
+  // Custom fix: if Luna faces left in your drawing, we adjust her here
+  if(cat === 'luna') spriteFacing = 1; 
+  
   document.getElementById('overlay').style.display = 'none';
   document.getElementById('controls').style.display = 'flex';
   document.getElementById('stats').style.display = 'block';
   gameState = "PLAYING";
   
-  // Initial Layout inspired by Cat Cafe Manager guide
   furniture = [
     { x: 200, y: 200, type: "TABLE", emoji: "🟫" },
-    { x: 160, y: 200, type: "CHAIR", emoji: "🪑", attached: true }, // Attached left
-    { x: 240, y: 200, type: "CHAIR", emoji: "🪑", attached: true }  // Attached right
+    { x: 160, y: 200, type: "CHAIR", emoji: "🪑", attached: true },
+    { x: 240, y: 200, type: "CHAIR", emoji: "🪑", attached: true }
   ];
-  
   spawnCustomer();
 }
 
 function spawnCustomer() {
-  // Customers look for chairs attached to tables
-  const availableChairs = furniture.filter(f => f.type === "CHAIR" && f.attached && !f.occupied);
-  if (availableChairs.length > 0) {
-    const target = availableChairs[Math.floor(Math.random() * availableChairs.length)];
-    target.occupied = true;
-    customers.push({ x: target.x, y: target.y, chair: target, timer: 200 });
+  const chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
+  if (chair) {
+    chair.occupied = true;
+    customers.push({ x: chair.x, y: chair.y, chair: chair });
   }
 }
 
@@ -102,15 +105,14 @@ function bind(id, k) {
 bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right");
 
 function meow() {
-  player.meowing = 40;
-  // Serving logic: Meow near a customer to collect resources
-  customers.forEach((c, index) => {
-    if(Math.abs(player.x - c.x) < 60 && Math.abs(player.y - c.y) < 60) {
-      score += 5;
+  player.meowing = 30;
+  customers.forEach((c, i) => {
+    if(Math.abs(player.x - c.x) < 70 && Math.abs(player.y - c.y) < 70) {
+      score += 10;
       document.getElementById('scoreVal').innerText = score;
       c.chair.occupied = false;
-      customers.splice(index, 1);
-      setTimeout(spawnCustomer, 2000); // Next customer comes in
+      customers.splice(i, 1);
+      setTimeout(spawnCustomer, 3000);
     }
   });
 }
@@ -121,47 +123,38 @@ function update() {
   if (keys.down) player.y += player.speed;
   if (keys.left) { player.x -= player.speed; player.dir = -1; }
   if (keys.right) { player.x += player.speed; player.dir = 1; }
-
-  player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
-  player.y = Math.max(110, Math.min(canvas.height - 110, player.y));
+  
+  player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
+  player.y = Math.max(120, Math.min(canvas.height - 100, player.y));
 }
 
 function draw() {
-  // Clear and Draw Floor
   ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Wood Plank Effect
-  ctx.strokeStyle = "rgba(0,0,0,0.1)";
-  for(let j=0; j<canvas.height; j+=30) { 
-    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); 
-  }
+  // Floor planks
+  ctx.strokeStyle = "rgba(0,0,0,0.05)";
+  for(let j=0; j<canvas.height; j+=40) { ctx.strokeRect(0, j, canvas.width, 1); }
 
-  // Draw Furniture
+  // Draw Furniture and Customers
   ctx.font = "40px Arial";
-  furniture.forEach(f => {
-    ctx.fillText(f.emoji, f.x - 20, f.y + 10);
-  });
+  furniture.forEach(f => ctx.fillText(f.emoji, f.x - 20, f.y + 10));
+  customers.forEach(c => ctx.fillText("👩‍🦱👗", c.x - 20, c.y));
 
-  // Draw Customers
-  customers.forEach(c => {
-    ctx.fillText("👩‍🦱", c.x - 20, c.y - 10);
-    ctx.fillText("👗", c.x - 20, c.y + 20);
-  });
-
-  // Draw Jinx/Mochi (Simplified Direction Fix)
+  // DRAW LUNA / MOCHI
   ctx.save();
   ctx.translate(player.x, player.y);
-  if(player.dir === -1) {
-    ctx.scale(-1, 1); // Flip context
-    ctx.drawImage(catImg, -40, -40, 80, 80); // Draw at negative half-width
-  } else {
-    ctx.drawImage(catImg, -40, -40, 80, 80);
+  
+  // Final Sprite Logic: Checks which way the cat is moving vs which way the PNG faces
+  if (player.dir !== spriteFacing) {
+    ctx.scale(-1, 1);
   }
+  
+  ctx.drawImage(catImg, -40, -40, 80, 80);
   ctx.restore();
 
   if(player.meowing > 0) {
-    ctx.font = "bold 14px Arial"; ctx.fillStyle = "white";
-    ctx.fillText("MEOW! 🐾", player.x + 25, player.y - 35);
+    ctx.font = "bold 16px Arial"; ctx.fillStyle = "white";
+    ctx.fillText("MEOW! 🐾", player.x - 30, player.y - 50);
     player.meowing--;
   }
 }
