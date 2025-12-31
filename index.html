@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: CLEAN UI</title>
+<title>WHISKER BYTES: FINAL TOUCHES</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -25,6 +25,8 @@
 
     #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 13px; }
     
+    #day-over { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 20px 40px; border: 4px solid var(--gold); border-radius: 20px; font-size: 24px; font-weight: bold; z-index: 8000; display: none; text-align: center; box-shadow: 0 10px 0 #2d1b1a; }
+
     @keyframes sparkle {
         0% { transform: scale(1); text-shadow: 0 0 0px var(--gold); }
         50% { transform: scale(1.1); text-shadow: 0 0 10px yellow; color: #ff9800; }
@@ -58,6 +60,8 @@
     </div>
     <div style="margin-top:20px; font-size:14px; color: white; text-decoration: underline; cursor: pointer;" onclick="openCredits()">🐾 Credits</div>
 </div>
+
+<div id="day-over">🐾 SHIFT OVER!<br><span style="font-size:16px;">See you tomorrow!</span></div>
 
 <div id="credits">
     <div class="credits-box">
@@ -101,7 +105,7 @@ const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), criticImg = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
 
-const player = { x: 200, y: 350, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
+const player = { x: 200, y: 300, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
 let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
@@ -123,7 +127,6 @@ function triggerPopup(amt) {
 function openCredits() {
     const content = document.getElementById("credits-scroller");
     const today = new Date();
-    // Only show New Year Banner if it's actually NYE
     if(today.getMonth() === 11 && today.getDate() === 31) document.getElementById('ny-banner').style.display='block';
     content.style.animation = "none"; void content.offsetWidth; 
     content.style.animation = "scrollCredits 15s linear forwards"; 
@@ -142,7 +145,9 @@ window.startGame = function(catId) {
     player.traits.luckBonus = (catId === 'jinx') ? 0.15 : 0;
     player.cookTime = (catId === 'mochi') ? 40 : 80;
 
-    const tableY = canvas.height - (SAFE_BOTTOM_PADDING + 60);
+    // CALCULATING MIDDLE OF THE FLOOR
+    const floorHeight = canvas.height - FLOOR_TOP - SAFE_BOTTOM_PADDING;
+    const midFloorY = FLOOR_TOP + (floorHeight / 2) + 20;
 
     furniture = [
         {x: 100, y: 200, type: "STATION", item: "☕", e: "☕"},
@@ -150,11 +155,11 @@ window.startGame = function(catId) {
         {x: 260, y: 200, type: "STATION", item: "🍼", e: "🍼"},
         {x: 340, y: 200, type: "TRASH", e: "🗑️"},
         {x: 50,  y: 200, type: "WINDOW", e: "🪟"}, 
-        {x: 50, y: tableY, type: "RADIO", e: "📻"},
-        {x: canvas.width - 50, y: tableY, type: "TV", e: "📺"},
-        {x: canvas.width / 2, y: tableY, type: "TABLE", e: "🟫"},
-        {x: canvas.width / 2 - 60, y: tableY, type: "CHAIR", e: "🪑", occupied: false},
-        {x: canvas.width / 2 + 60, y: tableY, type: "CHAIR", e: "🪑", occupied: false}
+        {x: 50, y: midFloorY, type: "RADIO", e: "📻"},
+        {x: canvas.width - 50, y: midFloorY, type: "TV", e: "📺"},
+        {x: canvas.width / 2, y: midFloorY, type: "TABLE", e: "🟫"},
+        {x: canvas.width / 2 - 60, y: midFloorY, type: "CHAIR", e: "🪑", occupied: false},
+        {x: canvas.width / 2 + 60, y: midFloorY, type: "CHAIR", e: "🪑", occupied: false}
     ];
 
     document.getElementById('overlay').style.display = 'none';
@@ -166,6 +171,7 @@ window.startGame = function(catId) {
 };
 
 function interact() {
+    if(!gameActive) return;
     furniture.forEach(f => {
         if (Math.hypot(player.x - f.x, player.y - f.y) < 70) {
             if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
@@ -207,7 +213,7 @@ function update() {
         else if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
     
-    player.y = Math.max(FLOOR_TOP + 30, Math.min(BOT_LIMIT, player.y));
+    player.y = Math.max(FLOOR_TOP + 35, Math.min(BOT_LIMIT, player.y));
     player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
 
     if (kitchen.active) {
@@ -218,8 +224,12 @@ function update() {
     gameMinutes += 0.1;
     if (gameMinutes >= 1200 && !isRushHour) { isRushHour = true; document.getElementById('rushTag').style.display = 'inline'; }
     
-    // END OF SHIFT: Just stop game, no auto-popup.
-    if(gameMinutes >= 1260) { gameActive = false; localStorage.setItem("whiskerBytesHigh", highScore); return; }
+    if(gameMinutes >= 1260) { 
+        gameActive = false; 
+        localStorage.setItem("whiskerBytesHigh", highScore); 
+        document.getElementById('day-over').style.display = 'block';
+        return; 
+    }
 
     if (Math.random() < (isRushHour ? 0.015 : 0.005)) spawnCustomer();
     
@@ -228,7 +238,7 @@ function update() {
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 
     if (radioActive && Math.random() < 0.05) {
-        musicNotes.push({ x: 50, y: canvas.height - (SAFE_BOTTOM_PADDING + 80), vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
+        musicNotes.push({ x: 50, y: 350, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
     }
     musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i, 1); });
     if(tvActive) toonFrame = (toonFrame + 0.05) % 2;
@@ -288,7 +298,7 @@ function spawnCustomer() {
     }
 }
 
-function loop() { update(); draw(); if(gameActive) requestAnimationFrame(loop); }
+function loop() { update(); draw(); requestAnimationFrame(loop); }
 
 window.onload = () => {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
