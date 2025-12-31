@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: NEW YEAR EDITION</title>
+<title>WHISKER BYTES: FLOOR TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -21,7 +21,6 @@
     .credits-box { background: #fff8f2; border: 4px solid var(--wood); border-radius: 18px; width: 85%; max-width: 320px; height: 350px; text-align: center; color: #4a2c2a; position: relative; overflow: hidden; }
     .credits-content { position: absolute; left: 0; width: 100%; bottom: -110%; }
     @keyframes scrollCredits { 0% { bottom: -110%; } 100% { bottom: 100%; } }
-    .credits-content h2 { color: #5d4037; margin-bottom: 10px; }
     .close-credits { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
 
     #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 13px; }
@@ -96,8 +95,8 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
-let playerHolding = null, tvActive = false, criticActive = false, isRushHour = false;
-let particles = [];
+let playerHolding = null, tvActive = false, radioActive = false, criticActive = false, isRushHour = false;
+let particles = [], musicNotes = [];
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), criticImg = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
@@ -110,9 +109,8 @@ document.getElementById('highVal').innerText = highScore;
 
 function createFirework(x, y) {
     const colors = ['#ff007f', '#00e5ff', '#ffff00', '#ffffff'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
     for(let i=0; i<15; i++) {
-        particles.push({ x:x, y:y, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, life:40, color:color });
+        particles.push({ x:x, y:y, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, life:40, color:colors[Math.floor(Math.random()*colors.length)] });
     }
 }
 
@@ -128,11 +126,15 @@ function triggerPopup(amt) {
 
 function openCredits() {
     const content = document.getElementById("credits-scroller");
-    if(new Date().getMonth() === 11 && new Date().getDate() === 31) document.getElementById('ny-banner').style.display='block';
+    const today = new Date();
+    if(today.getMonth() === 11 && today.getDate() === 31) {
+        document.getElementById('ny-banner').style.display='block';
+    }
     content.style.animation = "none"; void content.offsetWidth; 
     content.style.animation = "scrollCredits 15s linear forwards"; 
     document.getElementById('credits').style.display = 'flex';
 }
+
 function closeCredits() { document.getElementById('credits').style.display = 'none'; }
 
 window.startGame = function(catId) {
@@ -151,9 +153,8 @@ window.startGame = function(catId) {
         {x: 260, y: 320, type: "STATION", item: "🍼", e: "🍼"},
         {x: 340, y: 320, type: "TRASH", e: "🗑️"},
         {x: 50,  y: 320, type: "WINDOW", e: "🪟"}, 
-        {x: canvas.width - 50, y: 320, type: "RADIO", e: "📻"},
-        {x: canvas.width / 2, y: 140, type: "TV", e: "📺"},
-        {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
+        {x: 60, y: canvas.height - 80, type: "RADIO", e: "📻"},
+        {x: canvas.width - 60, y: 550, type: "TV", e: "📺"}, // Moved to far right floor
         {x: canvas.width / 2, y: 550, type: "TABLE", e: "🟫"},
         {x: canvas.width / 2 - 65, y: 550, type: "CHAIR", e: "🪑", occupied: false},
         {x: canvas.width / 2 + 65, y: 550, type: "CHAIR", e: "🪑", occupied: false}
@@ -173,6 +174,7 @@ function interact() {
             if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
             if (f.type === "TRASH") playerHolding = null;
             if (f.type === "TV") tvActive = !tvActive;
+            if (f.type === "RADIO") radioActive = !radioActive;
             document.getElementById('holdingTxt').innerText = playerHolding ? playerHolding : "🐾 Empty";
         }
     });
@@ -192,7 +194,6 @@ function interact() {
                 highScore = score;
                 document.getElementById('highVal').innerText = highScore;
                 document.getElementById('highVal').classList.add('sparkle-active');
-                document.getElementById('scoreVal').style.color = 'var(--gold)';
             }
             if(score >= 300 && !unlockedCake) {
                 furniture.push({x: 420, y: 320, type: "STATION", item: "🍰", e: "🍰"});
@@ -220,11 +221,18 @@ function update() {
 
     gameMinutes += 0.1;
     if (gameMinutes >= 1200 && !isRushHour) { isRushHour = true; document.getElementById('rushTag').style.display = 'inline'; }
-    if(gameMinutes >= 1260) { gameActive = false; localStorage.setItem("whiskerBytesHigh", highScore); openCredits(); }
+    if(gameMinutes >= 1260) { gameActive = false; localStorage.setItem("whiskerBytesHigh", highScore); openCredits(); return; }
 
     if (Math.random() < (isRushHour ? 0.015 : 0.005)) spawnCustomer();
-    customers.forEach(c => { c.patience -= tvActive ? 0.03 : 0.07; });
+    
+    const patienceDecay = (tvActive || radioActive) ? 0.03 : 0.07;
+    customers.forEach(c => { c.patience -= patienceDecay; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
+
+    if (radioActive && Math.random() < 0.05) {
+        musicNotes.push({ x: 60, y: canvas.height - 100, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
+    }
+    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i, 1); });
 }
 
 function draw() {
@@ -235,8 +243,17 @@ function draw() {
     ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 275, canvas.width, 10);
     
     furniture.forEach(f => {
+        if((f.type === "RADIO" && radioActive) || (f.type === "TV" && tvActive)) {
+            ctx.shadowBlur = 15; ctx.shadowColor = "gold";
+        }
         ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
+        ctx.shadowBlur = 0;
         if(f.type === "STATION") { ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 10); }
+    });
+
+    musicNotes.forEach(n => {
+        ctx.fillStyle = `rgba(212, 175, 55, ${n.life/50})`;
+        ctx.font = "20px Arial"; ctx.fillText(n.char, n.x, n.y);
     });
 
     customers.forEach(c => {
