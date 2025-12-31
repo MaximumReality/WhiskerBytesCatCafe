@@ -2,36 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>whisker bytes: the complete cafe</title>
+<title>WHISKER BYTES: COZY EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
-    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --rush: #ff007f; }
-    * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
+    * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
-    canvas { display: block; background: #3d2b1f; width: 100vw; height: 100vh; }
+    canvas { display: block; touch-action: none; background: #3d2b1f; width: 100vw; height: 100vh; }
     
     #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 5000; color: white; text-align: center; padding-bottom: 50px; }
     #logo-header { position: absolute; top: 0; left: 0; width: 100%; height: 45%; background: url('whiskerbytes.png') center/contain no-repeat; z-index: 5001; pointer-events: none; }
     
-    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; z-index: 6000; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; font-weight: bold; width: 110px; text-transform: lowercase; }
-    .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
+    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 6000; margin-top: 20px; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; font-size: 13px; font-weight: bold; }
+    .btn-select img { width: 45px; height: 45px; display: block; margin: 0 auto; }
 
-    .menu-bar { margin-top: 25px; padding: 10px 20px; background: rgba(0,0,0,0.6); border-radius: 30px; border: 2px solid var(--gold); z-index: 7000; }
-    .link-item { text-decoration: underline; cursor: pointer; font-weight: bold; font-size: 16px; text-transform: lowercase; }
+    .menu-bar { margin-top: 20px; z-index: 6000; display: flex; gap: 15px; }
+    .menu-link { color: white; text-decoration: underline; cursor: pointer; font-size: 14px; font-weight: bold; }
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    #credits-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
     .scroll-box { background: #fff8f2; border: 4px solid var(--wood); border-radius: 18px; width: 85%; max-width: 320px; height: 350px; text-align: center; color: #4a2c2a; position: relative; overflow: hidden; }
-    .scroll-content { position: absolute; left: 0; width: 100%; bottom: -110%; padding: 0 20px; box-sizing: border-box; text-transform: lowercase; }
-    @keyframes scrollBox { 0% { bottom: -110%; } 100% { bottom: 100%; } }
+    .scroll-content { position: absolute; left: 0; width: 100%; bottom: -110%; padding: 0 15px; box-sizing: border-box; }
+    @keyframes scrollText { 0% { bottom: -110%; } 100% { bottom: 100%; } }
     .close-btn { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
 
-    #day-over { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 40px; border: 5px solid var(--gold); border-radius: 25px; text-align: center; z-index: 9000; display: none; text-transform: lowercase; }
+    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 13px; }
+    #day-over { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 20px 40px; border: 4px solid var(--gold); border-radius: 20px; font-size: 24px; font-weight: bold; z-index: 8000; display: none; text-align: center; box-shadow: 0 10px 0 #2d1b1a; }
 
-    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; text-transform: lowercase; }
-    #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 5px; z-index: 1000; }
+    .score-popup { position: fixed; color: var(--green); font-weight: bold; font-size: 24px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 2000; }
+    @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -60px); } }
+
+    #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 5px; z-index: 1000; padding: 5px; }
     .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-    .ctrl-btn { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+    .ctrl-btn { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; display: flex; align-items: center; justify-content: center; opacity: 0.9; }
 </style>
 </head>
 <body>
@@ -39,51 +42,31 @@
 <div id="overlay">
     <div id="logo-header"></div> 
     <div class="char-grid">
-        <div onpointerdown="startGame('mochi')" class="btn-select"><img src="mochi_idle.png">mochi</div>
-        <div onpointerdown="startGame('gingerella')" class="btn-select"><img src="gingerella_idle.png">ginger</div>
-        <div onpointerdown="startGame('luna')" class="btn-select"><img src="luna_idle.png">luna</div>
-        <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">jinx</div>
+        <div onpointerdown="startGame('mochi')" class="btn-select"><img src="mochi_idle.png">MOCHI</div>
+        <div onpointerdown="startGame('gingerella')" class="btn-select"><img src="gingerella_idle.png">GINGER</div>
+        <div onpointerdown="startGame('luna')" class="btn-select"><img src="luna_idle.png">LUNA</div>
+        <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">JINX</div>
     </div>
     <div class="menu-bar">
-        <span class="link-item" style="color: var(--pink);" onclick="openModal('manual')">📖 manual</span> | 
-        <span class="link-item" style="color: var(--gold);" onclick="openModal('credits')">🐾 credits</span>
-    </div>
-</div>
-
-<div id="manual-modal" class="modal-overlay">
-    <div class="scroll-box">
-        <button class="close-btn" onclick="closeModal('manual-modal')">✕</button>
-        <div class="scroll-content" id="manual-scroller">
-            <h2>📖 staff manual</h2>
-            <p>1. move with arrows.</p>
-            <p>2. meow at stations to prep.</p>
-            <p>3. deliver to customers.</p>
-            <p>4. 8pm is rush hour!</p>
-        </div>
+        <span class="menu-link" style="color:var(--pink)" onclick="openModal('manual')">📖 Manual</span>
+        <span class="menu-link" style="color:var(--gold)" onclick="openModal('credits')">🐾 Credits</span>
     </div>
 </div>
 
 <div id="credits-modal" class="modal-overlay">
     <div class="scroll-box">
-        <button class="close-btn" onclick="closeModal('credits-modal')">✕</button>
-        <div class="scroll-content" id="credits-scroller">
-            <h2>✨ happy new year ✨</h2>
-            <p>created by lori kaye sifuentes</p>
-            <p>inspired by luna & stella</p>
-        </div>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+        <div class="scroll-content" id="modal-scroller">
+            </div>
     </div>
 </div>
 
-<div id="day-over">
-    <h1>🏁 shift over! 🏁</h1>
-    <h2 id="finalScore">score: 0</h2>
-    <button class="btn-select" onclick="location.reload()" style="width:160px; height:50px; font-size:20px;">replay</button>
-</div>
+<div id="day-over">🐾 SHIFT OVER!<br><span style="font-size:16px;">See you tomorrow!</span></div>
 
 <div id="stats">
-    ⭐ <span id="scoreVal">0</span> | 🏆 best: <span id="highVal">0</span><br>
-    🕒 <span id="timeVal">9:00 am</span><br>
-    <span id="holdingTxt" style="color: #8b4513;">🐾 empty</span>
+    ⭐ <span id="scoreVal">0</span> | 🏆 BEST: <span id="highVal">0</span><br>
+    🕒 <span id="timeVal">9:00 AM</span><br>
+    <span id="holdingTxt" style="color: #8b4513;">🐾 Empty</span>
 </div>
 
 <canvas id="game"></canvas>
@@ -95,51 +78,63 @@
         <button class="ctrl-btn" id="down">⬇️</button>
         <button class="ctrl-btn" id="right">➡️</button>
     </div>
-    <button class="ctrl-btn" id="action-btn" style="width:140px; border-radius: 35px; background:var(--pink); text-transform: lowercase;" onpointerdown="interact()">📢 meow</button>
+    <button class="ctrl-btn" id="action-btn" style="width:140px; border-radius: 35px; background:var(--pink);" onpointerdown="interact()">📢 MEOW</button>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-let gameActive = false, score = 0, gameMinutes = 540;
-let playerHolding = null, tvActive = false, radioActive = false, cakeUnlocked = false;
+let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
+let playerHolding = null, tvActive = false, radioActive = false, criticActive = false, isRushHour = false;
+let musicNotes = [], toonFrame = 0;
+const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), f3 = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'friend3.png';
 
 const player = { x: 200, y: 350, speed: 5, facing: 1, baseFacing: 1, cookTime: 60 };
-let furniture = [], customers = [], musicNotes = [];
-const keys = { up: false, down: false, left: false, right: false };
+let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
 let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
 document.getElementById('highVal').innerText = highScore;
 
-function openModal(id) {
-    document.getElementById(id + '-modal').style.display = 'flex';
-    const scroller = document.getElementById(id + '-scroller');
-    scroller.style.animation = "scrollBox 10s linear forwards";
+const WALL_HEIGHT = 160;
+const FLOOR_TOP = 160;
+
+function openModal(type) {
+    const scroller = document.getElementById('modal-scroller');
+    const today = new Date();
+    let ny = (today.getMonth() === 11 && today.getDate() === 31) ? "<h2 style='color:var(--rush)'>✨ HAPPY NEW YEAR! ✨</h2>" : "";
+    
+    if(type === 'manual') {
+        scroller.innerHTML = `<h2>📖 Staff Manual</h2>${ny}<p>1. Use arrows to move.</p><p>2. Meow at counter to prep food.</p><p>3. 300 pts unlocks CAKE! 🍰</p><p>4. 8pm is RUSH HOUR.</p>`;
+    } else {
+        scroller.innerHTML = `<h2>🐾 Credits</h2>${ny}<p>Created by Lori Kaye Sifuentes</p><p>Sprites inspired by Luna & Stella 💖</p><p>Paws up! 🐾</p>`;
+    }
+    document.getElementById('credits-modal').style.display = 'flex';
+    scroller.style.animation = "scrollText 12s linear forwards";
 }
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function closeModal() { document.getElementById('credits-modal').style.display = 'none'; }
 
 window.startGame = function(catId) {
     catImg.src = catId + '_idle.png';
     bgImg.src = 'IMG_2480.jpeg'; 
     player.baseFacing = (catId === 'mochi') ? 1 : -1;
     player.speed = (catId === 'luna') ? 8 : 5;
-    player.cookTime = (catId === 'mochi') ? 35 : 65;
-    
-    const floorTop = 165; 
-    const midY = floorTop + (canvas.height - 180 - floorTop) / 2;
+    player.cookTime = (catId === 'mochi') ? 35 : 70;
+
+    const midY = FLOOR_TOP + (canvas.height - 160 - FLOOR_TOP) / 2;
 
     furniture = [
-        {x: 60, y: 200, type: "STATION", item: "☕", e: "☕"},
-        {x: 130, y: 200, type: "STATION", item: "🍪", e: "🍪"},
-        {x: 200, y: 200, type: "STATION", item: "🍼", e: "🍼"},
-        {x: 350, y: 200, type: "TRASH", e: "🗑️"},
+        {x: 80, y: 200, type: "STATION", item: "☕", e: "☕"},
+        {x: 160, y: 200, type: "STATION", item: "🍪", e: "🍪"},
+        {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
+        {x: 320, y: 200, type: "TRASH", e: "🗑️"},
         {x: 50, y: midY, type: "RADIO", e: "📻"},
         {x: canvas.width - 50, y: midY, type: "TV", e: "📺"},
         {x: canvas.width / 2, y: midY, type: "TABLE", e: "🟫"},
-        {x: canvas.width / 2 - 60, y: midY, type: "CHAIR", e: "🪑", occupied: false},
-        {x: canvas.width / 2 + 60, y: midY, type: "CHAIR", e: "🪑", occupied: false}
+        {x: canvas.width / 2 - 65, y: midY, type: "CHAIR", e: "🪑", occupied: false},
+        {x: canvas.width / 2 + 65, y: midY, type: "CHAIR", e: "🪑", occupied: false}
     ];
 
     document.getElementById('overlay').style.display = 'none';
@@ -152,85 +147,74 @@ window.startGame = function(catId) {
 function interact() {
     furniture.forEach(f => {
         if (Math.hypot(player.x - f.x, player.y - f.y) < 75) {
-            if (f.type === "STATION" && !playerHolding) { player.busy = true; player.timer = player.cookTime; player.item = f.item; }
-            if (f.type === "TRASH") { playerHolding = null; document.getElementById('holdingTxt').innerText = "🐾 empty"; }
+            if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
+            if (f.type === "TRASH") playerHolding = null;
             if (f.type === "RADIO") radioActive = !radioActive;
             if (f.type === "TV") tvActive = !tvActive;
+            document.getElementById('holdingTxt').innerText = playerHolding ? playerHolding : "🐾 Empty";
         }
     });
-
     customers.forEach(c => {
         if (Math.hypot(player.x - c.x, player.y - c.y) < 85 && playerHolding === c.order) {
-            score += c.isCritic ? 500 : 75;
-            playerHolding = null; c.chair.occupied = false;
+            let gain = c.isCritic ? 500 : 75; score += gain; playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
-            document.getElementById('holdingTxt').innerText = "🐾 empty";
+            if(score > highScore) { highScore = score; localStorage.setItem("whiskerBytesHigh", score); }
+            if(score >= 300 && !unlockedCake) { furniture.push({x: 400, y: 200, type: "STATION", item: "🍰", e: "🍰"}); unlockedCake = true; }
         }
     });
 }
 
 function update() {
     if (!gameActive) return;
-
-    if (player.busy) {
-        player.timer--;
-        if (player.timer <= 0) { player.busy = false; playerHolding = player.item; document.getElementById('holdingTxt').innerText = playerHolding; }
-    } else {
+    if (!kitchen.active) {
         if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
         if (keys.left) { player.x -= player.speed; player.facing = -1; } if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
-
-    gameMinutes += 0.15;
-    if (gameMinutes >= 1260) { 
-        gameActive = false;
-        if(score > highScore) localStorage.setItem("whiskerBytesHigh", score);
-        document.getElementById('finalScore').innerText = "score: " + score;
-        document.getElementById('day-over').style.display = 'block';
-    }
-    
-    if (score >= 300 && !cakeUnlocked) { cakeUnlocked = true; furniture.push({x: 270, y: 200, type: "STATION", item: "🍰", e: "🍰"}); }
-
-    if (Math.random() < (gameMinutes > 1200 ? 0.025 : 0.007)) {
-        let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
-        if (chair) { 
-            chair.occupied = true;
-            let isCritic = Math.random() < 0.15; 
-            customers.push({ x: chair.x, y: chair.y, chair, order: isCritic ? (cakeUnlocked ? "🍰" : "☕") : (cakeUnlocked && Math.random() > 0.7 ? "🍰" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)]), isCritic, img: isCritic ? f3 : (Math.random() > 0.5 ? f1 : f2) });
-        }
-    }
-
-    if (radioActive && Math.random() < 0.1) musicNotes.push({ x: 50, y: 300, vx: 2, vy: -1, life: 200 });
-    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life<=0) musicNotes.splice(i,1); });
-
     player.y = Math.max(225, Math.min(canvas.height - 210, player.y));
     player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
+
+    if (kitchen.active) { kitchen.timer--; if (kitchen.timer <= 0) { kitchen.active = false; playerHolding = kitchen.item; document.getElementById('holdingTxt').innerText = playerHolding; }}
+
+    gameMinutes += 0.15;
+    if (gameMinutes >= 1200) isRushHour = true;
+    if (gameMinutes >= 1260) { gameActive = false; document.getElementById('day-over').style.display = 'block'; }
+
+    if (Math.random() < (isRushHour ? 0.02 : 0.007)) {
+        let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
+        if (chair) {
+            chair.occupied = true;
+            let isC = Math.random() < 0.12;
+            customers.push({ x: chair.x, y: chair.y, chair, order: isC ? (unlockedCake ? "🍰" : "☕") : (unlockedCake && Math.random() > 0.7 ? "🍰" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)]), isCritic: isC, img: isC ? f3 : (Math.random()>0.5?f1:f2) });
+        }
+    }
+    if (radioActive && Math.random() < 0.1) musicNotes.push({ x: 50, y: 280, vx: 1+Math.random()*2, vy: -1-Math.random(), life: 100 });
+    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i,1); });
 }
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
+    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, WALL_HEIGHT);
     
-    const isRush = gameMinutes >= 1200;
+    // WOOD TILE FLOOR
     const tileSize = 60;
     for(let x=0; x<canvas.width; x+=tileSize) {
-        for(let y=160; y<canvas.height; y+=tileSize) {
-            ctx.fillStyle = isRush ? (Math.random() > 0.9 ? "#ff007f" : "#4a0026") : ((x+y)/tileSize%2===0 ? "#d2b48c" : "#c1a37b");
+        for(let y=FLOOR_TOP; y<canvas.height; y+=tileSize) {
+            ctx.fillStyle = isRushHour ? (Math.random() > 0.9 ? "#ff007f" : "#4a0026") : ((x+y)/tileSize%2===0 ? "#d2b48c" : "#c1a37b");
             ctx.fillRect(x, y, tileSize, tileSize);
             ctx.strokeStyle = "rgba(0,0,0,0.05)"; ctx.strokeRect(x,y,tileSize,tileSize);
         }
     }
 
     furniture.forEach(f => {
-        if(f.type === "STATION") { ctx.fillStyle="#5d4037"; ctx.fillRect(f.x-40, f.y+20, 80, 10); }
-        ctx.font = "40px Arial"; ctx.fillText(f.e, f.x-20, f.y+15);
-        if(f.type === "TV" && tvActive) { ctx.fillStyle = "rgba(0, 255, 255, 0.2)"; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x-100, canvas.height); ctx.lineTo(f.x+100, canvas.height); ctx.fill(); }
+        if(f.type === "STATION") { ctx.fillStyle="#5d4037"; ctx.fillRect(f.x-40, f.y+22, 80, 10); }
+        ctx.font = "38px Arial"; ctx.fillText(f.e, f.x-19, f.y+15);
+        if(f.type === "TV" && tvActive) { ctx.fillStyle = "rgba(0, 255, 255, 0.15)"; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x-80, canvas.height); ctx.lineTo(f.x+80, canvas.height); ctx.fill(); }
     });
 
-    musicNotes.forEach(n => { ctx.font="20px Arial"; ctx.fillText("♪", n.x, n.y); });
-
-    customers.forEach(c => {
-        if(c.img.complete) ctx.drawImage(c.img, c.x-35, c.y-35, 70, 70);
-        ctx.fillStyle="white"; ctx.font="bold 20px Arial"; ctx.fillText(c.order, c.x-10, c.y-45);
+    musicNotes.forEach(n => { ctx.fillStyle="rgba(0,0,0,0.5)"; ctx.font="20px Arial"; ctx.fillText("♪", n.x, n.y); });
+    customers.forEach(c => { 
+        if(c.img.complete) ctx.drawImage(c.img, c.x-35, c.y-35, 70, 70); 
+        ctx.fillStyle="white"; ctx.font="bold 18px Arial"; ctx.fillText(c.order, c.x-10, c.y-45);
     });
 
     ctx.save(); ctx.translate(player.x, player.y);
@@ -238,11 +222,10 @@ function draw() {
     ctx.drawImage(catImg, -35, -35, 70, 70);
     ctx.restore();
 
-    if(player.busy) { ctx.fillStyle="lime"; ctx.fillRect(player.x-30, player.y-50, (player.timer/player.cookTime)*60, 10); }
-
+    if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-30, player.y-55, (kitchen.timer/player.cookTime)*60, 8); }
     document.getElementById('scoreVal').innerText = score;
     let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
-    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' pm':' am');
+    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
