@@ -55,7 +55,7 @@ const bgPattern = new Image();
 const player = { x: 0, y: 0, speed: 5, isFlipped: false, meowing: 0 };
 let furniture = [];
 let customers = [];
-const customerEmojis = ["🧎🏻‍♀️‍➡️", "🧎🏻‍♂️", "🧎🏿", "🧎🏽‍♀️"];
+const customerEmojis = ["🚶", "🚶🏻‍♂️", "🚶🏾‍♀️‍➡️", "🚶🏼‍➡️"];
 
 function startGame(cat) {
   catImg.src = cat + "_idle.png";
@@ -65,11 +65,11 @@ function startGame(cat) {
   document.getElementById('stats').style.display = 'block';
   gameState = "PLAYING";
   
-  // Table in the middle, chairs around it
+  // Arrange furniture so it's not overlapping
   furniture = [
-    { x: 250, y: 250, type: "TABLE", emoji: "🟫" },
-    { x: 210, y: 250, type: "CHAIR", emoji: "🪑" }, // Left chair
-    { x: 290, y: 250, type: "CHAIR", emoji: "🪑" }  // Right chair
+    { x: 250, y: 250, type: "TABLE", emoji: "🟫", solid: true },
+    { x: 190, y: 250, type: "CHAIR", emoji: "🪑", solid: false }, 
+    { x: 310, y: 250, type: "CHAIR", emoji: "🪑", solid: false }
   ];
   spawnCustomer();
 }
@@ -79,9 +79,10 @@ function spawnCustomer() {
   if (openChairs.length > 0) {
     const chair = openChairs[Math.floor(Math.random() * openChairs.length)];
     chair.occupied = true;
+    // Standing next to the chair
     customers.push({ 
       x: chair.x, 
-      y: chair.y, 
+      y: chair.y - 15, 
       chair: chair, 
       emoji: customerEmojis[Math.floor(Math.random() * customerEmojis.length)] 
     });
@@ -124,11 +125,28 @@ function meow() {
 
 function update() {
   if (gameState !== "PLAYING") return;
-  if (keys.up) player.y -= player.speed;
-  if (keys.down) player.y += player.speed;
-  if (keys.left) player.x -= player.speed;
-  if (keys.right) player.x += player.speed;
   
+  let nextX = player.x;
+  let nextY = player.y;
+
+  if (keys.up) nextY -= player.speed;
+  if (keys.down) nextY += player.speed;
+  if (keys.left) nextX -= player.speed;
+  if (keys.right) nextX += player.speed;
+  
+  // Basic Table Collision
+  let canMove = true;
+  furniture.forEach(f => {
+    if(f.solid && Math.abs(nextX - f.x) < 40 && Math.abs(nextY - f.y) < 40) {
+      canMove = false;
+    }
+  });
+
+  if(canMove) {
+    player.x = nextX;
+    player.y = nextY;
+  }
+
   player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
   player.y = Math.max(120, Math.min(canvas.height - 110, player.y));
 }
@@ -143,22 +161,17 @@ function draw() {
   // Wallpaper Border
   ctx.drawImage(bgPattern, 0, 0, canvas.width, 90);
 
-  // Furniture (Tables/Chairs)
+  // Furniture
   ctx.font = "40px Arial";
   furniture.forEach(f => ctx.fillText(f.emoji, f.x - 20, f.y + 10));
 
-  // SEATED CUSTOMERS (Using your new emojis!)
+  // CUSTOMERS (Standing)
   customers.forEach(c => ctx.fillText(c.emoji, c.x - 20, c.y + 10));
 
-  // DRAW LUNA (Direction Logic Overhauled)
+  // CAT
   ctx.save();
   ctx.translate(player.x, player.y);
-  
-  // If moving left, we flip the cat image
-  if (player.isFlipped) {
-    ctx.scale(-1, 1);
-  }
-  
+  if (player.isFlipped) ctx.scale(-1, 1);
   ctx.drawImage(catImg, -40, -40, 80, 80);
   ctx.restore();
 
