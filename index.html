@@ -32,7 +32,7 @@
   </div>
 </div>
 
-<div id="stats"><b>SUSHI BOWL: <span id="scoreVal">0</span>/25</b></div>
+<div id="stats"><b>RESOURCES: <span id="scoreVal">0</span></b><br><small>Place chairs near tables to serve!</small></div>
 
 <canvas id="game"></canvas>
 
@@ -54,8 +54,8 @@ const catImg = new Image();
 const bgPattern = new Image();
 
 const player = { x: 0, y: 0, speed: 4, dir: 1, meowing: 0 };
-const npc = { x: 0, y: 0, happy: 0 };
-let sushiBowls = [];
+let furniture = [];
+let customers = [];
 
 function startGame(cat) {
   catImg.src = cat + "_idle.png";
@@ -64,15 +64,25 @@ function startGame(cat) {
   document.getElementById('controls').style.display = 'flex';
   document.getElementById('stats').style.display = 'block';
   gameState = "PLAYING";
-  spawnSushi();
+  
+  // Initial Layout inspired by Cat Cafe Manager guide
+  furniture = [
+    { x: 200, y: 200, type: "TABLE", emoji: "🟫" },
+    { x: 160, y: 200, type: "CHAIR", emoji: "🪑", attached: true }, // Attached left
+    { x: 240, y: 200, type: "CHAIR", emoji: "🪑", attached: true }  // Attached right
+  ];
+  
+  spawnCustomer();
 }
 
-function spawnSushi() {
-  sushiBowls = Array.from({length: 25}, () => ({
-    x: 40 + Math.random() * (canvas.width - 80),
-    y: 120 + Math.random() * (canvas.height - 240),
-    collected: false
-  }));
+function spawnCustomer() {
+  // Customers look for chairs attached to tables
+  const availableChairs = furniture.filter(f => f.type === "CHAIR" && f.attached && !f.occupied);
+  if (availableChairs.length > 0) {
+    const target = availableChairs[Math.floor(Math.random() * availableChairs.length)];
+    target.occupied = true;
+    customers.push({ x: target.x, y: target.y, chair: target, timer: 200 });
+  }
 }
 
 function resize() {
@@ -80,9 +90,6 @@ function resize() {
   canvas.height = window.innerHeight;
   player.x = canvas.width / 2;
   player.y = canvas.height / 2;
-  // Position lady in the upper-right area but fully on-screen
-  npc.x = canvas.width - 100;
-  npc.y = 150;
 }
 window.addEventListener("resize", resize); resize();
 
@@ -96,7 +103,16 @@ bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right")
 
 function meow() {
   player.meowing = 40;
-  if(Math.abs(player.x - npc.x) < 80 && Math.abs(player.y - npc.y) < 80) npc.happy = 60;
+  // Serving logic: Meow near a customer to collect resources
+  customers.forEach((c, index) => {
+    if(Math.abs(player.x - c.x) < 60 && Math.abs(player.y - c.y) < 60) {
+      score += 5;
+      document.getElementById('scoreVal').innerText = score;
+      c.chair.occupied = false;
+      customers.splice(index, 1);
+      setTimeout(spawnCustomer, 2000); // Next customer comes in
+    }
+  });
 }
 
 function update() {
@@ -108,42 +124,39 @@ function update() {
 
   player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
   player.y = Math.max(110, Math.min(canvas.height - 110, player.y));
-
-  sushiBowls.forEach(s => {
-    if(!s.collected && Math.abs(player.x - s.x) < 35 && Math.abs(player.y - s.y) < 35) {
-      s.collected = true; score++;
-      document.getElementById('scoreVal').innerText = score;
-    }
-  });
 }
 
 function draw() {
-  // Floor
+  // Clear and Draw Floor
   ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Grid Tiles
-  ctx.strokeStyle = "rgba(0,0,0,0.08)";
-  for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
-  for(let j=0; j<canvas.height; j+=40) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
+  // Wood Plank Effect
+  ctx.strokeStyle = "rgba(0,0,0,0.1)";
+  for(let j=0; j<canvas.height; j+=30) { 
+    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); 
+  }
 
-  // Wallpaper Border
-  ctx.drawImage(bgPattern, 0, 0, canvas.width, 90);
-
-  // NPC Lady
+  // Draw Furniture
   ctx.font = "40px Arial";
-  ctx.fillText("👗", npc.x - 20, npc.y + 35);
-  ctx.fillText("👩‍🦱", npc.x - 20, npc.y);
-  if(npc.happy > 0) { ctx.fillText("❤️", npc.x, npc.y - 40); npc.happy--; }
+  furniture.forEach(f => {
+    ctx.fillText(f.emoji, f.x - 20, f.y + 10);
+  });
 
-  // Sushi
-  sushiBowls.forEach(s => { if(!s.collected) { ctx.font = "24px Arial"; ctx.fillText("🍱", s.x - 12, s.y); } });
+  // Draw Customers
+  customers.forEach(c => {
+    ctx.fillText("👩‍🦱", c.x - 20, c.y - 10);
+    ctx.fillText("👗", c.x - 20, c.y + 20);
+  });
 
-  // Jinx/Mochi Fixed Direction
+  // Draw Jinx/Mochi (Simplified Direction Fix)
   ctx.save();
   ctx.translate(player.x, player.y);
-  if(player.dir === -1) ctx.scale(-1, 1); 
-  // Drawing at -40, -40 ensures the cat flips exactly around its center
-  ctx.drawImage(catImg, -40, -40, 80, 80);
+  if(player.dir === -1) {
+    ctx.scale(-1, 1); // Flip context
+    ctx.drawImage(catImg, -40, -40, 80, 80); // Draw at negative half-width
+  } else {
+    ctx.drawImage(catImg, -40, -40, 80, 80);
+  }
   ctx.restore();
 
   if(player.meowing > 0) {
