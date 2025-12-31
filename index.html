@@ -3,150 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Whisker Bytes Cafe</title>
+  <title>Whisker Bytes: Side-Scroller</title>
   <style>
     :root {
       --brown: #6b3e2e;
-      --shelf-color: rgba(255, 255, 255, 0.5);
+      --shelf-color: rgba(255, 255, 255, 0.4);
     }
 
-    /* Prevent scrolling/bouncing on iPhone */
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden; position: fixed;
+      background-color: #f7d2c4;
+    }
+
+    /* THE CAMERA: A window that hides the extra width */
+    #viewport {
+      width: 100vw;
+      height: 100vh;
+      overflow-x: auto; /* Allows side-scrolling on iPhone */
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* THE ROOM: Twice as wide as the screen */
+    #room {
+      width: 200vw; 
       height: 100%;
-      overflow: hidden;
-      position: fixed;
+      background-image: url('IMG_2480.jpeg');
+      background-repeat: repeat-x;
+      background-size: contain;
+      position: relative;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica;
-      background: #f7d2c4 url('IMG_2480.jpeg') repeat;
-      background-size: 300px;
-      animation: bgScroll 60s linear infinite;
-    }
-
-    @keyframes bgScroll {
-      from { background-position: 0 0; }
-      to { background-position: 300px 300px; }
-    }
-
-    /* The main play area */
-    #stage {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 80%; /* Ends where floor begins */
-      z-index: 10;
-    }
-
-    /* THE FLOOR: Built as a table for perfect iPhone alignment */
-    #floor-table {
+    /* MOBILE-SAFE FLOOR: Also 200% wide */
+    #floor-scroll {
       position: absolute;
       bottom: 0;
-      width: 100%;
+      width: 200vw;
       height: 20%;
-      border-collapse: collapse;
-      background: white; /* Blocks wallpaper */
-      border-top: 4px solid var(--brown);
-      z-index: 100;
-      table-layout: fixed;
+      background: white;
+      border-top: 5px solid var(--brown);
+      display: flex;
     }
 
-    #floor-table td {
-      padding: 0;
+    .tile {
+      flex: 0 0 10%; /* 10% of viewport width per tile */
+      height: 100%;
       background-size: cover;
-      background-position: center;
     }
 
-    /* Checkerboard patterns */
-    .type-a { background-image: url('tile1.png'); }
-    .type-b { background-image: url('tile2.png'); }
+    .tile:nth-child(odd) { background-image: url('tile1.png'); }
+    .tile:nth-child(even) { background-image: url('tile2.png'); }
 
     /* Interactive Elements */
     .shelf {
       position: absolute;
       background: var(--shelf-color);
-      height: 12px;
-      border-radius: 10px;
+      height: 14px;
+      border-radius: 15px;
       border: 1px solid white;
       z-index: 20;
     }
 
     .cat {
       position: absolute;
-      width: 80px; /* Smaller for iPhone screens */
-      height: 80px;
+      width: 100px;
+      height: 100px;
       z-index: 150;
-      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: all 0.6s ease-out;
     }
 
-    .cat img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+    .cat img { width: 100%; height: 100%; object-fit: contain; }
 
-    #controls {
-      position: absolute;
+    /* UI locked to the screen, not the scrolling room */
+    #ui-fixed {
+      position: fixed;
       bottom: 22%;
-      width: 90%;
-      left: 5%;
-      background: rgba(255,255,255,0.9);
-      padding: 10px;
-      border-radius: 20px;
+      width: 100%;
       display: flex;
-      justify-content: space-around;
-      z-index: 200;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      justify-content: center;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    button {
+      padding: 10px 15px;
+      border-radius: 20px;
+      border: 2px solid var(--brown);
+      background: rgba(255,255,255,0.9);
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div id="stage">
-    <div class="shelf" style="top: 20%; left: 10%; width: 100px;" onclick="jump('10%', '20%')"></div>
-    <div class="shelf" style="top: 40%; left: 45%; width: 120px;" onclick="jump('45%', '40%')"></div>
-    <div class="shelf" style="top: 60%; left: 20%; width: 100px;" onclick="jump('20%', '60%')"></div>
+  <div id="viewport">
+    <div id="room">
+      <div class="shelf" style="top: 25%; left: 10%; width: 150px;" onclick="pounce('10%', '25%')"></div>
+      <div class="shelf" style="top: 50%; left: 30%; width: 150px;" onclick="pounce('30%', '50%')"></div>
+      
+      <div class="shelf" style="top: 20%; left: 110%; width: 150px;" onclick="pounce('110%', '20%')"></div>
+      <div class="shelf" style="top: 45%; left: 150%; width: 150px;" onclick="pounce('150%', '45%')"></div>
 
-    <div id="active-cat" class="cat" style="left: 10%; top: 82%;">
-      <img src="mochi_idle.png" id="cat-img">
+      <div id="main-cat" class="cat" style="left: 15%; top: 78%;">
+        <img src="mochi_idle.png" id="cat-img">
+      </div>
+
+      <div id="floor-scroll">
+        </div>
     </div>
   </div>
 
-  <table id="floor-table">
-    <tr id="row1"></tr>
-    <tr id="row2"></tr>
-  </table>
-
-  <div id="controls">
-    <button onclick="changeCat('mochi_idle.png')">Mochi</button>
-    <button onclick="changeCat('jinx_idle.png')">Jinx</button>
-    <button onclick="jump('10%', '82%')">Floor</button>
+  <div id="ui-fixed">
+    <button onclick="scrollToArea(0)">Left Side</button>
+    <button onclick="scrollToArea(1)">Right Side</button>
+    <button onclick="pounce('50%', '78%')">Down 🐾</button>
   </div>
 
   <script>
-    // Build the checkerboard floor
-    const r1 = document.getElementById('row1');
-    const r2 = document.getElementById('row2');
-    
-    for(let i=0; i<6; i++) { // 6 tiles wide is better for iPhone portrait
-      r1.innerHTML += `<td class="${i%2==0 ? 'type-a' : 'type-b'}"></td>`;
-      r2.innerHTML += `<td class="${i%2==0 ? 'type-b' : 'type-a'}"></td>`;
+    // Create tiles for the 200% width floor
+    const floor = document.getElementById('floor-scroll');
+    for(let i=0; i<20; i++) {
+      const t = document.createElement('div');
+      t.className = 'tile';
+      floor.appendChild(t);
     }
 
-    function jump(x, y) {
-      const cat = document.getElementById('active-cat');
+    function pounce(x, y) {
+      const cat = document.getElementById('main-cat');
       cat.style.left = x;
-      // Adjust y for cat height
-      const yVal = parseFloat(y);
-      cat.style.top = (yVal - 8) + "%";
+      cat.style.top = (parseInt(y) - 10) + "%";
     }
 
-    function changeCat(imgSrc) {
-      document.getElementById('cat-img').src = imgSrc;
+    function scrollToArea(side) {
+      const view = document.getElementById('viewport');
+      const width = window.innerWidth;
+      view.scrollTo({
+        left: side * width,
+        behavior: 'smooth'
+      });
     }
   </script>
 </body>
