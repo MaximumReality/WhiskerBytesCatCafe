@@ -5,44 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Whisker Bytes Cat Cafe</title>
   <style>
+    /* Base styles */
     body {
-      background-color: #f7d2c4; 
+      background-color: #f7d2c4;
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
     }
     header {
-      background-color: #964b00; 
-      color: #ffffff; 
+      background-color: #964b00;
+      color: #ffffff;
       padding: 20px;
       text-align: center;
     }
     section {
       margin: 40px;
       padding: 20px;
-      background-color: #ffffff; 
-      border: 1px solid #ddd; 
+      background-color: #ffffff;
+      border: 1px solid #ddd;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    button {
-      margin: 5px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    h2 {
+      margin-top: 0;
     }
-    #cat-animation img, #feeder-animation img, #hide-seek-animation img {
-      display: block;
-      margin: 10px auto;
-    }
-
     /* Responsive design */
     @media only screen and (max-width: 768px) {
       body { font-size: 14px; }
       header { padding: 10px; }
       section { margin: 20px; padding: 10px; }
-      button { width: 100%; margin-top: 5px; }
+      #feed-btn, #hide-seek-btn { width: 100%; }
     }
     @media only screen and (max-width: 480px) {
       body { font-size: 12px; }
@@ -52,6 +44,8 @@
   </style>
 </head>
 <body>
+
+  <!-- Header -->
   <header>Welcome to Whisker Bytes Cat Cafe!</header>
 
   <!-- Cat Lounge Section -->
@@ -61,7 +55,17 @@
       <li><strong>Mochi</strong> - Sphynx, 2 yrs, Playful & cuddly, loves laser pointers</li>
       <li><strong>Luna</strong> - British Shorthair, 5 yrs, Calm & gentle, loves tuna</li>
       <li><strong>Jinx</strong> - Maine Coon, 3 yrs, Mischievous & adventurous, loves hide-and-seek</li>
-      <li><strong>Gingerella</strong> - Domestic Longhair, 12 yrs, Sweet & affectionate, needs gentle pets</li>
+      <li><strong>Gingerella</strong> - Domestic Longhair, 12 yrs, Sweet & affectionate</li>
+    </ul>
+  </section>
+
+  <!-- Cafe Menu Section -->
+  <section id="cafe-menu">
+    <h2>Cafe Menu:</h2>
+    <ul>
+      <li>Coffee</li>
+      <li>Tea</li>
+      <li>Tuna Cups</li>
     </ul>
   </section>
 
@@ -76,7 +80,7 @@
     </ul>
     <button id="adopt-btn">Learn More About Adoption</button>
     <div id="adoption-info" style="display:none;">
-      Adoption process details...
+      <p>Adoption process details...</p>
       <form id="adoption-form">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name"><br><br>
@@ -90,166 +94,102 @@
     </div>
   </section>
 
-  <!-- Cat Interaction Game Section -->
-  <section id="cat-interaction">
-    <h2>Interact with the Cats!</h2>
-    <select id="cat-select">
-      <option value="Mochi">Mochi</option>
-      <option value="Luna">Luna</option>
-      <option value="Jinx">Jinx</option>
-      <option value="Gingerella">Gingerella</option>
-    </select>
-    <button id="feed-cat">Feed</button>
-    <button id="pet-cat">Pet</button>
-    <button id="play-cat">Play</button>
-    <div id="cat-status" style="margin-top:10px;"></div>
-    <div id="cat-animation" style="height:100px; margin-top:10px;"></div>
-  </section>
-
-  <!-- Virtual Cat Feeder -->
+  <!-- Virtual Cat Feeder Section -->
   <section id="cat-feeder">
     <h2>Feed Our Feline Friends!</h2>
     <button id="feed-btn">Dispense Treats</button>
-    <div id="feeder-animation"></div>
+    <div id="cat-feeder-animation"></div>
   </section>
 
-  <!-- Hide-and-Seek Game -->
-  <section id="hide-seek">
-    <h2>Play Hide-and-Seek!</h2>
-    <button id="hide-seek-btn">Start Game</button>
-    <div id="hide-seek-animation"></div>
+  <!-- Cat Lounge Games Section -->
+  <section id="cat-lounge-games">
+    <h2>Play with Our Cats!</h2>
+    <button id="hide-seek-btn">Play Hide-and-Seek</button>
+    <div id="hide-seek-game"></div>
   </section>
 
-  <!-- Azul-style AI Chat Section -->
+  <!-- Azul Chat Widget -->
   <section id="azul-chat">
-    <h2>Chat with Azul the Cat!</h2>
-    <div id="chat-window" style="border:1px solid #ccc; height:200px; overflow-y:auto; padding:5px; background:#fefefe;"></div>
-    <input type="text" id="chat-input" placeholder="Ask Azul something..." style="width:80%;">
-    <button id="chat-send">Send</button>
+    <h2>Chat with Azul!</h2>
+    <div id="chat-window" style="border:1px solid #ddd; padding:10px; height:300px; overflow-y:auto; background:#111; color:#0ff; font-family:monospace;"></div>
+    <input type="text" id="chat-input" placeholder="Type a message..." style="width:80%; padding:5px;">
+    <button id="send-btn">Send</button>
   </section>
 
+  <!-- Footer -->
+  <footer>Thanks for visiting Whisker Bytes Cat Cafe!</footer>
+
+  <!-- JavaScript -->
   <script>
-    // --- Adoption Scripts ---
+    // Adoption toggle
     document.getElementById("adopt-btn").addEventListener("click", function() {
-      const info = document.getElementById("adoption-info");
+      var info = document.getElementById("adoption-info");
       info.style.display = (info.style.display === "none") ? "block" : "none";
     });
-    document.getElementById("submit-adoption").addEventListener("click", function(e){
-      e.preventDefault();
+
+    // Adoption form submission
+    document.getElementById("submit-adoption").addEventListener("click", function(event) {
+      event.preventDefault();
       document.getElementById("submission-message").style.display = "block";
     });
 
-    // --- Cat Interaction Game ---
-    const cats = {
-      Mochi: { hunger: 50, happiness: 50, energy: 50 },
-      Luna: { hunger: 50, happiness: 50, energy: 50 },
-      Jinx: { hunger: 50, happiness: 50, energy: 50 },
-      Gingerella: { hunger: 50, happiness: 50, energy: 50 }
-    };
-    const catSelect = document.getElementById("cat-select");
-    const catStatus = document.getElementById("cat-status");
-    const catAnimation = document.getElementById("cat-animation");
-    const feedBtn = document.getElementById("feed-cat");
-    const petBtn = document.getElementById("pet-cat");
-    const playBtn = document.getElementById("play-cat");
-
-    let points = 0;
-    const rewardDisplay = document.createElement("div");
-    rewardDisplay.style.marginTop = "10px";
-    catStatus.appendChild(rewardDisplay);
-
-    function updateStatus(catName) {
-      const cat = cats[catName];
-      catStatus.innerHTML = `<strong>${catName}</strong> - Hunger: ${cat.hunger}, Happiness: ${cat.happiness}, Energy: ${cat.energy}`;
-      catStatus.appendChild(rewardDisplay);
-    }
-
-    function showAnimation(action){
-      let imgSrc = "";
-      switch(action){
-        case "feed": imgSrc="images/cat-eating.gif"; break;
-        case "pet": imgSrc="images/cat-purring.gif"; break;
-        case "play": imgSrc="images/cat-playing.gif"; break;
-      }
-      catAnimation.innerHTML = `<img src="${imgSrc}" width="100px">`;
-      setTimeout(()=>{ catAnimation.innerHTML=""; }, 2000);
-    }
-
-    function addPoints(value, action){
-      points += value;
-      rewardDisplay.innerHTML = `Points: ${points} (for ${action})`;
-    }
-
-    feedBtn.addEventListener("click", ()=>{
-      const cat = cats[catSelect.value];
-      cat.hunger = Math.max(0, cat.hunger-20);
-      cat.happiness += 10;
-      updateStatus(catSelect.value);
-      showAnimation("feed");
-      addPoints(5, "feeding");
-    });
-
-    petBtn.addEventListener("click", ()=>{
-      const cat = cats[catSelect.value];
-      cat.happiness += 15;
-      updateStatus(catSelect.value);
-      showAnimation("pet");
-      addPoints(5, "petting");
-    });
-
-    playBtn.addEventListener("click", ()=>{
-      const cat = cats[catSelect.value];
-      cat.energy -= 15;
-      cat.happiness += 20;
-      cat.hunger += 10;
-      updateStatus(catSelect.value);
-      showAnimation("play");
-      addPoints(10, "playing");
-    });
-
-    updateStatus(catSelect.value);
-    catSelect.addEventListener("change", ()=>updateStatus(catSelect.value));
-
-    // --- Virtual Cat Feeder ---
+    // Virtual Cat Feeder
     document.getElementById("feed-btn").addEventListener("click", function() {
-      const feederAnim = document.getElementById("feeder-animation");
-      feederAnim.innerHTML = "<img src='images/treats.gif' width='100px'>";
-      setTimeout(()=>{ feederAnim.innerHTML=""; }, 2000);
+      var feederAnim = document.getElementById("cat-feeder-animation");
+      feederAnim.innerHTML = "<img src='treats.gif' width='100px'>";
+      setTimeout(() => { feederAnim.innerHTML = ""; }, 2000);
     });
 
-    // --- Hide-and-Seek Game ---
+    // Hide-and-Seek Game
     document.getElementById("hide-seek-btn").addEventListener("click", function() {
-      const hideSeekDiv = document.getElementById("hide-seek-animation");
-      hideSeekDiv.innerHTML = "<img src='images/hiding-cat.gif' width='100px'>";
-      setTimeout(()=>{ hideSeekDiv.innerHTML = "<img src='images/found-cat.gif' width='100px'>"; }, 3000);
+      var gameDiv = document.getElementById("hide-seek-game");
+      gameDiv.innerHTML = "<img src='hiding-cat.gif' width='100px'>";
+      setTimeout(() => {
+        gameDiv.innerHTML = "<img src='found-cat.gif' width='100px'>";
+      }, 3000);
     });
 
-    // --- Azul Chatbot Simulation ---
-    const chatWindow = document.getElementById("chat-window");
-    const chatInput = document.getElementById("chat-input");
-    const chatSend = document.getElementById("chat-send");
+    // Azul Chat
+    const chatWindow = document.getElementById('chat-window');
+    const chatInput = document.getElementById('chat-input');
 
-    const azulResponses = {
-      hello: "Tilts head thoughtfully. Hello, curious mind! What adventure shall we explore today?",
-      javascript: "Purrs! JavaScript makes websites interactive. Want to create a simple game or learn events?",
-      math: "Math is like cat hair—everywhere! What’s tangling your whiskers today?",
-      default: "Purrs curiously. I don’t quite know that yet, but I’m eager to explore with you!"
-    };
-
-    chatSend.addEventListener("click", ()=>{
-      const userText = chatInput.value.trim();
-      if(!userText) return;
-      chatWindow.innerHTML += `<div><strong>You:</strong> ${userText}</div>`;
-      chatInput.value = "";
-      let response = azulResponses.default;
-      for(const key in azulResponses){
-        if(userText.toLowerCase().includes(key)){
-          response = azulResponses[key];
-        }
+    function azulRespond(message) {
+      message = message.toLowerCase();
+      if(message.includes('hello') || message.includes('hi')) {
+        return "Tilts head curiously. Hello! What science, math, or cat trick shall we explore?";
+      } else if(message.includes('javascript')) {
+        return "Purrs! JavaScript makes websites playful and interactive. Do you want to code a mini-game?";
+      } else if(message.includes('cat')) {
+        return "Tail flicks! I love cats. Shall we play with virtual treats?";
+      } else if(message.includes('bye')) {
+        return "Yawn. Farewell, curious friend! Come back soon for more whisker adventures.";
+      } else {
+        return "Hmm… intriguing! Could you rephrase or ask about science, math, or cats?";
       }
-      chatWindow.innerHTML += `<div><strong>Azul:</strong> ${response}</div>`;
+    }
+
+    function appendMessage(sender, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      chatWindow.appendChild(msgDiv);
       chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    document.getElementById('send-btn').addEventListener('click', () => {
+      const userMsg = chatInput.value.trim();
+      if(userMsg === '') return;
+      appendMessage('You', userMsg);
+      chatInput.value = '';
+      setTimeout(() => {
+        const azulMsg = azulRespond(userMsg);
+        appendMessage('Azul', azulMsg);
+      }, 500);
+    });
+
+    chatInput.addEventListener('keypress', e => {
+      if(e.key === 'Enter') document.getElementById('send-btn').click();
     });
   </script>
+
 </body>
 </html>
