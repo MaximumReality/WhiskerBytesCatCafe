@@ -3,23 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Whisker Bytes Cat Cafe - Maximum Reality Edition</title>
+  <title>Whisker Bytes Cafe - Sprite Edition</title>
   <style>
     :root {
       --pink: #ffc0cb;
       --brown: #6b3e2e;
       --mochi-blue: #00f2ff;
       --jinx-amber: #ffaa00;
+      --luna-silver: #e0e0e0;
+      --ginger-orange: #ff9900;
       --soft-bg: #f7d2c4;
-      --glow-intensity: 15px;
     }
 
-    /* Global Themes */
+    /* Global Vibe */
     body {
       background: radial-gradient(circle, #fce4ec, var(--soft-bg));
       font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
       margin: 0;
-      transition: all 0.5s ease;
+      transition: background 0.5s ease;
       color: var(--brown);
       overflow-x: hidden;
     }
@@ -31,22 +32,22 @@
 
     header {
       background-color: var(--brown);
-      color: #ffffff;
+      color: white;
       padding: 20px;
       text-align: center;
       border-bottom: 5px solid var(--pink);
     }
 
+    /* Layout Sections */
     section {
       margin: 20px auto;
-      max-width: 700px;
+      max-width: 900px;
       background: rgba(255, 255, 255, 0.9);
       border: 6px solid var(--brown);
       border-radius: 40px;
       padding: 20px;
       box-shadow: 8px 8px 0px var(--pink);
       position: relative;
-      z-index: 10;
     }
 
     body.night-mode section {
@@ -55,173 +56,192 @@
       box-shadow: 8px 8px 0px #4a004a;
     }
 
-    /* Cat Sprites & Animations */
-    .cat-grid { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
-    
-    .cat-card { text-align: center; width: 140px; transition: transform 0.3s; }
-    
-    .cat-avatar {
-      width: 100px;
-      height: 100px;
-      margin: 20px auto;
-      border-radius: 50% 50% 45% 45%;
-      position: relative;
-      border: 3px solid #333;
-      background: #eee;
-      animation: breathe 3s ease-in-out infinite;
-      cursor: pointer;
+    /* Cat Sprite Styling */
+    .cat-grid {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
     }
 
-    /* PNG PLACEHOLDER STYLE: If you add PNGs, this handles them */
+    .cat-card {
+      text-align: center;
+      width: 180px;
+    }
+
+    .cat-avatar {
+      width: 150px;
+      height: 150px;
+      margin: 10px auto;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The PNG Image */
     .cat-avatar img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      display: none; /* Hidden until you add <img src="..."> */
+      z-index: 1;
+      animation: breathe 3s ease-in-out infinite;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     @keyframes breathe {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
-    /* Breed Visuals */
-    .mochi .cat-avatar { background: #fce4ec; border-color: var(--mochi-blue); }
-    .jinx .cat-avatar { background: #4a4a4a; border-color: var(--jinx-amber); }
-
-    /* Eyes & Tufts */
-    .eyes { position: absolute; top: 40%; width: 100%; display: flex; justify-content: space-around; padding: 0 20px; box-sizing: border-box; }
-    .eye { width: 10px; height: 10px; border-radius: 50%; background: white; box-shadow: 0 0 5px white; }
-    .mochi .eye { background: var(--mochi-blue); box-shadow: 0 0 var(--glow-intensity) var(--mochi-blue); }
-
-    .jinx .cat-avatar::before, .jinx .cat-avatar::after {
-      content: ''; position: absolute; top: -20px; border-left: 12px solid transparent; 
-      border-right: 12px solid transparent; border-bottom: 20px solid #4a4a4a;
+    /* The Glow Layer (Positioned over eyes) */
+    .eyes-glow {
+      position: absolute;
+      top: 40%; /* Adjust this to match your drawing */
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 0 35px;
+      box-sizing: border-box;
+      z-index: 2;
+      pointer-events: none;
     }
-    .jinx .cat-avatar::before { left: -5px; transform: rotate(-20deg); filter: drop-shadow(0 -5px 5px var(--jinx-amber)); }
-    .jinx .cat-avatar::after { right: -5px; transform: rotate(20deg); filter: drop-shadow(0 -5px 5px var(--jinx-amber)); }
 
-    /* Mood Meters */
-    .mood-container { width: 80px; height: 8px; background: #ddd; border-radius: 4px; margin: 5px auto; overflow: hidden; border: 1px solid #999; }
-    .mood-bar { height: 100%; width: 50%; background: linear-gradient(90deg, #ff66b2, #ff00ff); transition: width 0.5s; }
-
-    /* UI Sidebars */
-    #toy-tray, #cat-tower { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.3); backdrop-filter: blur(5px); border-radius: 30px; padding: 10px; border: 3px solid var(--brown); z-index: 50; }
-    #toy-tray { left: 15px; display: flex; flex-direction: column; gap: 15px; }
-    #cat-tower { right: 15px; height: 300px; width: 60px; display: flex; flex-direction: column; justify-content: space-between; }
-    
-    .toy { font-size: 2rem; cursor: grab; text-align: center; }
-    .tower-spot { width: 40px; height: 10px; background: var(--brown); border-radius: 5px; margin: auto; cursor: pointer; position: relative; }
-    .tower-occupant { position: absolute; bottom: 10px; left: -30px; transform: scale(0.6); }
-
-    /* Binary Rain */
-    .rain-box { position: relative; overflow: hidden; }
-    .rain-box::before {
-      content: "101100101"; position: absolute; top: 0; color: rgba(107, 62, 46, 0.05); font-size: 10px; animation: rain-scroll 10s linear infinite;
+    .eye-point {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.8;
+      filter: blur(2px);
     }
-    @keyframes rain-scroll { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
 
-    /* Buttons & Interactions */
-    .controls { text-align: center; padding: 10px; }
-    button { padding: 10px 15px; border-radius: 20px; border: none; background: var(--brown); color: white; cursor: pointer; font-family: inherit; margin: 5px; }
-    button:hover { filter: brightness(1.2); }
+    .mochi .eye-point { background: var(--mochi-blue); box-shadow: 0 0 15px var(--mochi-blue); }
+    .jinx .eye-point { background: var(--jinx-amber); box-shadow: 0 0 15px var(--jinx-amber); }
+    .luna .eye-point { background: white; box-shadow: 0 0 15px white; }
+    .gingerella .eye-point { background: var(--ginger-orange); box-shadow: 0 0 15px var(--ginger-orange); }
+
+    /* Mood & Game UI */
+    .mood-container { width: 100px; height: 10px; background: #ddd; border-radius: 5px; margin: 10px auto; overflow: hidden; }
+    .mood-bar { height: 100%; width: 50%; background: linear-gradient(90deg, #00f2ff, #ff00ff); transition: width 0.5s; }
+
+    /* Interactive Sidebars */
+    #toy-tray { position: fixed; left: 15px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; background: rgba(255,255,255,0.4); padding: 15px; border-radius: 20px; border: 3px solid var(--brown); z-index: 100; }
+    .toy { font-size: 2rem; cursor: grab; transition: transform 0.2s; }
+    .toy:hover { transform: scale(1.3); }
+
+    #cat-tower { position: fixed; right: 15px; top: 50%; transform: translateY(-50%); height: 350px; width: 80px; background: var(--brown); border-radius: 40px; border: 4px solid var(--pink); display: flex; flex-direction: column; justify-content: space-around; align-items: center; }
+    .tower-platform { width: 60px; height: 12px; background: var(--pink); border-radius: 6px; cursor: pointer; }
+
+    /* Hide UI for Photo Mode */
+    .hidden { opacity: 0 !important; pointer-events: none !important; }
   </style>
 </head>
 <body>
 
-<header>Whisker Bytes Cafe</header>
+  <header>
+    <h1>Whisker Bytes Cafe</h1>
+    <button onclick="toggleNightMode()">🌙 Toggle Night</button>
+    <button id="photo-btn" onclick="togglePhotoMode()">📸 Photo Mode</button>
+  </header>
 
-<div class="controls">
-  <button onclick="toggleNightMode()">🌙 Cyber-Night</button>
-  <button id="photo-mode-btn" onclick="togglePhotoMode()">📸 Photo Mode</button>
-</div>
-
-<div id="toy-tray">
-  <div class="toy" id="laser" draggable="true">🔴</div>
-  <div class="toy" id="fish" draggable="true">🐟</div>
-  <div class="toy" id="feather" draggable="true">🪶</div>
-</div>
-
-<div id="cat-tower">
-  <div class="tower-spot" onclick="jumpToTower(this)"><div class="tower-occupant"></div></div>
-  <div class="tower-spot" onclick="jumpToTower(this)"><div class="tower-occupant"></div></div>
-  <div class="tower-spot" onclick="jumpToTower(this)"><div class="tower-occupant"></div></div>
-</div>
-
-<section id="lounge">
-  <div class="cat-grid">
-    <div class="cat-card mochi" id="mochi-card">
-      <div class="cat-avatar" ondrop="dropToy(event, 'mochi')" ondragover="allowDrop(event)">
-        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-      </div>
-      <strong>Mochi</strong>
-      <div class="mood-container"><div class="mood-bar" id="mochi-mood"></div></div>
-    </div>
-
-    <div class="cat-card jinx" id="jinx-card">
-      <div class="cat-avatar" ondrop="dropToy(event, 'jinx')" ondragover="allowDrop(event)">
-        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-      </div>
-      <strong>Jinx</strong>
-      <div class="mood-container"><div class="mood-bar" id="jinx-mood"></div></div>
-    </div>
+  <div id="toy-tray">
+    <div class="toy" id="laser" draggable="true">🔴</div>
+    <div class="toy" id="fish" draggable="true">🐟</div>
+    <div class="toy" id="feather" draggable="true">🪶</div>
   </div>
-  <p id="status-text" style="text-align: center; font-weight: bold;"></p>
-</section>
 
-<section class="rain-box">
-  <h3>Adoption Desk</h3>
-  <p>Gingerella (12yrs) - 100% compatible with your hardware.</p>
-</section>
+  <div id="cat-tower">
+    <div class="tower-platform" onclick="moveCatToTower('level-3')"></div>
+    <div class="tower-platform" onclick="moveCatToTower('level-2')"></div>
+    <div class="tower-platform" onclick="moveCatToTower('level-1')"></div>
+  </div>
 
-<div id="music-player" style="position:fixed; bottom:10px; left:10px; background:rgba(255,255,255,0.5); padding:10px; border-radius:20px;">
-  🎵 Lo-Fi Purr <button onclick="toggleMusic()">⏯️</button>
-</div>
+  <section id="main-lounge">
+    <div class="cat-grid">
+      <div class="cat-card mochi" id="mochi-card">
+        <div class="cat-avatar" onclick="interact('mochi')">
+          <img src="mochi_idle.png" alt="Mochi" onerror="this.src='https://via.placeholder.com/150?text=Mochi'">
+          <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+        </div>
+        <strong>Mochi</strong>
+        <div class="mood-container"><div class="mood-bar" id="mochi-bar"></div></div>
+      </div>
 
-<script>
-  let moodLevels = { mochi: 50, jinx: 50 };
+      <div class="cat-card jinx" id="jinx-card">
+        <div class="cat-avatar" onclick="interact('jinx')">
+          <img src="jinx_idle.png" alt="Jinx" onerror="this.src='https://via.placeholder.com/150?text=Jinx'">
+          <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+        </div>
+        <strong>Jinx</strong>
+        <div class="mood-container"><div class="mood-bar" id="jinx-bar"></div></div>
+      </div>
 
-  function toggleNightMode() {
-    document.body.classList.toggle('night-mode');
-  }
+      <div class="cat-card luna" id="luna-card">
+        <div class="cat-avatar" onclick="interact('luna')">
+          <img src="luna_idle.png" alt="Luna" onerror="this.src='https://via.placeholder.com/150?text=Luna'">
+          <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+        </div>
+        <strong>Luna</strong>
+        <div class="mood-container"><div class="mood-bar" id="luna-bar"></div></div>
+      </div>
 
-  function allowDrop(ev) { ev.preventDefault(); }
-  
-  document.querySelectorAll('.toy').forEach(toy => {
-    toy.ondragstart = (e) => e.dataTransfer.setData("toyId", e.target.id);
-  });
+      <div class="cat-card gingerella" id="ginger-card">
+        <div class="cat-avatar" onclick="interact('gingerella')">
+          <img src="gingerella_idle.png" alt="Gingerella" onerror="this.src='https://via.placeholder.com/150?text=Gingerella'">
+          <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+        </div>
+        <strong>Gingerella</strong>
+        <div class="mood-container"><div class="mood-bar" id="gingerella-bar"></div></div>
+      </div>
+    </div>
+    <p id="game-status" style="text-align: center; margin-top: 20px;">Welcome! Drag a toy to a cat to start playing.</p>
+  </section>
 
-  function dropToy(ev, cat) {
-    ev.preventDefault();
-    const toyId = ev.dataTransfer.getData("toyId");
-    moodLevels[cat] = Math.min(moodLevels[cat] + 15, 100);
-    document.getElementById(`${cat}-mood`).style.width = moodLevels[cat] + "%";
-    document.getElementById('status-text').innerText = `${cat.toUpperCase()} loved the ${toyId}!`;
-    
-    // Trigger "Super Glow" if happy
-    if(moodLevels[cat] > 80) {
-        document.querySelector(`.${cat} .cat-avatar`).style.boxShadow = "0 0 30px white";
+  <script>
+    let moods = { mochi: 50, jinx: 50, luna: 50, gingerella: 50 };
+
+    function toggleNightMode() {
+      document.body.classList.toggle('night-mode');
     }
-  }
 
-  function jumpToTower(spot) {
-    const mochi = document.querySelector('.mochi .cat-avatar');
-    spot.querySelector('.tower-occupant').appendChild(mochi);
-    document.getElementById('status-text').innerText = "Mochi claimed the high ground!";
-  }
+    function interact(cat) {
+      moods[cat] = Math.min(moods[cat] + 10, 100);
+      document.getElementById(`${cat}-bar`).style.width = moods[cat] + "%";
+      document.getElementById('game-status').innerText = `${cat.toUpperCase()} is purring!`;
+      
+      const img = document.querySelector(`.${cat} img`);
+      img.style.transform = "scale(1.2) rotate(5deg)";
+      setTimeout(() => img.style.transform = "scale(1) rotate(0deg)", 300);
+    }
 
-  function togglePhotoMode() {
-    const sections = document.querySelectorAll('section, #toy-tray, #cat-tower, header, .controls, #music-player');
-    const isPhoto = document.getElementById('photo-mode-btn').innerText.includes("Photo");
-    
-    sections.forEach(s => {
-        if(s.id !== 'lounge' && s.tagName !== 'BUTTON') s.style.display = isPhoto ? 'none' : 'block';
+    // Drag and Drop Logic
+    document.querySelectorAll('.toy').forEach(toy => {
+      toy.addEventListener('dragstart', (e) => e.dataTransfer.setData("toy", e.target.id));
     });
-    document.getElementById('photo-mode-btn').innerText = isPhoto ? "📸 Exit" : "📸 Photo Mode";
-  }
 
-  function toggleMusic() { alert("Simulating Lo-Fi Audio... Purr Purr..."); }
-</script>
+    document.querySelectorAll('.cat-avatar').forEach(avatar => {
+      avatar.addEventListener('dragover', (e) => e.preventDefault());
+      avatar.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const catClass = e.target.closest('.cat-card').classList[1];
+        interact(catClass);
+        document.getElementById('game-status').innerText = `You played with ${catClass}! +15 Happiness`;
+      });
+    });
 
+    function togglePhotoMode() {
+      const ui = ['#toy-tray', '#cat-tower', 'header', '.mood-container', 'h1', '#game-status'];
+      ui.forEach(selector => {
+        document.querySelectorAll(selector).forEach(el => el.classList.toggle('hidden'));
+      });
+      const btn = document.getElementById('photo-btn');
+      btn.innerText = btn.innerText.includes("Photo") ? "📸 Exit Photo" : "📸 Photo Mode";
+    }
+
+    function moveCatToTower(level) {
+      document.getElementById('game-status').innerText = "Feature: Jinx jumped to the tower! (Coming in Build 2)";
+    }
+  </script>
 </body>
 </html>
