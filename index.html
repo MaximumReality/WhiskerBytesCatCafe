@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Whisker Bytes Cat Cafe</title>
+  <title>Whisker Bytes Cat Cafe - Maximum Reality Edition</title>
   <style>
     :root {
       --pink: #ffc0cb;
@@ -11,15 +11,17 @@
       --mochi-blue: #00f2ff;
       --jinx-amber: #ffaa00;
       --soft-bg: #f7d2c4;
+      --glow-intensity: 15px;
     }
 
-    /* Global Style & Theme Transition */
+    /* Global Themes */
     body {
       background: radial-gradient(circle, #fce4ec, var(--soft-bg));
       font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
       margin: 0;
-      transition: background 0.5s ease, color 0.5s ease;
+      transition: all 0.5s ease;
       color: var(--brown);
+      overflow-x: hidden;
     }
 
     body.night-mode {
@@ -30,195 +32,196 @@
     header {
       background-color: var(--brown);
       color: #ffffff;
-      padding: 30px;
+      padding: 20px;
       text-align: center;
-      font-size: 2rem;
       border-bottom: 5px solid var(--pink);
     }
 
-    body.night-mode header {
-      background-color: #1a0f1f;
-      border-color: #ff00ff;
-      box-shadow: 0 5px 15px #ff00ff;
-    }
-
     section {
-      margin: 30px auto;
-      max-width: 800px;
+      margin: 20px auto;
+      max-width: 700px;
       background: rgba(255, 255, 255, 0.9);
       border: 6px solid var(--brown);
-      border-radius: 50px;
-      padding: 30px;
-      box-shadow: 10px 10px 0px var(--pink);
+      border-radius: 40px;
+      padding: 20px;
+      box-shadow: 8px 8px 0px var(--pink);
       position: relative;
+      z-index: 10;
     }
 
     body.night-mode section {
       background: rgba(20, 15, 30, 0.95);
       border-color: #ff00ff;
-      box-shadow: 10px 10px 0px #4a004a;
+      box-shadow: 8px 8px 0px #4a004a;
     }
 
-    /* Cat Avatar & Animation Styles */
-    .cat-grid {
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .cat-card {
-      text-align: center;
-      width: 160px;
-      cursor: pointer;
-    }
-
+    /* Cat Sprites & Animations */
+    .cat-grid { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+    
+    .cat-card { text-align: center; width: 140px; transition: transform 0.3s; }
+    
     .cat-avatar {
       width: 100px;
       height: 100px;
       margin: 20px auto;
-      border-radius: 50% 50% 40% 40%;
+      border-radius: 50% 50% 45% 45%;
       position: relative;
       border: 3px solid #333;
-      animation: float-breathing 3s ease-in-out infinite;
+      background: #eee;
+      animation: breathe 3s ease-in-out infinite;
+      cursor: pointer;
     }
 
-    @keyframes float-breathing {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-
-    /* Breed Specifics */
-    .mochi .cat-avatar { background: #fce4ec; border-color: var(--mochi-blue); box-shadow: 0 0 15px var(--mochi-blue); }
-    .jinx .cat-avatar { background: #4a4a4a; border-color: var(--jinx-amber); box-shadow: 0 0 15px var(--jinx-amber); }
-    
-    /* Ears & Tufts */
-    .cat-avatar::before, .cat-avatar::after { content: ''; position: absolute; }
-    
-    .mochi .cat-avatar::before { left: -15px; top: -20px; width: 30px; height: 50px; background: #fce4ec; border-radius: 50% 50% 10% 10%; transform: rotate(-30deg); z-index: -1; border: 2px solid var(--mochi-blue); }
-    .mochi .cat-avatar::after { right: -15px; top: -20px; width: 30px; height: 50px; background: #fce4ec; border-radius: 50% 50% 10% 10%; transform: rotate(30deg); z-index: -1; border: 2px solid var(--mochi-blue); }
-
-    .jinx .cat-avatar::before { left: -5px; top: -25px; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 25px solid #4a4a4a; transform: rotate(-20deg); filter: drop-shadow(0 -5px 5px var(--jinx-amber)); }
-    .jinx .cat-avatar::after { right: -5px; top: -25px; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 25px solid #4a4a4a; transform: rotate(20deg); filter: drop-shadow(0 -5px 5px var(--jinx-amber)); }
-
-    .eyes { position: absolute; top: 40%; width: 100%; display: flex; justify-content: space-around; padding: 0 20px; box-sizing: border-box; }
-    .eye { width: 12px; height: 12px; border-radius: 50%; background: white; animation: blink 4s infinite; }
-    .mochi .eye { background: var(--mochi-blue); box-shadow: 0 0 8px var(--mochi-blue); }
-
-    @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
-
-    /* Binary Rain for Adoption */
-    #cat-adoptions { overflow: hidden; }
-    #cat-adoptions::before {
-      content: "01101001";
-      position: absolute;
-      top: -100%;
-      left: 0;
+    /* PNG PLACEHOLDER STYLE: If you add PNGs, this handles them */
+    .cat-avatar img {
       width: 100%;
-      height: 200%;
-      font-size: 10px;
-      color: rgba(107, 62, 46, 0.05);
-      white-space: pre-wrap;
-      animation: rain 20s linear infinite;
-      pointer-events: none;
+      height: 100%;
+      object-fit: contain;
+      display: none; /* Hidden until you add <img src="..."> */
     }
-    body.night-mode #cat-adoptions::before { color: rgba(0, 242, 255, 0.1); content: "BYTEBYTE"; }
-    @keyframes rain { from { transform: translateY(0); } to { transform: translateY(50%); } }
 
-    /* UI Elements */
-    .menu-grid { display: flex; gap: 20px; justify-content: center; padding: 20px; }
-    .menu-item { width: 80px; height: 80px; background: white; border: 3px solid var(--brown); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; font-size: 0.8rem; text-align: center; }
-    .menu-item:hover { transform: scale(1.2) rotate(5deg); background: var(--pink); box-shadow: 0 0 20px var(--pink); }
+    @keyframes breathe {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
 
-    button { background: var(--brown); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+    /* Breed Visuals */
+    .mochi .cat-avatar { background: #fce4ec; border-color: var(--mochi-blue); }
+    .jinx .cat-avatar { background: #4a4a4a; border-color: var(--jinx-amber); }
+
+    /* Eyes & Tufts */
+    .eyes { position: absolute; top: 40%; width: 100%; display: flex; justify-content: space-around; padding: 0 20px; box-sizing: border-box; }
+    .eye { width: 10px; height: 10px; border-radius: 50%; background: white; box-shadow: 0 0 5px white; }
+    .mochi .eye { background: var(--mochi-blue); box-shadow: 0 0 var(--glow-intensity) var(--mochi-blue); }
+
+    .jinx .cat-avatar::before, .jinx .cat-avatar::after {
+      content: ''; position: absolute; top: -20px; border-left: 12px solid transparent; 
+      border-right: 12px solid transparent; border-bottom: 20px solid #4a4a4a;
+    }
+    .jinx .cat-avatar::before { left: -5px; transform: rotate(-20deg); filter: drop-shadow(0 -5px 5px var(--jinx-amber)); }
+    .jinx .cat-avatar::after { right: -5px; transform: rotate(20deg); filter: drop-shadow(0 -5px 5px var(--jinx-amber)); }
+
+    /* Mood Meters */
+    .mood-container { width: 80px; height: 8px; background: #ddd; border-radius: 4px; margin: 5px auto; overflow: hidden; border: 1px solid #999; }
+    .mood-bar { height: 100%; width: 50%; background: linear-gradient(90deg, #ff66b2, #ff00ff); transition: width 0.5s; }
+
+    /* UI Sidebars */
+    #toy-tray, #cat-tower { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.3); backdrop-filter: blur(5px); border-radius: 30px; padding: 10px; border: 3px solid var(--brown); z-index: 50; }
+    #toy-tray { left: 15px; display: flex; flex-direction: column; gap: 15px; }
+    #cat-tower { right: 15px; height: 300px; width: 60px; display: flex; flex-direction: column; justify-content: space-between; }
+    
+    .toy { font-size: 2rem; cursor: grab; text-align: center; }
+    .tower-spot { width: 40px; height: 10px; background: var(--brown); border-radius: 5px; margin: auto; cursor: pointer; position: relative; }
+    .tower-occupant { position: absolute; bottom: 10px; left: -30px; transform: scale(0.6); }
+
+    /* Binary Rain */
+    .rain-box { position: relative; overflow: hidden; }
+    .rain-box::before {
+      content: "101100101"; position: absolute; top: 0; color: rgba(107, 62, 46, 0.05); font-size: 10px; animation: rain-scroll 10s linear infinite;
+    }
+    @keyframes rain-scroll { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+
+    /* Buttons & Interactions */
+    .controls { text-align: center; padding: 10px; }
+    button { padding: 10px 15px; border-radius: 20px; border: none; background: var(--brown); color: white; cursor: pointer; font-family: inherit; margin: 5px; }
     button:hover { filter: brightness(1.2); }
-
-    #chat-box div { background: #fff; border: 2px solid var(--brown); border-radius: 20px 20px 20px 0; padding: 10px; margin-bottom: 10px; width: fit-content; animation: pop-in 0.3s ease-out; }
-    @keyframes pop-in { from { transform: scale(0); } to { transform: scale(1); } }
   </style>
 </head>
 <body>
 
-  <header>Whisker Bytes Cafe</header>
+<header>Whisker Bytes Cafe</header>
 
-  <div style="text-align: right; padding: 20px; max-width: 800px; margin: auto;">
-    <button id="mode-toggle" onclick="toggleNightMode()">🌙 Switch to Cyber-Night</button>
+<div class="controls">
+  <button onclick="toggleNightMode()">🌙 Cyber-Night</button>
+  <button id="photo-mode-btn" onclick="togglePhotoMode()">📸 Photo Mode</button>
+</div>
+
+<div id="toy-tray">
+  <div class="toy" id="laser" draggable="true">🔴</div>
+  <div class="toy" id="fish" draggable="true">🐟</div>
+  <div class="toy" id="feather" draggable="true">🪶</div>
+</div>
+
+<div id="cat-tower">
+  <div class="tower-spot" onclick="jumpToTower(this)"><div class="tower-occupant"></div></div>
+  <div class="tower-spot" onclick="jumpToTower(this)"><div class="tower-occupant"></div></div>
+  <div class="tower-spot" onclick="jumpToTower(this)"><div class="tower-occupant"></div></div>
+</div>
+
+<section id="lounge">
+  <div class="cat-grid">
+    <div class="cat-card mochi" id="mochi-card">
+      <div class="cat-avatar" ondrop="dropToy(event, 'mochi')" ondragover="allowDrop(event)">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+      </div>
+      <strong>Mochi</strong>
+      <div class="mood-container"><div class="mood-bar" id="mochi-mood"></div></div>
+    </div>
+
+    <div class="cat-card jinx" id="jinx-card">
+      <div class="cat-avatar" ondrop="dropToy(event, 'jinx')" ondragover="allowDrop(event)">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+      </div>
+      <strong>Jinx</strong>
+      <div class="mood-container"><div class="mood-bar" id="jinx-mood"></div></div>
+    </div>
   </div>
+  <p id="status-text" style="text-align: center; font-weight: bold;"></p>
+</section>
 
-  <section id="cat-lounge">
-    <h2>Cat Lounge Residents</h2>
-    <div class="cat-grid">
-      <div class="cat-card mochi" onclick="interact('Mochi')">
-        <div class="cat-avatar"><div class="eyes"><div class="eye"></div><div class="eye"></div></div></div>
-        <strong>Mochi</strong><br><small>Sphynx (Glow Blue)</small>
-      </div>
-      <div class="cat-card jinx" onclick="interact('Jinx')">
-        <div class="cat-avatar"><div class="eyes"><div class="eye"></div><div class="eye"></div></div></div>
-        <strong>Jinx</strong><br><small>Maine Coon (Amber)</small>
-      </div>
-    </div>
-    <div id="status-msg" style="text-align:center; margin-top:20px; height: 20px;"></div>
-  </section>
+<section class="rain-box">
+  <h3>Adoption Desk</h3>
+  <p>Gingerella (12yrs) - 100% compatible with your hardware.</p>
+</section>
 
-  <section id="cafe-order">
-    <h2>Cafe Order Menu</h2>
-    <div class="menu-grid">
-      <div class="menu-item" onclick="placeOrder('Coffee')">☕<br>Coffee</div>
-      <div class="menu-item" onclick="placeOrder('Tea')">🍵<br>Tea</div>
-      <div class="menu-item" onclick="placeOrder('Tuna Cup')">🐟<br>Tuna</div>
-    </div>
-  </section>
+<div id="music-player" style="position:fixed; bottom:10px; left:10px; background:rgba(255,255,255,0.5); padding:10px; border-radius:20px;">
+  🎵 Lo-Fi Purr <button onclick="toggleMusic()">⏯️</button>
+</div>
 
-  <section id="cat-adoptions">
-    <h2>Digital Adoption Desk</h2>
-    <p>Current Bytes ready for download (adoption):</p>
-    <ul style="position: relative; z-index: 1;">
-      <li>Gingerella - Senior Byte (12 yrs)</li>
-      <li>Simba - Adventure.exe (2 yrs)</li>
-    </ul>
-    <button onclick="alert('Inquiry sent to the cloud!')">Submit Inquiry</button>
-  </section>
+<script>
+  let moodLevels = { mochi: 50, jinx: 50 };
 
-  <section id="live-chat">
-    <h2>Visitor Chat</h2>
-    <div id="chat-box" style="height:100px; overflow-y:auto; margin-bottom:10px;"></div>
-    <input type="text" id="chat-input" placeholder="Say hello..." style="border-radius:10px; padding:5px;">
-    <button onclick="sendChat()">Send</button>
-  </section>
+  function toggleNightMode() {
+    document.body.classList.toggle('night-mode');
+  }
 
-  <script>
-    function toggleNightMode() {
-      const body = document.body;
-      const btn = document.getElementById("mode-toggle");
-      body.classList.toggle("night-mode");
-      btn.innerText = body.classList.contains("night-mode") ? "☀️ Switch to Day Mode" : "🌙 Switch to Cyber-Night";
+  function allowDrop(ev) { ev.preventDefault(); }
+  
+  document.querySelectorAll('.toy').forEach(toy => {
+    toy.ondragstart = (e) => e.dataTransfer.setData("toyId", e.target.id);
+  });
+
+  function dropToy(ev, cat) {
+    ev.preventDefault();
+    const toyId = ev.dataTransfer.getData("toyId");
+    moodLevels[cat] = Math.min(moodLevels[cat] + 15, 100);
+    document.getElementById(`${cat}-mood`).style.width = moodLevels[cat] + "%";
+    document.getElementById('status-text').innerText = `${cat.toUpperCase()} loved the ${toyId}!`;
+    
+    // Trigger "Super Glow" if happy
+    if(moodLevels[cat] > 80) {
+        document.querySelector(`.${cat} .cat-avatar`).style.boxShadow = "0 0 30px white";
     }
+  }
 
-    function interact(name) {
-      const msg = document.getElementById("status-msg");
-      msg.innerText = `✨ ${name} is purring at a high frequency! ✨`;
-      const avatar = document.querySelector(`.${name.toLowerCase()} .cat-avatar`);
-      avatar.style.animation = "float-breathing 0.5s ease-in-out infinite";
-      setTimeout(() => { 
-        avatar.style.animation = "float-breathing 3s ease-in-out infinite";
-        msg.innerText = "";
-      }, 2000);
-    }
+  function jumpToTower(spot) {
+    const mochi = document.querySelector('.mochi .cat-avatar');
+    spot.querySelector('.tower-occupant').appendChild(mochi);
+    document.getElementById('status-text').innerText = "Mochi claimed the high ground!";
+  }
 
-    function placeOrder(item) {
-      const msg = document.getElementById("status-msg");
-      msg.innerText = `Synthesizing ${item}... Done!`;
-    }
+  function togglePhotoMode() {
+    const sections = document.querySelectorAll('section, #toy-tray, #cat-tower, header, .controls, #music-player');
+    const isPhoto = document.getElementById('photo-mode-btn').innerText.includes("Photo");
+    
+    sections.forEach(s => {
+        if(s.id !== 'lounge' && s.tagName !== 'BUTTON') s.style.display = isPhoto ? 'none' : 'block';
+    });
+    document.getElementById('photo-mode-btn').innerText = isPhoto ? "📸 Exit" : "📸 Photo Mode";
+  }
 
-    function sendChat() {
-      const input = document.getElementById("chat-input");
-      if(input.value) {
-        const box = document.getElementById("chat-box");
-        box.innerHTML += `<div><strong>Visitor:</strong> ${input.value}</div>`;
-        input.value = "";
-        box.scrollTop = box.scrollHeight;
-      }
-    }
-  </script>
+  function toggleMusic() { alert("Simulating Lo-Fi Audio... Purr Purr..."); }
+</script>
+
 </body>
 </html>
