@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES</title>
+<title>WHISKER BYTES: Mission Mode</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; }
@@ -31,7 +31,10 @@
   </div>
 </div>
 
-<div id="stats"><b>RESOURCES: <span id="scoreVal">0</span></b></div>
+<div id="stats">
+    <b>RESOURCES: <span id="scoreVal">0</span></b><br>
+    <span id="holdingTxt">Holding: Nothing</span>
+</div>
 
 <canvas id="game"></canvas>
 
@@ -42,23 +45,25 @@
     <button class="ctrl-btn" id="down">⬇️</button>
     <button class="ctrl-btn" id="right">➡️</button>
   </div>
-  <button class="ctrl-btn" style="background:var(--pink); width: 80px;" onclick="meow()">📢</button>
+  <button class="ctrl-btn" style="background:var(--pink); width: 80px;" onclick="interact()">📢</button>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-let score = 0, gameState = "START";
+let score = 0, gameState = "START", playerHolding = null;
 const catImg = new Image();
 const bgPattern = new Image();
 
-// SPRITE NPC SYSTEM
-const friendImg = new Image();
-friendImg.src = 'friend1.png'; // Make sure you have this file!
+// Friend Assets
+const friend1 = new Image(); friend1.src = 'friend1.png';
+const friend2 = new Image(); friend2.src = 'friend2.png';
+const friendImages = [friend1, friend2];
 
 const player = { x: 0, y: 0, speed: 5, flip: false, meowing: 0 };
 let furniture = [];
 let customers = [];
+const menu = ["☕", "🍪"];
 
 function startGame(cat) {
   catImg.src = cat + "_idle.png";
@@ -69,9 +74,11 @@ function startGame(cat) {
   gameState = "PLAYING";
   
   furniture = [
-    { x: 300, y: 300, type: "TABLE", emoji: "🟫", solid: true },
-    { x: 230, y: 300, type: "CHAIR", emoji: "🪑", solid: false }, 
-    { x: 370, y: 300, type: "CHAIR", emoji: "🪑", solid: false }
+    { x: 100, y: 150, type: "COUNTER", emoji: "🏪", item: "☕", label: "Coffee" },
+    { x: 200, y: 150, type: "COUNTER", emoji: "🏪", item: "🍪", label: "Cookie" },
+    { x: 300, y: 350, type: "TABLE", emoji: "🟫", solid: true },
+    { x: 230, y: 350, type: "CHAIR", emoji: "🪑" }, 
+    { x: 370, y: 350, type: "CHAIR", emoji: "🪑" }
   ];
   spawnCustomer();
 }
@@ -81,7 +88,13 @@ function spawnCustomer() {
   if (openChairs.length > 0) {
     const chair = openChairs[Math.floor(Math.random() * openChairs.length)];
     chair.occupied = true;
-    customers.push({ x: chair.x, y: chair.y - 20, chair: chair });
+    customers.push({ 
+        x: chair.x, 
+        y: chair.y - 20, 
+        chair: chair, 
+        img: friendImages[Math.floor(Math.random() * friendImages.length)],
+        order: menu[Math.floor(Math.random() * menu.length)]
+    });
   }
 }
 
@@ -106,15 +119,29 @@ function bind(id, k) {
 }
 bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right");
 
-function meow() {
+function interact() {
   player.meowing = 30;
+  
+  // Check Counter Pickup
+  furniture.forEach(f => {
+    if(f.type === "COUNTER" && Math.abs(player.x - f.x) < 60 && Math.abs(player.y - f.y) < 60) {
+      playerHolding = f.item;
+      document.getElementById('holdingTxt').innerText = "Holding: " + playerHolding;
+    }
+  });
+
+  // Check Delivery
   customers.forEach((c, i) => {
     if(Math.abs(player.x - c.x) < 80 && Math.abs(player.y - c.y) < 80) {
-      score += 10;
-      document.getElementById('scoreVal').innerText = score;
-      c.chair.occupied = false;
-      customers.splice(i, 1);
-      setTimeout(spawnCustomer, 3000);
+      if(playerHolding === c.order) {
+        score += 50;
+        playerHolding = null;
+        document.getElementById('holdingTxt').innerText = "Holding: Nothing";
+        document.getElementById('scoreVal').innerText = score;
+        c.chair.occupied = false;
+        customers.splice(i, 1);
+        setTimeout(spawnCustomer, 3000);
+      }
     }
   });
 }
@@ -146,16 +173,31 @@ function draw() {
   ctx.drawImage(bgPattern, 0, 0, canvas.width, 90);
 
   // Furniture
-  ctx.font = "50px Arial";
-  furniture.forEach(f => ctx.fillText(f.emoji, f.x - 25, f.y + 15));
-
-  // DRAW SPRITE CUSTOMERS
-  customers.forEach(c => {
-    // Drawing the friend sprite at a similar size to the cat
-    ctx.drawImage(friendImg, c.x - 40, c.y - 40, 80, 80);
+  ctx.font = "45px Arial";
+  furniture.forEach(f => {
+      ctx.fillText(f.emoji, f.x - 25, f.y + 15);
+      if(f.type === "COUNTER") {
+          ctx.font = "bold 12px Arial";
+          ctx.fillText(f.item, f.x - 10, f.y - 30);
+          ctx.font = "45px Arial";
+      }
   });
 
-  // DRAW LUNA/MOCHI (Universal Direction Fix)
+  // DRAW SPRITE CUSTOMERS & ORDER BUBBLES
+  customers.forEach(c => {
+    ctx.drawImage(c.img, c.x - 45, c.y - 45, 90, 90);
+    
+    // Order Bubble
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(c.x + 30, c.y - 40, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "black"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = "black"; ctx.font = "18px Arial";
+    ctx.fillText(c.order, c.x + 20, c.y - 33);
+  });
+
+  // DRAW LUNA/MOCHI
   ctx.save();
   ctx.translate(player.x, player.y);
   if (player.flip) ctx.scale(-1, 1);
