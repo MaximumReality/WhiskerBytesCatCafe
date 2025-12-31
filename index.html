@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: COZY CAFE</title>
+<title>WHISKER BYTES: STABILITY FIX</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --rush: #ff007f; }
@@ -17,7 +17,6 @@
     .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; font-weight: bold; width: 110px; text-transform: lowercase; }
     .btn-select img { width: 45px; height: 45px; display: block; margin: 0 auto; }
 
-    /* CAPSULE BUTTONS FOR MENU */
     .menu-capsule-container { display: flex; gap: 10px; z-index: 6000; margin-bottom: 10px; }
     .capsule-btn { background: rgba(255,255,255,0.9); border: 2px solid var(--wood); border-radius: 20px; padding: 8px 15px; color: var(--wood); font-weight: bold; font-size: 14px; text-transform: lowercase; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
 
@@ -84,8 +83,10 @@ const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
 let playerHolding = null, tvActive = false, radioActive = false, isRushHour = false;
 let musicNotes = [];
+
 const keys = { up: false, down: false, left: false, right: false };
-const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), f3 = new Image();
+const catImg = new Image(), bgImg = new Image();
+const f1 = new Image(), f2 = new Image(), f3 = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'friend3.png';
 
 const player = { x: 200, y: 350, speed: 5, facing: 1, baseFacing: 1, cookTime: 60 };
@@ -119,7 +120,6 @@ window.startGame = function(catId) {
         {x: 160, y: 200, type: "STATION", item: "🍪", e: "🍪"},
         {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
         {x: 320, y: 200, type: "TRASH", e: "🗑️"},
-        {x: 40, y: 200, type: "WINDOW", e: "🪟"},
         {x: 50, y: midY, type: "RADIO", e: "📻"},
         {x: canvas.width - 50, y: midY, type: "TV", e: "📺"},
         {x: canvas.width / 2, y: midY, type: "TABLE", e: "🟫"},
@@ -138,10 +138,9 @@ function interact() {
     furniture.forEach(f => {
         if (Math.hypot(player.x - f.x, player.y - f.y) < 75) {
             if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
-            if (f.type === "TRASH") playerHolding = null;
+            if (f.type === "TRASH") { playerHolding = null; document.getElementById('holdingTxt').innerText = "🐾 empty"; }
             if (f.type === "RADIO") radioActive = !radioActive;
             if (f.type === "TV") tvActive = !tvActive;
-            document.getElementById('holdingTxt').innerText = playerHolding ? playerHolding : "🐾 empty";
         }
     });
     customers.forEach(c => {
@@ -175,11 +174,15 @@ function update() {
         if (chair) {
             chair.occupied = true;
             let isC = Math.random() < 0.15;
-            customers.push({ x: chair.x, y: chair.y, chair, order: isC ? (unlockedCake ? "🍰" : "☕") : (unlockedCake && Math.random() > 0.7 ? "🍰" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)]), isCritic: isC, img: isC ? f3 : (Math.random()>0.5?f1:f2) });
+            customers.push({ 
+                x: chair.x, y: chair.y, chair, 
+                order: isC ? (unlockedCake ? "🍰" : "☕") : (unlockedCake && Math.random() > 0.7 ? "🍰" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)]), 
+                isCritic: isC, 
+                img: isC ? f3 : (Math.random()>0.5?f1:f2) 
+            });
         }
     }
 
-    // LAZY RADIO NOTES
     if (radioActive && Math.random() < 0.03) {
         musicNotes.push({ x: 60, y: 300, vx: (Math.random()-0.5), vy: -0.5 - Math.random(), life: 150 });
     }
@@ -190,7 +193,6 @@ function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
     if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
     
-    // CALM WOOD TILE FLOOR
     const tileSize = 60;
     for(let x=0; x<canvas.width; x+=tileSize) {
         for(let y=160; y<canvas.height; y+=tileSize) {
@@ -207,14 +209,22 @@ function draw() {
     });
 
     musicNotes.forEach(n => { ctx.fillStyle=`rgba(0,0,0,${n.life/150})`; ctx.font="20px Arial"; ctx.fillText("♪", n.x, n.y); });
+    
     customers.forEach(c => { 
-        if(c.img.complete) ctx.drawImage(c.img, c.x-35, c.y-35, 70, 70); 
+        if(c.img.complete && c.img.width > 0) {
+            ctx.drawImage(c.img, c.x-35, c.y-35, 70, 70); 
+        } else {
+            // Safety fallback shadow if image flickers
+            ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.beginPath(); ctx.ellipse(c.x, c.y+30, 20, 10, 0, 0, Math.PI*2); ctx.fill();
+        }
         ctx.fillStyle="white"; ctx.font="bold 18px Arial"; ctx.fillText(c.order, c.x-10, c.y-45);
     });
 
     ctx.save(); ctx.translate(player.x, player.y);
     if(player.facing !== player.baseFacing) ctx.scale(-1, 1);
-    ctx.drawImage(catImg, -35, -35, 70, 70);
+    if(catImg.complete && catImg.width > 0) {
+        ctx.drawImage(catImg, -35, -35, 70, 70);
+    }
     ctx.restore();
 
     if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-30, player.y-55, (kitchen.timer/player.cookTime)*60, 8); }
@@ -229,8 +239,10 @@ window.onload = () => {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
     ["up","down","left","right"].forEach(id => {
         let b = document.getElementById(id);
-        b.addEventListener('pointerdown', (e) => { e.preventDefault(); keys[id] = true; });
-        b.addEventListener('pointerup', (e) => { e.preventDefault(); keys[id] = false; });
+        if(b) {
+            b.addEventListener('pointerdown', (e) => { e.preventDefault(); keys[id] = true; });
+            b.addEventListener('pointerup', (e) => { e.preventDefault(); keys[id] = false; });
+        }
     });
 };
 </script>
