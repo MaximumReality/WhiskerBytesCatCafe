@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: COZY CAFE</title>
+<title>WHISKER BYTES: CLEAN COUNTER</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; }
@@ -10,14 +10,14 @@
     canvas { display: block; touch-action: none; background: var(--floor); width: 100vw; height: 100vh; }
     
     #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2480.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; }
-    #overlay::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: -1; }
+    #overlay::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
     .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 10; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; }
     .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
 
-    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); display: none; z-index: 100; font-weight: bold; }
+    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; }
     #ui-right { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
-    .ui-btn { background: var(--pink); border: 2px solid white; padding: 10px 15px; font-weight: bold; border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+    .ui-btn { background: var(--pink); border: 2px solid white; padding: 10px 15px; font-weight: bold; border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
 
     #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 8px; z-index: 1000; }
     .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -27,8 +27,7 @@
 <body>
 
 <div id="overlay">
-    <h1>WHISKER BYTES</h1>
-    <p>Select your Cat Barista:</p>
+    <h1 style="text-shadow: 2px 2px 4px black;">WHISKER BYTES</h1>
     <div class="char-grid">
         <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
         <div class="btn-select" onclick="startGame('gingerella')"><img src="gingerella_idle.png">GINGER</div>
@@ -71,27 +70,28 @@ const f1 = new Image(); f1.src = 'friend1.png';
 const f2 = new Image(); f2.src = 'friend2.png';
 const criticImg = new Image(); criticImg.src = 'critic.png';
 
-const player = { x: 200, y: 350, speed: 5, name: "", facing: 1, isNapping: false };
+const player = { x: 200, y: 400, speed: 5, name: "", facing: 1, isNapping: false };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
 function startGame(catId) {
     player.name = catId;
     catImg.src = catId + '_idle.png';
-    bgImg.src = 'IMG_2480.jpeg'; // MATCHED CAPS
+    bgImg.src = 'IMG_2480.jpeg';
     player.speed = (catId === 'gingerella') ? 8 : 5;
     player.cookTime = (catId === 'mochi') ? 45 : 90;
 
     furniture = [
-        {x: 80, y: 120, type: "STATION", item: "☕", e: "☕"},
-        {x: 160, y: 120, type: "STATION", item: "🍪", e: "🍪"},
-        {x: 240, y: 120, type: "STATION", item: "🍼", e: "🍼"},
-        {x: canvas.width - 60, y: 80, type: "RADIO", e: "📻"},
-        {x: 60, y: 80, type: "WINDOW", e: "🖼️"},
+        {x: 80, y: 130, type: "STATION", item: "☕", e: "☕"},
+        {x: 160, y: 130, type: "STATION", item: "🍪", e: "🍪"},
+        {x: 240, y: 130, type: "STATION", item: "🍼", e: "🍼"},
+        {x: 320, y: 130, type: "TRASH", e: "🗑️"},
+        {x: canvas.width - 60, y: 130, type: "RADIO", e: "📻"},
+        {x: 60, y: 130, type: "WINDOW", e: "🪟"},
         {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
-        {x: canvas.width/2, y: 80, type: "TV", e: "📺"},
-        {x: canvas.width/2, y: 350, type: "TABLE", e: "🟫"},
-        {x: canvas.width/2 - 65, y: 350, type: "CHAIR", e: "🪑", occupied: false},
-        {x: canvas.width/2 + 65, y: 350, type: "CHAIR", e: "🪑", occupied: false}
+        {x: canvas.width/2, y: 130, type: "TV", e: "📺"},
+        {x: canvas.width/2, y: 400, type: "TABLE", e: "🟫"},
+        {x: canvas.width/2 - 65, y: 400, type: "CHAIR", e: "🪑", occupied: false},
+        {x: canvas.width/2 + 65, y: 400, type: "CHAIR", e: "🪑", occupied: false}
     ];
 
     document.getElementById('overlay').style.display = 'none';
@@ -106,7 +106,15 @@ function interact() {
     furniture.forEach(f => {
         let d = Math.hypot(player.x - f.x, player.y - f.y);
         if (d < 70) {
-            if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
+            if (f.type === "TRASH" && playerHolding) {
+                playerHolding = null; score -= 5;
+                document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
+                payEffect = { active: true, x: f.x, y: f.y, t: "-5", life: 30 };
+                return;
+            }
+            if (f.type === "STATION") {
+                kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item;
+            }
             if (f.type === "TV") tvActive = !tvActive;
             if (f.type === "RADIO") f.e = (f.e === "📻") ? "🎵" : "📻";
         }
@@ -114,22 +122,19 @@ function interact() {
 
     customers.forEach(c => {
         if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
-            score += c.isCritic ? 500 : 50;
-            payEffect = { active: true, x: c.x, y: c.y, t: Math.random() > 0.5 ? "💳" : "💵", life: 40 };
+            score += c.isCritic ? 500 : 60;
+            payEffect = { active: true, x: c.x, y: c.y, t: "💵", life: 40 };
             playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
             if(c.isCritic) criticActive = false;
             document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
-            if(navigator.vibrate) navigator.vibrate(50);
         }
     });
 }
 
 function update() {
     if (!gameActive) return;
-    
-    // Check for Napping
-    let onBed = furniture.find(f => f.type === "BED" && Math.hypot(player.x - f.x, player.y - f.y) < 40);
+    let onBed = furniture.find(f => f.type === "BED" && Math.hypot(player.x - f.x, player.y - f.y) < 50);
     player.isNapping = !!onBed;
 
     if (!kitchen.active) {
@@ -146,10 +151,50 @@ function update() {
         }
     }
 
-    gameMinutes += player.isNapping ? 0.5 : 0.1;
+    gameMinutes += player.isNapping ? 0.6 : 0.1;
     if (Math.random() < 0.005) spawnCustomer();
     customers.forEach(c => { c.patience -= tvActive ? 0.03 : 0.07; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
+}
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    // WALL vs FLOOR Logic
+    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 240);
+    ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 240, canvas.width, canvas.height-240);
+    ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 235, canvas.width, 10);
+
+    furniture.forEach(f => {
+        ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
+        if(f.type === "STATION" || f.type === "TRASH") {
+            ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 10);
+        }
+    });
+
+    customers.forEach(c => {
+        if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
+        ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+30, c.y-30, 18, 0, 7); ctx.fill();
+        ctx.fillStyle="black"; ctx.font="20px Arial"; ctx.fillText(c.order, c.x+20, c.y-23);
+        ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
+    });
+
+    ctx.save(); ctx.translate(player.x, player.y);
+    if(player.facing === -1) ctx.scale(-1, 1);
+    if(player.isNapping) { ctx.rotate(Math.PI/2); ctx.font="20px Arial"; ctx.fillText("💤", 20, -20); }
+    if(catImg.complete) ctx.drawImage(catImg, -40, -40, 80, 80);
+    ctx.restore();
+
+    if(kitchen.active) {
+        ctx.fillStyle="lime"; ctx.fillRect(player.x-40, player.y-60, (kitchen.timer/player.cookTime)*80, 8);
+    }
+    if(payEffect.active) {
+        ctx.fillStyle="red"; ctx.font="bold 30px Arial"; ctx.fillText(payEffect.t, payEffect.x, payEffect.y--);
+        payEffect.life--; if(payEffect.life<=0) payEffect.active=false;
+    }
+
+    document.getElementById('scoreVal').innerText = score;
+    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
+    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
 }
 
 function spawnCustomer() {
@@ -160,44 +205,6 @@ function spawnCustomer() {
         if (isC) criticActive = true;
         customers.push({ x: chair.x, y: chair.y, chair: chair, order: ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)], patience: 100, isCritic: isC, img: isC ? criticImg : (Math.random()>0.5?f1:f2) });
     }
-}
-
-function draw() {
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    
-    // Kitchen Counter Visual
-    ctx.fillStyle = "#4e342e"; ctx.fillRect(40, 130, 240, 15);
-
-    furniture.forEach(f => {
-        ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
-    });
-
-    customers.forEach(c => {
-        if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
-        ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+30, c.y-30, 18, 0, 7); ctx.fill();
-        ctx.fillStyle="black"; ctx.font="20px Arial"; ctx.fillText(c.order, c.x+20, c.y-23);
-        ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
-    });
-
-    // Player
-    ctx.save(); ctx.translate(player.x, player.y);
-    if(player.facing === -1) ctx.scale(-1, 1);
-    if(player.isNapping) ctx.rotate(Math.PI/2);
-    if(catImg.complete) ctx.drawImage(catImg, -40, -40, 80, 80);
-    ctx.restore();
-
-    if(kitchen.active) {
-        ctx.fillStyle="lime"; ctx.fillRect(player.x-40, player.y-60, (kitchen.timer/player.cookTime)*80, 8);
-    }
-    if(payEffect.active) {
-        ctx.font="30px Arial"; ctx.fillText(payEffect.t, payEffect.x, payEffect.y--);
-        payEffect.life--; if(payEffect.life<=0) payEffect.active=false;
-    }
-
-    document.getElementById('scoreVal').innerText = score;
-    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
-    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
