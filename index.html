@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: FINAL TOUCHES</title>
+<title>WHISKER BYTES: FINAL VERSION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -33,9 +33,6 @@
         100% { transform: scale(1); text-shadow: 0 0 2px var(--gold); }
     }
     .sparkle-active { animation: sparkle 0.6s ease-in-out infinite; color: var(--gold) !important; }
-
-    .rush-ui { animation: rushPulse 0.5s infinite; font-weight: 900; }
-    @keyframes rushPulse { 0% { color: var(--rush); transform: scale(1); } 50% { color: white; transform: scale(1.1); } 100% { color: var(--rush); } }
 
     .score-popup { position: fixed; color: var(--green); font-weight: bold; font-size: 24px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 2000; }
     @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -60px); } }
@@ -78,7 +75,7 @@
 
 <div id="stats">
     ⭐ <span id="scoreVal">0</span> | 🏆 BEST: <span id="highVal">0</span><br>
-    🕒 <span id="timeVal">9:00 AM</span> <span id="rushTag" class="rush-ui" style="display:none;">🔥 RUSH</span><br>
+    🕒 <span id="timeVal">9:00 AM</span> <span id="rushTag" style="display:none; color:var(--rush); font-weight:900;">🔥 RUSH</span><br>
     <span id="holdingTxt" style="color: #8b4513;">🐾 Empty</span>
 </div>
 
@@ -145,16 +142,15 @@ window.startGame = function(catId) {
     player.traits.luckBonus = (catId === 'jinx') ? 0.15 : 0;
     player.cookTime = (catId === 'mochi') ? 40 : 80;
 
-    // CALCULATING MIDDLE OF THE FLOOR
     const floorHeight = canvas.height - FLOOR_TOP - SAFE_BOTTOM_PADDING;
-    const midFloorY = FLOOR_TOP + (floorHeight / 2) + 20;
+    const midFloorY = FLOOR_TOP + (floorHeight / 2) + 15;
 
     furniture = [
-        {x: 100, y: 200, type: "STATION", item: "☕", e: "☕"},
-        {x: 180, y: 200, type: "STATION", item: "🍪", e: "🍪"},
-        {x: 260, y: 200, type: "STATION", item: "🍼", e: "🍼"},
-        {x: 340, y: 200, type: "TRASH", e: "🗑️"},
-        {x: 50,  y: 200, type: "WINDOW", e: "🪟"}, 
+        {x: 80, y: 200, type: "STATION", item: "☕", e: "☕"},
+        {x: 160, y: 200, type: "STATION", item: "🍪", e: "🍪"},
+        {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
+        {x: 320, y: 200, type: "TRASH", e: "🗑️"},
+        {x: 40,  y: 200, type: "WINDOW", e: "🪟"}, 
         {x: 50, y: midFloorY, type: "RADIO", e: "📻"},
         {x: canvas.width - 50, y: midFloorY, type: "TV", e: "📺"},
         {x: canvas.width / 2, y: midFloorY, type: "TABLE", e: "🟫"},
@@ -195,7 +191,7 @@ function interact() {
                 document.getElementById('highVal').classList.add('sparkle-active');
             }
             if(score >= 300 && !unlockedCake) {
-                furniture.push({x: 420, y: 200, type: "STATION", item: "🍰", e: "🍰"});
+                furniture.push({x: 400, y: 200, type: "STATION", item: "🍰", e: "🍰"});
                 unlockedCake = true;
             }
         }
@@ -209,6 +205,8 @@ function update() {
     if (!kitchen.active) {
         if (keys.up) player.y -= player.speed;
         else if (keys.down) player.y += player.speed;
+        
+        // FIXED FACING LOGIC: facing 1 for Right, -1 for Left
         if (keys.left) { player.x -= player.speed; player.facing = -1; }
         else if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
@@ -223,7 +221,6 @@ function update() {
 
     gameMinutes += 0.1;
     if (gameMinutes >= 1200 && !isRushHour) { isRushHour = true; document.getElementById('rushTag').style.display = 'inline'; }
-    
     if(gameMinutes >= 1260) { 
         gameActive = false; 
         localStorage.setItem("whiskerBytesHigh", highScore); 
@@ -238,7 +235,7 @@ function update() {
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 
     if (radioActive && Math.random() < 0.05) {
-        musicNotes.push({ x: 50, y: 350, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
+        musicNotes.push({ x: 50, y: 300, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
     }
     musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i, 1); });
     if(tvActive) toonFrame = (toonFrame + 0.05) % 2;
@@ -276,8 +273,10 @@ function draw() {
         ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
     });
 
-    ctx.save(); ctx.translate(player.x, player.y);
-    if(player.facing === -1) ctx.scale(-1, 1);
+    // DRAW PLAYER FACING DIRECTION
+    ctx.save(); 
+    ctx.translate(player.x, player.y);
+    if(player.facing === -1) ctx.scale(-1, 1); // Flip horizontally if facing left
     if(catImg.complete) ctx.drawImage(catImg, -35, -35, 70, 70);
     ctx.restore();
 
