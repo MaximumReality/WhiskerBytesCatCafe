@@ -52,10 +52,13 @@ let score = 0, gameState = "START";
 const catImg = new Image();
 const bgPattern = new Image();
 
-const player = { x: 0, y: 0, speed: 5, isFlipped: false, meowing: 0 };
+// SPRITE NPC SYSTEM
+const friendImg = new Image();
+friendImg.src = 'friend1.png'; // Make sure you have this file!
+
+const player = { x: 0, y: 0, speed: 5, flip: false, meowing: 0 };
 let furniture = [];
 let customers = [];
-const customerEmojis = ["🚶", "🚶🏻‍♂️", "🚶🏾‍♀️‍➡️", "🚶🏼‍➡️"];
 
 function startGame(cat) {
   catImg.src = cat + "_idle.png";
@@ -65,11 +68,10 @@ function startGame(cat) {
   document.getElementById('stats').style.display = 'block';
   gameState = "PLAYING";
   
-  // Arrange furniture so it's not overlapping
   furniture = [
-    { x: 250, y: 250, type: "TABLE", emoji: "🟫", solid: true },
-    { x: 190, y: 250, type: "CHAIR", emoji: "🪑", solid: false }, 
-    { x: 310, y: 250, type: "CHAIR", emoji: "🪑", solid: false }
+    { x: 300, y: 300, type: "TABLE", emoji: "🟫", solid: true },
+    { x: 230, y: 300, type: "CHAIR", emoji: "🪑", solid: false }, 
+    { x: 370, y: 300, type: "CHAIR", emoji: "🪑", solid: false }
   ];
   spawnCustomer();
 }
@@ -79,13 +81,7 @@ function spawnCustomer() {
   if (openChairs.length > 0) {
     const chair = openChairs[Math.floor(Math.random() * openChairs.length)];
     chair.occupied = true;
-    // Standing next to the chair
-    customers.push({ 
-      x: chair.x, 
-      y: chair.y - 15, 
-      chair: chair, 
-      emoji: customerEmojis[Math.floor(Math.random() * customerEmojis.length)] 
-    });
+    customers.push({ x: chair.x, y: chair.y - 20, chair: chair });
   }
 }
 
@@ -103,8 +99,8 @@ function bind(id, k) {
   btn.ontouchstart = (e) => { 
     e.preventDefault(); 
     keys[k] = true; 
-    if (k === 'left') player.isFlipped = true;
-    if (k === 'right') player.isFlipped = false;
+    if (k === 'left') player.flip = true;
+    if (k === 'right') player.flip = false;
   };
   btn.ontouchend = () => { keys[k] = false; };
 }
@@ -113,7 +109,7 @@ bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right")
 function meow() {
   player.meowing = 30;
   customers.forEach((c, i) => {
-    if(Math.abs(player.x - c.x) < 60 && Math.abs(player.y - c.y) < 60) {
+    if(Math.abs(player.x - c.x) < 80 && Math.abs(player.y - c.y) < 80) {
       score += 10;
       document.getElementById('scoreVal').innerText = score;
       c.chair.occupied = false;
@@ -125,29 +121,19 @@ function meow() {
 
 function update() {
   if (gameState !== "PLAYING") return;
-  
-  let nextX = player.x;
-  let nextY = player.y;
-
+  let nextX = player.x, nextY = player.y;
   if (keys.up) nextY -= player.speed;
   if (keys.down) nextY += player.speed;
   if (keys.left) nextX -= player.speed;
   if (keys.right) nextX += player.speed;
   
-  // Basic Table Collision
   let canMove = true;
   furniture.forEach(f => {
-    if(f.solid && Math.abs(nextX - f.x) < 40 && Math.abs(nextY - f.y) < 40) {
-      canMove = false;
-    }
+    if(f.solid && Math.abs(nextX - f.x) < 50 && Math.abs(nextY - f.y) < 50) canMove = false;
   });
 
-  if(canMove) {
-    player.x = nextX;
-    player.y = nextY;
-  }
-
-  player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
+  if(canMove) { player.x = nextX; player.y = nextY; }
+  player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
   player.y = Math.max(120, Math.min(canvas.height - 110, player.y));
 }
 
@@ -157,27 +143,28 @@ function draw() {
   // Floor planks
   ctx.strokeStyle = "rgba(0,0,0,0.05)";
   for(let j=0; j<canvas.height; j+=40) { ctx.strokeRect(0, j, canvas.width, 1); }
-
-  // Wallpaper Border
   ctx.drawImage(bgPattern, 0, 0, canvas.width, 90);
 
   // Furniture
-  ctx.font = "40px Arial";
-  furniture.forEach(f => ctx.fillText(f.emoji, f.x - 20, f.y + 10));
+  ctx.font = "50px Arial";
+  furniture.forEach(f => ctx.fillText(f.emoji, f.x - 25, f.y + 15));
 
-  // CUSTOMERS (Standing)
-  customers.forEach(c => ctx.fillText(c.emoji, c.x - 20, c.y + 10));
+  // DRAW SPRITE CUSTOMERS
+  customers.forEach(c => {
+    // Drawing the friend sprite at a similar size to the cat
+    ctx.drawImage(friendImg, c.x - 40, c.y - 40, 80, 80);
+  });
 
-  // CAT
+  // DRAW LUNA/MOCHI (Universal Direction Fix)
   ctx.save();
   ctx.translate(player.x, player.y);
-  if (player.isFlipped) ctx.scale(-1, 1);
-  ctx.drawImage(catImg, -40, -40, 80, 80);
+  if (player.flip) ctx.scale(-1, 1);
+  ctx.drawImage(catImg, -45, -45, 90, 90);
   ctx.restore();
 
   if(player.meowing > 0) {
     ctx.font = "bold 16px Arial"; ctx.fillStyle = "white";
-    ctx.fillText("MEOW! 🐾", player.x - 30, player.y - 50);
+    ctx.fillText("MEOW! 🐾", player.x - 35, player.y - 60);
     player.meowing--;
   }
 }
