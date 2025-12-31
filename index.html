@@ -82,19 +82,59 @@ function startGame(catId) {
     player.speed = (catId === 'gingerella') ? 8 : 5;
     player.cookTime = (catId === 'mochi') ? 45 : 90;
 
-    furniture = [
-        {x: 80, y: 130, type: "STATION", item: "☕", e: "☕"},
-        {x: 160, y: 130, type: "STATION", item: "🍪", e: "🍪"},
-        {x: 240, y: 130, type: "STATION", item: "🍼", e: "🍼"},
-        {x: 320, y: 130, type: "TRASH", e: "🗑️"},
-        {x: canvas.width - 60, y: 130, type: "RADIO", e: "📻"},
-        {x: 60, y: 130, type: "WINDOW", e: "🪟"},
-        {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
-        {x: canvas.width/2, y: 130, type: "TV", e: "📺"},
-        {x: canvas.width/2, y: 400, type: "TABLE", e: "🟫"},
-        {x: canvas.width/2 - 65, y: 400, type: "CHAIR", e: "🪑", occupied: false},
-        {x: canvas.width/2 + 65, y: 400, type: "CHAIR", e: "🪑", occupied: false}
-    ];
+    // ... (Inside your startGame function, replace the furniture array with this one)
+furniture = [
+    // THE KITCHEN LINE (Lowered and spread out)
+    {x: 100, y: 180, type: "STATION", item: "☕", e: "☕"},
+    {x: 180, y: 180, type: "STATION", item: "🍪", e: "🍪"},
+    {x: 260, y: 180, type: "STATION", item: "🍼", e: "🍼"},
+    {x: 340, y: 180, type: "TRASH", e: "🗑️"},
+    
+    // WALL DECOR (Lowered to avoid UI overlap)
+    {x: 50,  y: 180, type: "WINDOW", e: "🪟"}, 
+    {x: canvas.width - 50, y: 180, type: "RADIO", e: "📻"},
+    {x: canvas.width / 2, y: 160, type: "TV", e: "📺"},
+
+    // FLOOR ITEMS
+    {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
+    {x: canvas.width / 2, y: 450, type: "TABLE", e: "🟫"},
+    {x: canvas.width / 2 - 65, y: 450, type: "CHAIR", e: "🪑", occupied: false},
+    {x: canvas.width / 2 + 65, y: 450, type: "CHAIR", e: "🪑", occupied: false}
+];
+
+// ... (Inside your draw function, replace the TV and Furniture logic with this)
+furniture.forEach(f => {
+    ctx.font = "45px Arial"; 
+    ctx.fillText(f.e, f.x - 22, f.y + 15);
+    
+    // THE KITCHEN COUNTERS
+    if(f.type === "STATION" || f.type === "TRASH") {
+        ctx.fillStyle = "#4e342e"; 
+        ctx.fillRect(f.x - 40, f.y + 25, 80, 10);
+    }
+
+    // THE NEWS CAT (RESTORED)
+    if(f.type === "TV" && tvActive) {
+        ctx.fillStyle = "black";
+        ctx.fillRect(f.x - 25, f.y - 15, 50, 30); // Screen
+        ctx.font = "16px Arial";
+        ctx.fillText("🐱🎤", f.x - 15, f.y + 5); // The Reporter
+        
+        // News Glow
+        ctx.fillStyle = "rgba(135, 206, 250, 0.15)";
+        ctx.beginPath();
+        ctx.moveTo(f.x - 50, f.y + 15);
+        ctx.lineTo(f.x + 50, f.y + 15);
+        ctx.lineTo(f.x + 100, f.y + 150);
+        ctx.lineTo(f.x - 100, f.y + 150);
+        ctx.fill();
+    }
+});
+
+// Update the Wall/Floor divider to match the new height
+if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 280); // Taller Wall
+ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 280, canvas.width, canvas.height - 280); // Floor
+ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 275, canvas.width, 10); // Baseboard
 
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('stats').style.display = 'block';
