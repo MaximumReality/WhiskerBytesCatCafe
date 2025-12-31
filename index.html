@@ -2,37 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: COZY EDITION</title>
+<title>WHISKER BYTES: COZY CAFE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
-    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
-    * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --rush: #ff007f; }
+    * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
-    canvas { display: block; touch-action: none; background: #3d2b1f; width: 100vw; height: 100vh; }
+    canvas { display: block; background: #3d2b1f; width: 100vw; height: 100vh; }
     
     #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 5000; color: white; text-align: center; padding-bottom: 50px; }
     #logo-header { position: absolute; top: 0; left: 0; width: 100%; height: 45%; background: url('whiskerbytes.png') center/contain no-repeat; z-index: 5001; pointer-events: none; }
     
-    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 6000; margin-top: 20px; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; font-size: 13px; font-weight: bold; }
+    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; z-index: 6000; margin-bottom: 20px; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; font-weight: bold; width: 110px; text-transform: lowercase; }
     .btn-select img { width: 45px; height: 45px; display: block; margin: 0 auto; }
 
-    .menu-bar { margin-top: 20px; z-index: 6000; display: flex; gap: 15px; }
-    .menu-link { color: white; text-decoration: underline; cursor: pointer; font-size: 14px; font-weight: bold; }
+    /* CAPSULE BUTTONS FOR MENU */
+    .menu-capsule-container { display: flex; gap: 10px; z-index: 6000; margin-bottom: 10px; }
+    .capsule-btn { background: rgba(255,255,255,0.9); border: 2px solid var(--wood); border-radius: 20px; padding: 8px 15px; color: var(--wood); font-weight: bold; font-size: 14px; text-transform: lowercase; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
 
-    #credits-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
     .scroll-box { background: #fff8f2; border: 4px solid var(--wood); border-radius: 18px; width: 85%; max-width: 320px; height: 350px; text-align: center; color: #4a2c2a; position: relative; overflow: hidden; }
-    .scroll-content { position: absolute; left: 0; width: 100%; bottom: -110%; padding: 0 15px; box-sizing: border-box; }
+    .scroll-content { position: absolute; left: 0; width: 100%; bottom: -110%; padding: 0 20px; box-sizing: border-box; text-transform: lowercase; }
     @keyframes scrollText { 0% { bottom: -110%; } 100% { bottom: 100%; } }
     .close-btn { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
 
-    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; font-size: 13px; }
-    #day-over { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 20px 40px; border: 4px solid var(--gold); border-radius: 20px; font-size: 24px; font-weight: bold; z-index: 8000; display: none; text-align: center; box-shadow: 0 10px 0 #2d1b1a; }
+    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; text-transform: lowercase; }
+    #day-over { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 20px 40px; border: 4px solid var(--gold); border-radius: 20px; font-size: 24px; font-weight: bold; z-index: 8000; display: none; text-align: center; text-transform: lowercase; }
 
-    .score-popup { position: fixed; color: var(--green); font-weight: bold; font-size: 24px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 2000; }
-    @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -60px); } }
-
-    #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 5px; z-index: 1000; padding: 5px; }
+    #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 5px; z-index: 1000; }
     .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
     .ctrl-btn { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; display: flex; align-items: center; justify-content: center; opacity: 0.9; }
 </style>
@@ -42,31 +40,30 @@
 <div id="overlay">
     <div id="logo-header"></div> 
     <div class="char-grid">
-        <div onpointerdown="startGame('mochi')" class="btn-select"><img src="mochi_idle.png">MOCHI</div>
-        <div onpointerdown="startGame('gingerella')" class="btn-select"><img src="gingerella_idle.png">GINGER</div>
-        <div onpointerdown="startGame('luna')" class="btn-select"><img src="luna_idle.png">LUNA</div>
-        <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">JINX</div>
+        <div onpointerdown="startGame('mochi')" class="btn-select"><img src="mochi_idle.png">mochi</div>
+        <div onpointerdown="startGame('gingerella')" class="btn-select"><img src="gingerella_idle.png">ginger</div>
+        <div onpointerdown="startGame('luna')" class="btn-select"><img src="luna_idle.png">luna</div>
+        <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">jinx</div>
     </div>
-    <div class="menu-bar">
-        <span class="menu-link" style="color:var(--pink)" onclick="openModal('manual')">📖 Manual</span>
-        <span class="menu-link" style="color:var(--gold)" onclick="openModal('credits')">🐾 Credits</span>
+    <div class="menu-capsule-container">
+        <div class="capsule-btn" onclick="openModal('manual')">📖 manual</div>
+        <div class="capsule-btn" onclick="openModal('credits')">🐾 credits</div>
     </div>
 </div>
 
-<div id="credits-modal" class="modal-overlay">
+<div id="modal-ui" class="modal-overlay">
     <div class="scroll-box">
         <button class="close-btn" onclick="closeModal()">✕</button>
-        <div class="scroll-content" id="modal-scroller">
-            </div>
+        <div class="scroll-content" id="modal-scroller"></div>
     </div>
 </div>
 
-<div id="day-over">🐾 SHIFT OVER!<br><span style="font-size:16px;">See you tomorrow!</span></div>
+<div id="day-over">🎆 shift over! 🎆<br><span style="font-size:16px;">happy new year!</span></div>
 
 <div id="stats">
-    ⭐ <span id="scoreVal">0</span> | 🏆 BEST: <span id="highVal">0</span><br>
-    🕒 <span id="timeVal">9:00 AM</span><br>
-    <span id="holdingTxt" style="color: #8b4513;">🐾 Empty</span>
+    ⭐ <span id="scoreVal">0</span> | 🏆 best: <span id="highVal">0</span><br>
+    🕒 <span id="timeVal">9:00 am</span><br>
+    <span id="holdingTxt" style="color: #8b4513;">🐾 empty</span>
 </div>
 
 <canvas id="game"></canvas>
@@ -78,15 +75,15 @@
         <button class="ctrl-btn" id="down">⬇️</button>
         <button class="ctrl-btn" id="right">➡️</button>
     </div>
-    <button class="ctrl-btn" id="action-btn" style="width:140px; border-radius: 35px; background:var(--pink);" onpointerdown="interact()">📢 MEOW</button>
+    <button class="ctrl-btn" id="action-btn" style="width:140px; border-radius: 35px; background:var(--pink); text-transform: lowercase;" onpointerdown="interact()">📢 meow</button>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
-let playerHolding = null, tvActive = false, radioActive = false, criticActive = false, isRushHour = false;
-let musicNotes = [], toonFrame = 0;
+let playerHolding = null, tvActive = false, radioActive = false, isRushHour = false;
+let musicNotes = [];
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), f3 = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'friend3.png';
@@ -97,39 +94,32 @@ let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: n
 let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
 document.getElementById('highVal').innerText = highScore;
 
-const WALL_HEIGHT = 160;
-const FLOOR_TOP = 160;
-
 function openModal(type) {
     const scroller = document.getElementById('modal-scroller');
-    const today = new Date();
-    let ny = (today.getMonth() === 11 && today.getDate() === 31) ? "<h2 style='color:var(--rush)'>✨ HAPPY NEW YEAR! ✨</h2>" : "";
-    
     if(type === 'manual') {
-        scroller.innerHTML = `<h2>📖 Staff Manual</h2>${ny}<p>1. Use arrows to move.</p><p>2. Meow at counter to prep food.</p><p>3. 300 pts unlocks CAKE! 🍰</p><p>4. 8pm is RUSH HOUR.</p>`;
+        scroller.innerHTML = `<h2>📖 staff manual</h2><p>1. move with arrows.</p><p>2. meow at stations to prep food.</p><p>3. 300 points unlocks cake!</p><p>4. 8pm is rush hour.</p>`;
     } else {
-        scroller.innerHTML = `<h2>🐾 Credits</h2>${ny}<p>Created by Lori Kaye Sifuentes</p><p>Sprites inspired by Luna & Stella 💖</p><p>Paws up! 🐾</p>`;
+        scroller.innerHTML = `<h2>🐾 credits</h2><p>created by lori kaye sifuentes</p><p>inspired by luna & stella 💖</p><p>happy new year 2025! 🐾</p>`;
     }
-    document.getElementById('credits-modal').style.display = 'flex';
+    document.getElementById('modal-ui').style.display = 'flex';
     scroller.style.animation = "scrollText 12s linear forwards";
 }
-
-function closeModal() { document.getElementById('credits-modal').style.display = 'none'; }
+function closeModal() { document.getElementById('modal-ui').style.display = 'none'; }
 
 window.startGame = function(catId) {
     catImg.src = catId + '_idle.png';
     bgImg.src = 'IMG_2480.jpeg'; 
     player.baseFacing = (catId === 'mochi') ? 1 : -1;
     player.speed = (catId === 'luna') ? 8 : 5;
-    player.cookTime = (catId === 'mochi') ? 35 : 70;
+    player.cookTime = (catId === 'mochi') ? 40 : 80;
 
-    const midY = FLOOR_TOP + (canvas.height - 160 - FLOOR_TOP) / 2;
-
+    const midY = 160 + (canvas.height - 160 - 160) / 2;
     furniture = [
         {x: 80, y: 200, type: "STATION", item: "☕", e: "☕"},
         {x: 160, y: 200, type: "STATION", item: "🍪", e: "🍪"},
         {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
         {x: 320, y: 200, type: "TRASH", e: "🗑️"},
+        {x: 40, y: 200, type: "WINDOW", e: "🪟"},
         {x: 50, y: midY, type: "RADIO", e: "📻"},
         {x: canvas.width - 50, y: midY, type: "TV", e: "📺"},
         {x: canvas.width / 2, y: midY, type: "TABLE", e: "🟫"},
@@ -151,15 +141,16 @@ function interact() {
             if (f.type === "TRASH") playerHolding = null;
             if (f.type === "RADIO") radioActive = !radioActive;
             if (f.type === "TV") tvActive = !tvActive;
-            document.getElementById('holdingTxt').innerText = playerHolding ? playerHolding : "🐾 Empty";
+            document.getElementById('holdingTxt').innerText = playerHolding ? playerHolding : "🐾 empty";
         }
     });
     customers.forEach(c => {
         if (Math.hypot(player.x - c.x, player.y - c.y) < 85 && playerHolding === c.order) {
-            let gain = c.isCritic ? 500 : 75; score += gain; playerHolding = null; c.chair.occupied = false;
+            score += c.isCritic ? 500 : 75; playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
             if(score > highScore) { highScore = score; localStorage.setItem("whiskerBytesHigh", score); }
             if(score >= 300 && !unlockedCake) { furniture.push({x: 400, y: 200, type: "STATION", item: "🍰", e: "🍰"}); unlockedCake = true; }
+            document.getElementById('holdingTxt').innerText = "🐾 empty";
         }
     });
 }
@@ -183,23 +174,27 @@ function update() {
         let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
         if (chair) {
             chair.occupied = true;
-            let isC = Math.random() < 0.12;
+            let isC = Math.random() < 0.15;
             customers.push({ x: chair.x, y: chair.y, chair, order: isC ? (unlockedCake ? "🍰" : "☕") : (unlockedCake && Math.random() > 0.7 ? "🍰" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)]), isCritic: isC, img: isC ? f3 : (Math.random()>0.5?f1:f2) });
         }
     }
-    if (radioActive && Math.random() < 0.1) musicNotes.push({ x: 50, y: 280, vx: 1+Math.random()*2, vy: -1-Math.random(), life: 100 });
+
+    // LAZY RADIO NOTES
+    if (radioActive && Math.random() < 0.03) {
+        musicNotes.push({ x: 60, y: 300, vx: (Math.random()-0.5), vy: -0.5 - Math.random(), life: 150 });
+    }
     musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i,1); });
 }
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, WALL_HEIGHT);
+    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
     
-    // WOOD TILE FLOOR
+    // CALM WOOD TILE FLOOR
     const tileSize = 60;
     for(let x=0; x<canvas.width; x+=tileSize) {
-        for(let y=FLOOR_TOP; y<canvas.height; y+=tileSize) {
-            ctx.fillStyle = isRushHour ? (Math.random() > 0.9 ? "#ff007f" : "#4a0026") : ((x+y)/tileSize%2===0 ? "#d2b48c" : "#c1a37b");
+        for(let y=160; y<canvas.height; y+=tileSize) {
+            ctx.fillStyle = (x+y)/tileSize%2===0 ? "#d2b48c" : "#c1a37b";
             ctx.fillRect(x, y, tileSize, tileSize);
             ctx.strokeStyle = "rgba(0,0,0,0.05)"; ctx.strokeRect(x,y,tileSize,tileSize);
         }
@@ -208,10 +203,10 @@ function draw() {
     furniture.forEach(f => {
         if(f.type === "STATION") { ctx.fillStyle="#5d4037"; ctx.fillRect(f.x-40, f.y+22, 80, 10); }
         ctx.font = "38px Arial"; ctx.fillText(f.e, f.x-19, f.y+15);
-        if(f.type === "TV" && tvActive) { ctx.fillStyle = "rgba(0, 255, 255, 0.15)"; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x-80, canvas.height); ctx.lineTo(f.x+80, canvas.height); ctx.fill(); }
+        if(f.type === "TV" && tvActive) { ctx.fillStyle = "rgba(0, 255, 255, 0.1)"; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x-60, canvas.height); ctx.lineTo(f.x+60, canvas.height); ctx.fill(); }
     });
 
-    musicNotes.forEach(n => { ctx.fillStyle="rgba(0,0,0,0.5)"; ctx.font="20px Arial"; ctx.fillText("♪", n.x, n.y); });
+    musicNotes.forEach(n => { ctx.fillStyle=`rgba(0,0,0,${n.life/150})`; ctx.font="20px Arial"; ctx.fillText("♪", n.x, n.y); });
     customers.forEach(c => { 
         if(c.img.complete) ctx.drawImage(c.img, c.x-35, c.y-35, 70, 70); 
         ctx.fillStyle="white"; ctx.font="bold 18px Arial"; ctx.fillText(c.order, c.x-10, c.y-45);
@@ -225,7 +220,7 @@ function draw() {
     if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-30, player.y-55, (kitchen.timer/player.cookTime)*60, 8); }
     document.getElementById('scoreVal').innerText = score;
     let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
-    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
+    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' pm':' am');
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
