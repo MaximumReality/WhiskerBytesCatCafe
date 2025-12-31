@@ -2,14 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: FULL ART EDITION</title>
+<title>WHISKER BYTES: MASTER EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
     :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; --gold: #ffd700; }
     html, body { margin: 0; padding: 0; overflow: hidden; background: #222; font-family: 'Courier New', monospace; width: 100%; height: 100%; position: fixed; }
     canvas { display: block; touch-action: none; background: #d2b48c; }
     
-    #overlay, #results-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; }
+    /* WELCOME SCREEN ARTWORK FIX */
+    #overlay { 
+        position: fixed; inset: 0; 
+        background-image: url('img_2480.jpeg'); 
+        background-size: cover; background-position: center;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        z-index: 5000; color: white; text-align: center; 
+    }
+    #overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
+
+    #results-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; display: none; }
     .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #4a2c2a; font-weight: bold; cursor: pointer; }
     .btn-select img { width: 60px; height: 60px; display: block; margin: 0 auto 5px; }
@@ -17,8 +27,8 @@
     #shop-menu { position: fixed; top: 0; right: -280px; width: 240px; height: 100%; background: white; border-left: 5px solid var(--wood); z-index: 4000; transition: 0.3s; padding: 20px; color: #4a2c2a; overflow-y: auto; }
     #shop-menu.open { right: 0; }
     
-    #stats { position: fixed; top: 10px; left: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; border: 2px solid var(--wood); font-size: 12px; }
-    #ui-right { position: fixed; top: 10px; right: 10px; z-index: 1001; display: flex; gap: 5px; }
+    #stats { position: fixed; top: 10px; left: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; border: 2px solid var(--wood); font-size: 12px; display: none; }
+    #ui-right { position: fixed; top: 10px; right: 10px; z-index: 1001; display: flex; gap: 5px; display: none; }
     .ui-btn { background: var(--pink); border: 2px solid white; border-radius: 5px; padding: 8px; font-weight: bold; color: #4a2c2a; cursor: pointer; }
 
     #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 5px; z-index: 1000; }
@@ -29,7 +39,7 @@
 <body>
 
 <div id="overlay">
-    <h1>WHISKER BYTES</h1>
+    <h1 style="text-shadow: 2px 2px 5px black;">WHISKER BYTES</h1>
     <div class="char-grid">
         <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
         <div class="btn-select" onclick="startGame('gingerella')"><img src="gingerella_idle.png">GINGER</div>
@@ -44,19 +54,19 @@
     <button class="ui-btn" onclick="toggleShop()">⬅ BACK</button>
 </div>
 
-<div id="results-overlay" style="display:none;">
-    <h1>DAY DONE</h1>
+<div id="results-overlay">
+    <h1 id="closing-text">CLOSING TIME...</h1>
     <p>Daily Profit: <span id="res-profit">0</span></p>
     <button class="ui-btn" onclick="nextDay()">START NEXT DAY</button>
 </div>
 
-<div id="stats" style="display:none;">
+<div id="stats">
     <b>DAY <span id="dayVal">1</span></b> | <span id="timeVal">9:00 AM</span><br>
     <b>⭐ <span id="scoreVal">0</span></b><br>
     <span id="holdingTxt" style="color:brown">Empty Paws</span>
 </div>
 
-<div id="ui-right" style="display:none;">
+<div id="ui-right">
     <button class="ui-btn" onclick="toggleShop()">🛒 SHOP</button>
 </div>
 
@@ -76,16 +86,14 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// ART ASSETS
-const catImg = new Image();
-const bgImg = new Image();
+const catImg = new Image(), bgImg = new Image();
 const f1 = new Image(); f1.src = 'friend1.png';
 const f2 = new Image(); f2.src = 'friend2.png';
 const criticImg = new Image(); criticImg.src = 'critic.png';
 
 let score = 0, currentDay = 1, gameMinutes = 540, dayServed = 0, dayActive = false;
 let playerHolding = null, tvActive = false, tickerX = 150, criticActive = false, criticApologized = false;
-let unlocked = ["☕", "🍪", "🍼"], dingEffect = {active: false}, heartEffect = {active: false};
+let unlocked = ["☕", "🍪", "🍼"], dingEffect = {active: false}, heartEffect = {active: false}, dimAlpha = 0;
 const player = { x: 100, y: 300, speed: 5, facing: 1, name: "", cookTime: 60 };
 let customers = [], furniture = [];
 const keys = {up:0, down:0, left:0, right:0};
@@ -113,25 +121,17 @@ function startGame(catId) {
     document.getElementById('controls').style.display = 'flex';
     document.getElementById('stats').style.display = 'block';
     document.getElementById('ui-right').style.display = 'flex';
-    dayActive = true; 
-    loop();
+    dayActive = true; loop();
 }
-
-let kitchen = { active: false, t: 0, item: null };
 
 function interact() {
     if(kitchen.active) return;
-
     furniture.forEach(f => {
-        let d = Math.hypot(player.x-f.x, player.y-f.y);
-        if(d < 60) {
-            if(f.type === "COUNTER" && !playerHolding) {
-                kitchen.active = true; kitchen.t = player.cookTime; kitchen.item = f.item;
-            }
+        if(Math.hypot(player.x-f.x, player.y-f.y) < 60) {
+            if(f.type === "COUNTER" && !playerHolding) { kitchen.active = true; kitchen.t = player.cookTime; kitchen.item = f.item; }
             if(f.type === "TV") { tvActive = !tvActive; f.e = tvActive ? "🎞️" : "📺"; vibrate(30); }
         }
     });
-
     customers.forEach(c => {
         if(Math.hypot(player.x-c.x, player.y-c.y) < 70) {
             if(playerHolding === c.order) {
@@ -139,7 +139,6 @@ function interact() {
                 playerHolding = null; c.chair.occupied = false;
                 customers = customers.filter(cust => cust !== c);
                 if(c.isCritic) { criticActive = false; criticApologized = false; }
-                document.getElementById('holdingTxt').innerText = "Empty Paws";
                 vibrate(50);
             } else if (c.isCritic && !criticApologized && !playerHolding) {
                 c.patience = 100; criticApologized = true;
@@ -150,103 +149,82 @@ function interact() {
     });
 }
 
+let kitchen = { active: false, t: 0, item: null };
+
 function update() {
     if(!dayActive) return;
     gameMinutes += 0.2;
-    if(gameMinutes >= 1080) endDay();
+    if(gameMinutes >= 1080) { dayActive = false; triggerClosing(); }
 
     if(!kitchen.active) {
-        let spd = player.speed;
-        if(keys.up) player.y -= spd; if(keys.down) player.y += spd;
-        if(keys.left) { player.x -= spd; player.facing = -1; }
-        if(keys.right) { player.x += spd; player.facing = 1; }
+        if(keys.up) player.y -= player.speed; if(keys.down) player.y += player.speed;
+        if(keys.left) { player.x -= player.speed; player.facing = -1; }
+        if(keys.right) { player.x += player.speed; player.facing = 1; }
     }
-
-    if(player.name === 'luna' && criticActive && !tvActive) { tvActive = true; vibrate(30); }
+    if(player.name === 'luna' && criticActive && !tvActive) tvActive = true;
 
     if(kitchen.active) {
         kitchen.t--;
         if(kitchen.t <= 0) {
             playerHolding = kitchen.item; kitchen.active = false;
             dingEffect = { active: true, x: player.x, y: player.y - 80, life: 40 };
-            document.getElementById('holdingTxt').innerText = "Holding: "+playerHolding;
             vibrate(50);
         }
     }
-
     customers.forEach(c => {
-        let decay = c.isCritic ? 0.15 : 0.08;
-        if(tvActive) decay *= 0.5;
-        let oldP = c.patience;
+        let decay = tvActive ? (c.isCritic ? 0.07 : 0.04) : (c.isCritic ? 0.15 : 0.08);
         c.patience -= decay;
-        if(c.isCritic && oldP >= 25 && c.patience < 25) vibrate(300);
-        if(c.patience <= 0) {
-            c.chair.occupied = false;
-            customers = customers.filter(cust => cust !== c);
-            if(c.isCritic) { criticActive = false; criticApologized = false; }
-        }
+        if(c.patience <= 0) { c.chair.occupied = false; customers = customers.filter(cust => cust !== c); if(c.isCritic) criticActive = false; }
     });
-
     if(Math.random() < 0.005) spawnCustomer();
 }
 
+function triggerClosing() {
+    let fade = setInterval(() => {
+        dimAlpha += 0.05;
+        if(dimAlpha >= 1) {
+            clearInterval(fade);
+            document.getElementById('res-profit').innerText = dayServed * 50;
+            document.getElementById('results-overlay').style.display = 'flex';
+        }
+    }, 50);
+}
+
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // 1. Draw Background Art
     ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    
-    // 2. TV Glow
     if(tvActive) {
         ctx.fillStyle = "rgba(135, 206, 250, 0.2)";
-        ctx.beginPath(); ctx.moveTo(canvas.width/2-50, 70); ctx.lineTo(canvas.width/2+50, 70);
-        ctx.lineTo(canvas.width/2+120, 300); ctx.lineTo(canvas.width/2-120, 300); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(canvas.width/2-50, 70); ctx.lineTo(canvas.width/2+120, 300); ctx.lineTo(canvas.width/2-120, 300); ctx.fill();
     }
-
-    // 3. Furniture
     ctx.font = "40px Arial";
     furniture.forEach(f => {
         ctx.fillText(f.e, f.x-20, f.y+15);
         if(f.type === "TV" && tvActive) {
             ctx.fillStyle="black"; ctx.fillRect(f.x-25, f.y-15, 50, 30);
-            ctx.font="15px Arial"; ctx.fillText("🐱🎤", f.x-15, f.y+5);
-            ctx.font="40px Arial";
+            ctx.font="15px Arial"; ctx.fillText("🐱🎤", f.x-15, f.y+5); ctx.font="40px Arial";
         }
     });
-
-    // 4. TV News Ticker
     if(tvActive) {
         tickerX -= 2; if(tickerX < -300) tickerX = 150;
         ctx.fillStyle="white"; ctx.font="bold 10px Arial";
-        ctx.fillText("BREAKING: PROFIT "+(dayServed*50)+" | HI SCORE: "+score, canvas.width/2-40 + tickerX, 60);
+        ctx.fillText("PROFIT: "+(dayServed*50)+" | HI: "+score, canvas.width/2-40 + tickerX, 60);
     }
-
-    // 5. Draw Customer Sprites
     customers.forEach(c => {
         ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
-        // Order Bubble
         ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+25, c.y-25, 15, 0, 7); ctx.fill();
-        ctx.fillStyle="black"; ctx.font="14px Arial";
-        ctx.fillText(c.patience < 25 ? "😡" : c.order, c.x+18, c.y-20);
-        // Patience Bar
+        ctx.fillStyle="black"; ctx.font="14px Arial"; ctx.fillText(c.patience < 25 ? "😡" : c.order, c.x+18, c.y-20);
         ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 4);
     });
+    if(dingEffect.active) { ctx.fillStyle="gold"; ctx.font="bold 20px Arial"; ctx.fillText("DING! 🛎️", dingEffect.x-30, dingEffect.y); dingEffect.life--; }
+    if(heartEffect.active) { ctx.font="30px Arial"; ctx.fillText("💖", heartEffect.x-15, heartEffect.y--); heartEffect.life--; }
 
-    // 6. Effects (Ding/Heart)
-    if(dingEffect.active) {
-        ctx.fillStyle="gold"; ctx.font="bold 20px Arial"; ctx.fillText("DING! 🛎️", dingEffect.x-30, dingEffect.y);
-        dingEffect.life--; if(dingEffect.life<=0) dingEffect.active=false;
-    }
-    if(heartEffect.active) {
-        ctx.font="30px Arial"; ctx.fillText("💖", heartEffect.x-15, heartEffect.y);
-        heartEffect.y--; heartEffect.life--; if(heartEffect.life<=0) heartEffect.active=false;
-    }
-
-    // 7. Player Sprite
-    ctx.save(); ctx.translate(player.x, player.y);
-    if(player.facing === -1) ctx.scale(-1,1);
+    ctx.save(); ctx.translate(player.x, player.y); if(player.facing === -1) ctx.scale(-1,1);
     ctx.drawImage(catImg, -40, -40, 80, 80); ctx.restore();
-    
+
+    if(dimAlpha > 0) { ctx.fillStyle = `rgba(0,0,0,${dimAlpha})`; ctx.fillRect(0,0,canvas.width, canvas.height); }
     document.getElementById('scoreVal').innerText = score;
+    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
+    document.getElementById('timeVal').innerText = (h>12?h-12:h)+":"+(m<10?'0'+m:m)+(h>=12?'PM':'AM');
 }
 
 function spawnCustomer() {
@@ -255,26 +233,20 @@ function spawnCustomer() {
         chair.occupied = true;
         let isC = !criticActive && Math.random() < 0.2;
         if(isC) criticActive = true;
-        
-        let randomFriend = Math.random() > 0.5 ? f1 : f2;
-        customers.push({
-            x: chair.x, y: chair.y-10, chair: chair, 
-            img: isC ? criticImg : randomFriend,
-            order: unlocked[Math.floor(Math.random()*unlocked.length)], 
-            patience: 100, isCritic: isC
-        });
+        customers.push({ x: chair.x, y: chair.y-10, chair: chair, img: isC ? criticImg : (Math.random()>0.5?f1:f2), order: unlocked[Math.floor(Math.random()*unlocked.length)], patience: 100, isCritic: isC });
     }
 }
 
-function endDay() { dayActive = false; document.getElementById('res-profit').innerText = dayServed*50; document.getElementById('results-overlay').style.display='flex'; }
-function nextDay() { currentDay++; gameMinutes=540; dayServed=0; dayActive=true; customers=[]; furniture.forEach(f=>f.occupied=false); document.getElementById('results-overlay').style.display='none'; }
-function toggleShop() { document.getElementById('shop-menu').classList.toggle('open'); }
-function buyTable() { if(score>=200){score-=200; let x=Math.random()*canvas.width; furniture.push({x:x, y:300, type:"CHAIR", e:"🪑"});}}
+function nextDay() {
+    currentDay++; gameMinutes=540; dayServed=0; dayActive=true; customers=[]; dimAlpha=0;
+    furniture.forEach(f=>f.occupied=false);
+    document.getElementById('results-overlay').style.display='none';
+    document.getElementById('dayVal').innerText = currentDay;
+}
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
 function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener("resize", resize); resize();
-
 function bind(id, k) {
     let b = document.getElementById(id);
     b.ontouchstart = (e) => { e.preventDefault(); keys[k] = 1; };
