@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Whisker Bytes: Seamless Lounge</title>
+  <title>Whisker Bytes: Fixed Lounge</title>
   <style>
     :root {
       --pink: #ffc0cb;
@@ -16,11 +16,10 @@
     body {
       margin: 0;
       font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
-      /* Background setup for seamless scrolling */
       background-color: #f7d2c4;
       background-image: url('IMG_2480.jpeg');
       background-repeat: repeat;
-      background-size: 400px; /* Adjust this to make the teacups bigger or smaller */
+      background-size: 400px;
       animation: backgroundScroll 60s linear infinite;
       height: 100vh;
       overflow: hidden;
@@ -28,29 +27,42 @@
       flex-direction: column;
     }
 
-    /* Seamless background animation */
     @keyframes backgroundScroll {
       from { background-position: 0 0; }
       to { background-position: 400px 400px; }
     }
 
-    /* Moroccan Tiled Floor */
+    /* FIXED FLOOR: Solid background and explicit grid */
     #floor {
       position: absolute;
       bottom: 0;
       width: 100%;
-      height: 18%;
+      height: 18vh;
+      background-color: #ffffff; /* Blocks wallpaper from showing below */
       display: grid;
-      grid-template-columns: repeat(20, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      border-top: 4px solid var(--brown);
-      z-index: 5;
-      background: #fff;
+      grid-template-columns: repeat(10, 1fr); /* 10 tiles wide */
+      grid-template-rows: repeat(2, 1fr);    /* 2 tiles deep */
+      border-top: 5px solid var(--brown);
+      z-index: 100; /* Ensures it is above the wallpaper */
+      box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
     }
 
-    .tile { width: 100%; height: 100%; background-size: cover; }
-    .tile:nth-child(odd) { background-image: url('tile1.png'); }
-    .tile:nth-child(even) { background-image: url('tile2.png'); }
+    .tile { 
+      width: 100%; 
+      height: 100%; 
+      background-size: cover; 
+      background-position: center;
+    }
+
+    /* Checkerboard Pattern Logic */
+    /* Row 1: Odd tiles = Pattern A */
+    #floor .tile:nth-child(-n+10):nth-child(odd) { background-image: url('tile1.png'); }
+    /* Row 1: Even tiles = Pattern B */
+    #floor .tile:nth-child(-n+10):nth-child(even) { background-image: url('tile2.png'); }
+    /* Row 2: Odd tiles = Pattern B */
+    #floor .tile:nth-child(n+11):nth-child(odd) { background-image: url('tile2.png'); }
+    /* Row 2: Even tiles = Pattern A */
+    #floor .tile:nth-child(n+11):nth-child(even) { background-image: url('tile1.png'); }
 
     header {
       background: rgba(107, 62, 46, 0.9);
@@ -60,17 +72,16 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 200;
     }
 
     #game-stage {
       position: relative;
       flex-grow: 1;
       width: 100%;
+      z-index: 10;
     }
 
-    /* Shelves */
     .shelf {
       position: absolute;
       background: var(--shelf-color);
@@ -79,17 +90,14 @@
       border-radius: 20px;
       border: 2px solid rgba(255,255,255,0.6);
       cursor: pointer;
-      z-index: 10;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 20;
     }
-    .shelf:hover { background: rgba(255,255,255,0.8); transform: scale(1.05); }
 
-    /* Cats */
     .cat-sprite {
       position: absolute;
       width: 110px;
       height: 110px;
-      z-index: 20;
+      z-index: 150; /* Above the floor base */
       transition: left 1.2s ease-in-out, top 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       cursor: pointer;
     }
@@ -99,35 +107,18 @@
       height: 100%;
       object-fit: contain;
       animation: breathe 3s infinite ease-in-out;
-      transition: filter 1s ease;
     }
 
     .cat-sprite.sleeping img { filter: grayscale(0.7) brightness(0.5); }
-    .cat-sprite.sleeping .eyes-glow { opacity: 0; }
-
+    
     @keyframes breathe {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.06); }
     }
 
-    .eyes-glow { 
-      position: absolute; width: 100%; display: flex; 
-      justify-content: space-around; pointer-events: none;
-      transition: opacity 0.5s ease;
-    }
-    .eye-point { width: 8px; height: 8px; border-radius: 50%; filter: blur(2px); }
-    
-    .mochi .eyes-glow { top: 35%; padding: 0 32px; }
-    .jinx .eyes-glow { top: 25%; padding: 0 42px; }
-    .luna .eyes-glow { top: 45%; padding: 0 28px; }
-    .gingerella .eyes-glow { top: 40%; padding: 0 32px; }
-
-    .mochi .eye-point { background: var(--mochi-blue); box-shadow: 0 0 12px var(--mochi-blue); }
-    .jinx .eye-point { background: var(--jinx-amber); box-shadow: 0 0 12px var(--jinx-amber); }
-
     #toy-box {
       position: fixed;
-      bottom: 20%;
+      bottom: 20vh; /* Sits above the fixed floor height */
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255,255,255,0.95);
@@ -137,49 +128,36 @@
       display: flex;
       align-items: center;
       gap: 20px;
-      z-index: 100;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 300;
     }
 
-    .toy { font-size: 2.5rem; cursor: grab; transition: transform 0.2s; }
-    .toy:hover { transform: scale(1.2) rotate(10deg); }
-
-    #status { font-size: 0.9rem; font-weight: bold; color: var(--brown); min-width: 150px; text-align: center; }
-
+    .toy { font-size: 2.5rem; cursor: grab; }
     .hidden { display: none; }
   </style>
 </head>
 <body>
 
   <header>
-    <h2 style="margin:0; letter-spacing: 1px;">Whisker Bytes Cafe</h2>
-    <button onclick="togglePhoto()" style="padding:8px 18px; border-radius:20px; border:none; background:var(--pink); cursor:pointer; font-weight:bold; font-family:inherit;">📸 Photo Mode</button>
+    <h2 style="margin:0;">Whisker Bytes Lounge</h2>
+    <button onclick="togglePhoto()" style="padding:8px 18px; border-radius:20px; border:none; background:var(--pink); cursor:pointer; font-weight:bold;">📸 Photo Mode</button>
   </header>
 
   <div id="game-stage">
     <div class="shelf" style="top: 20%; left: 15%; width: 180px;" onclick="moveCat(15, 20)"></div>
     <div class="shelf" style="top: 45%; left: 42%; width: 200px;" onclick="moveCat(42, 45)"></div>
     <div class="shelf" style="top: 25%; left: 70%; width: 170px;" onclick="moveCat(70, 25)"></div>
-    <div class="shelf" style="top: 60%; left: 10%; width: 140px;" onclick="moveCat(10, 60)"></div>
 
-    <div id="mochi" class="cat-sprite mochi" style="left: 15%; top: 72%;" onclick="wakeAndSelect('mochi')">
-      <img src="mochi_idle.png" alt="Mochi" onerror="this.src='https://via.placeholder.com/100?text=Mochi'">
-      <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+    <div id="mochi" class="cat-sprite" style="left: 10%; top: 72%;" onclick="wakeAndSelect('mochi')">
+      <img src="mochi_idle.png" alt="Mochi">
     </div>
-
-    <div id="jinx" class="cat-sprite jinx" style="left: 35%; top: 72%;" onclick="wakeAndSelect('jinx')">
-      <img src="jinx_idle.png" alt="Jinx" onerror="this.src='https://via.placeholder.com/100?text=Jinx'">
-      <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+    <div id="jinx" class="cat-sprite" style="left: 30%; top: 72%;" onclick="wakeAndSelect('jinx')">
+      <img src="jinx_idle.png" alt="Jinx">
     </div>
-
-    <div id="luna" class="cat-sprite luna" style="left: 55%; top: 72%;" onclick="wakeAndSelect('luna')">
-      <img src="luna_idle.png" alt="Luna" onerror="this.src='https://via.placeholder.com/100?text=Luna'">
-      <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+    <div id="luna" class="cat-sprite" style="left: 50%; top: 72%;" onclick="wakeAndSelect('luna')">
+      <img src="luna_idle.png" alt="Luna">
     </div>
-
-    <div id="gingerella" class="cat-sprite gingerella" style="left: 75%; top: 72%;" onclick="wakeAndSelect('gingerella')">
-      <img src="gingerella_idle.png" alt="Ginger" onerror="this.src='https://via.placeholder.com/100?text=Ginger'">
-      <div class="eyes-glow"><div class="eye-point"></div><div class="eye-point"></div></div>
+    <div id="gingerella" class="cat-sprite" style="left: 70%; top: 72%;" onclick="wakeAndSelect('gingerella')">
+      <img src="gingerella_idle.png" alt="Gingerella">
     </div>
   </div>
 
@@ -188,17 +166,15 @@
   <div id="toy-box">
     <div class="toy" draggable="true" ondragstart="drag(event)" id="laser">🔴</div>
     <div class="toy" draggable="true" ondragstart="drag(event)" id="fish">🐟</div>
-    <div id="status">Tap a cat to play!</div>
+    <div id="status" style="font-size:0.9rem; font-weight:bold;">Select a cat!</div>
   </div>
 
   <script>
     let selectedCat = null;
-    let sleepTimers = {};
-    let gravityTimers = {};
 
-    // Generate Floor Tiles
+    // Create exactly 20 tiles (10x2 grid)
     const floor = document.getElementById('floor');
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 20; i++) {
       const tile = document.createElement('div');
       tile.className = 'tile';
       floor.appendChild(tile);
@@ -206,65 +182,22 @@
 
     function wakeAndSelect(id) {
       selectedCat = id;
-      const cat = document.getElementById(id);
-      cat.classList.remove('sleeping');
-      document.getElementById('status').innerText = id.toUpperCase() + " is ready!";
-      startSleepTimer(id);
-      
-      // Select feedback animation
-      cat.animate([{transform:'translateY(0)'},{transform:'translateY(-15px)'},{transform:'translateY(0)'}], {duration: 400});
+      document.getElementById('status').innerText = id.toUpperCase() + " active!";
     }
 
     function moveCat(x, y) {
-      if (!selectedCat) {
-        document.getElementById('status').innerText = "Pick a cat first! 🐾";
-        return;
-      }
+      if (!selectedCat) return;
       const cat = document.getElementById(selectedCat);
       cat.style.left = x + "%";
       cat.style.top = (y - 12) + "%"; 
-      document.getElementById('status').innerText = selectedCat.toUpperCase() + " pounced!";
-      
-      clearTimeout(gravityTimers[selectedCat]);
-      gravityTimers[selectedCat] = setTimeout(() => goHome(selectedCat), 30000);
-      startSleepTimer(selectedCat);
-    }
-
-    function goHome(id) {
-      const cat = document.getElementById(id);
-      cat.style.top = "72%";
-      startSleepTimer(id);
-    }
-
-    function startSleepTimer(id) {
-      clearTimeout(sleepTimers[id]);
-      sleepTimers[id] = setTimeout(() => {
-        const cat = document.getElementById(id);
-        if (cat.style.top === "72%") {
-          cat.classList.add('sleeping');
-          if (selectedCat === id) selectedCat = null;
-        }
-      }, 45000);
     }
 
     function drag(ev) { ev.dataTransfer.setData("toy", ev.target.id); }
-
-    document.getElementById('game-stage').ondragover = (e) => e.preventDefault();
-    document.getElementById('game-stage').ondrop = (e) => {
-      e.preventDefault();
-      const toy = e.dataTransfer.getData("toy");
-      if (selectedCat) {
-        document.getElementById('status').innerText = selectedCat.toUpperCase() + " loves the " + toy + "!";
-        wakeAndSelect(selectedCat);
-      }
-    };
 
     function togglePhoto() {
       document.getElementById('toy-box').classList.toggle('hidden');
       document.querySelectorAll('.shelf').forEach(s => s.classList.toggle('hidden'));
     }
-
-    ['mochi', 'jinx', 'luna', 'gingerella'].forEach(id => startSleepTimer(id));
   </script>
 </body>
 </html>
