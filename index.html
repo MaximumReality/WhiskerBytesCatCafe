@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: FLOOR TV</title>
+<title>WHISKER BYTES: CAT-TOON TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -96,7 +96,7 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
 let playerHolding = null, tvActive = false, radioActive = false, criticActive = false, isRushHour = false;
-let particles = [], musicNotes = [];
+let particles = [], musicNotes = [], toonFrame = 0;
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), criticImg = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
@@ -121,15 +121,12 @@ function triggerPopup(amt) {
     el.style.left = player.x + 'px'; el.style.top = (player.y - 40) + 'px';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 800);
-    if (window.navigator.vibrate) window.navigator.vibrate(40);
 }
 
 function openCredits() {
     const content = document.getElementById("credits-scroller");
     const today = new Date();
-    if(today.getMonth() === 11 && today.getDate() === 31) {
-        document.getElementById('ny-banner').style.display='block';
-    }
+    if(today.getMonth() === 11 && today.getDate() === 31) document.getElementById('ny-banner').style.display='block';
     content.style.animation = "none"; void content.offsetWidth; 
     content.style.animation = "scrollCredits 15s linear forwards"; 
     document.getElementById('credits').style.display = 'flex';
@@ -154,7 +151,7 @@ window.startGame = function(catId) {
         {x: 340, y: 320, type: "TRASH", e: "🗑️"},
         {x: 50,  y: 320, type: "WINDOW", e: "🪟"}, 
         {x: 60, y: canvas.height - 80, type: "RADIO", e: "📻"},
-        {x: canvas.width - 60, y: 550, type: "TV", e: "📺"}, // Moved to far right floor
+        {x: canvas.width - 60, y: 550, type: "TV", e: "📺"},
         {x: canvas.width / 2, y: 550, type: "TABLE", e: "🟫"},
         {x: canvas.width / 2 - 65, y: 550, type: "CHAIR", e: "🪑", occupied: false},
         {x: canvas.width / 2 + 65, y: 550, type: "CHAIR", e: "🪑", occupied: false}
@@ -187,8 +184,6 @@ function interact() {
             playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
             if(c.isCritic) criticActive = false;
-            document.getElementById('holdingTxt').innerText = "🐾 Empty";
-            
             if (score > highScore) {
                 if(!document.getElementById('highVal').classList.contains('sparkle-active')) createFirework(player.x, player.y);
                 highScore = score;
@@ -205,14 +200,14 @@ function interact() {
 
 function update() {
     if (!gameActive) return;
-    const TOP = 280, BOT = canvas.height - 50, L = 40, R = canvas.width - 40;
+    const TOP = 280, BOT = canvas.height - 50;
     if (!kitchen.active) {
         if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
         if (keys.left) { player.x -= player.speed; player.facing = -1; }
         if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
-    if (player.y < TOP) player.y = TOP; if (player.y > BOT) player.y = BOT;
-    if (player.x < L) player.x = L; if (player.x > R) player.x = R;
+    player.y = Math.max(TOP, Math.min(BOT, player.y));
+    player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
 
     if (kitchen.active) {
         kitchen.timer--;
@@ -225,14 +220,17 @@ function update() {
 
     if (Math.random() < (isRushHour ? 0.015 : 0.005)) spawnCustomer();
     
-    const patienceDecay = (tvActive || radioActive) ? 0.03 : 0.07;
-    customers.forEach(c => { c.patience -= patienceDecay; });
+    // Patience logic
+    let boost = (tvActive && radioActive) ? 0.02 : (tvActive || radioActive) ? 0.03 : 0.07;
+    customers.forEach(c => { c.patience -= boost; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 
     if (radioActive && Math.random() < 0.05) {
         musicNotes.push({ x: 60, y: canvas.height - 100, vx: (Math.random()-0.5)*2, vy: -2, life: 50, char: Math.random() > 0.5 ? '♪' : '♫' });
     }
     musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i, 1); });
+    
+    if(tvActive) toonFrame = (toonFrame + 0.05) % 2;
 }
 
 function draw() {
@@ -248,6 +246,16 @@ function draw() {
         }
         ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
         ctx.shadowBlur = 0;
+
+        // The Toon Screen!
+        if(f.type === "TV" && tvActive) {
+            ctx.fillStyle = "rgba(255,255,255,0.1)"; // Flicker
+            ctx.fillRect(f.x-10, f.y-5, 20, 15);
+            ctx.fillStyle = "black"; ctx.font = "10px Arial";
+            let eye = Math.floor(toonFrame) === 0 ? "^.^" : "-.-"; 
+            ctx.fillText(eye, f.x-8, f.y+5);
+        }
+
         if(f.type === "STATION") { ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 10); }
     });
 
