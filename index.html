@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: FINAL VERSION</title>
+<title>WHISKER BYTES: DIRECTION FIX</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -97,12 +97,12 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
 let playerHolding = null, tvActive = false, radioActive = false, criticActive = false, isRushHour = false;
-let particles = [], musicNotes = [], toonFrame = 0;
+let musicNotes = [], toonFrame = 0;
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), criticImg = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
 
-const player = { x: 200, y: 300, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
+const player = { x: 200, y: 300, speed: 5, facing: 1, baseFacing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
 let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
@@ -136,6 +136,11 @@ window.startGame = function(catId) {
     if (gameActive) return;
     catImg.src = catId + '_idle.png';
     bgImg.src = 'IMG_2480.jpeg'; 
+    
+    // ORIENTATION FIX: Mochi faces Right (1), everyone else faces Left (-1)
+    player.baseFacing = (catId === 'mochi') ? 1 : -1;
+    player.facing = player.baseFacing;
+
     player.speed = (catId === 'luna') ? 8 : 5;
     player.traits.tipBonus = (catId === 'gingerella') ? 20 : 0;
     player.traits.patienceBonus = (catId === 'mochi') ? 30 : 0;
@@ -205,8 +210,6 @@ function update() {
     if (!kitchen.active) {
         if (keys.up) player.y -= player.speed;
         else if (keys.down) player.y += player.speed;
-        
-        // FIXED FACING LOGIC: facing 1 for Right, -1 for Left
         if (keys.left) { player.x -= player.speed; player.facing = -1; }
         else if (keys.right) { player.x += player.speed; player.facing = 1; }
     }
@@ -273,10 +276,10 @@ function draw() {
         ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
     });
 
-    // DRAW PLAYER FACING DIRECTION
     ctx.save(); 
     ctx.translate(player.x, player.y);
-    if(player.facing === -1) ctx.scale(-1, 1); // Flip horizontally if facing left
+    // SMART FLIP: If the current direction doesn't match the image's original facing, flip it.
+    if(player.facing !== player.baseFacing) ctx.scale(-1, 1);
     if(catImg.complete) ctx.drawImage(catImg, -35, -35, 70, 70);
     ctx.restore();
 
