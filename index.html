@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Whisker Bytes Cat Cafe</title>
+  <style>
+    /* General Styles */
+    body {
+      background-color: #f7d2c4;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #964b00;
+      color: #ffffff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    section {
+      margin: 40px;
+      padding: 20px;
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #964b00;
+    }
+
+    button {
+      background-color: #ffcc66;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ffaa33;
+    }
+
+    /* Cat Lounge List */
+    ul li {
+      margin-bottom: 10px;
+    }
+
+    /* Interactive Animations */
+    #cat-feeder-animation img,
+    #hide-seek-game img {
+      display: block;
+      margin: 10px auto;
+    }
+
+    /* Contact form */
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #submission-message {
+      color: green;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Welcome to Whisker Bytes Cat Cafe!</h1>
+  </header>
+
+  <!-- Cat Lounge -->
+  <section id="cat-lounge">
+    <h2>Cat Lounge Area Residents:</h2>
+    <ul>
+      <li><strong>Mochi</strong> - Sphynx, 2 yrs, Playful & cuddly, loves laser pointers <!-- expert laser chaser --></li>
+      <li><strong>Luna</strong> - British Shorthair, 5 yrs, Calm & gentle, loves tuna <!-- nap enthusiast --></li>
+      <li><strong>Jinx</strong> - Maine Coon, 3 yrs, Mischievous & adventurous, loves hide-and-seek <!-- hide-and-seek champ --></li>
+      <li><strong>Gingerella</strong> - Domestic Longhair, 12 yrs, Sweet & affectionate, adoption fee $25 <!-- senior sweetheart, gentle pets --></li>
+    </ul>
+  </section>
+
+  <!-- Cafe Menu -->
+  <section id="cafe-menu">
+    <h2>Café Menu</h2>
+    <ul>
+      <li>Coffee Latte</li>
+      <li>Catnip Tea</li>
+      <li>Tuna Cupcake</li>
+      <li>Salmon Snack</li>
+      <li>Milkshake (cat-friendly)</li>
+    </ul>
+  </section>
+
+  <!-- Cat Adoptions -->
+  <section id="cat-adoptions">
+    <h2>Cat Adoptions:</h2>
+    <ul>
+      <li><strong>Whiskers</strong> - Tabby, 1 yr, Curious & playful, adoption fee $75 <!-- loves cuddles --></li>
+      <li><strong>Fluffy</strong> - Persian, 3 yrs, Gentle & laid-back, adoption fee $50 <!-- needs regular grooming --></li>
+      <li><strong>Simba</strong> - Orange Tabby, 2 yrs, Adventurous & loyal, adoption fee $60 <!-- plays fetch --></li>
+      <li><strong>Gingerella</strong> - Domestic Longhair, 12 yrs, Sweet & affectionate, adoption fee $25 <!-- senior sweetheart --></li>
+    </ul>
+    <button id="adopt-btn">Learn More About Adoption</button>
+    <div id="adoption-info" style="display:none;">
+      Adoption process details...
+      <form id="adoption-form">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"><br><br>
+        <label for="cat-interest">Cat(s) you're interested in:</label>
+        <input type="text" id="cat-interest" name="cat-interest"><br><br>
+        <button id="submit-adoption">Submit Inquiry</button>
+      </form>
+      <div id="submission-message" style="display:none;">Thank you for your inquiry!</div>
+    </div>
+  </section>
+
+  <!-- Virtual Cat Feeder -->
+  <section id="cat-feeder">
+    <h2>Feed Our Feline Friends!</h2>
+    <button id="feed-btn">Dispense Treats</button>
+    <div id="cat-feeder-animation"></div>
+  </section>
+
+  <!-- Cat Lounge Games -->
+  <section id="cat-lounge-games">
+    <h2>Play with Our Cats!</h2>
+    <button id="hide-seek-btn">Play Hide-and-Seek</button>
+    <div id="hide-seek-game"></div>
+  </section>
+
+  <footer>Thanks for visiting!</footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Adoption toggle
+    document.getElementById("adopt-btn").addEventListener("click", function() {
+      var adoptionInfo = document.getElementById("adoption-info");
+      adoptionInfo.style.display = adoptionInfo.style.display === "none" ? "block" : "none";
+    });
+
+    // Adoption form submission
+    document.getElementById("submit-adoption").addEventListener("click", function(event) {
+      event.preventDefault();
+      document.getElementById("submission-message").style.display = "block";
+      // TO DO: integrate email functionality
+    });
+
+    // Cat feeder animation
+    document.getElementById("feed-btn").addEventListener("click", function() {
+      var feederAnim = document.getElementById("cat-feeder-animation");
+      feederAnim.innerHTML = "<img src='treats.gif' width='100px'>";
+      setTimeout(function() {
+        feederAnim.innerHTML = "";
+      }, 2000);
+    });
+
+    // Hide-and-seek game
+    document.getElementById("hide-seek-btn").addEventListener("click", function() {
+      var gameDiv = document.getElementById("hide-seek-game");
+      gameDiv.innerHTML = "<img src='hiding-cat.gif' width='100px'>";
+      setTimeout(function() {
+        gameDiv.innerHTML = "<img src='found-cat.gif' width='100px'>";
+      }, 3000);
+    });
+  </script>
+
+</body>
+</html>
