@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: FULL RESTORE</title>
+<title>WHISKER BYTES: NO-STICK EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --green: #4caf50; --rush: #ff007f; }
@@ -104,11 +104,11 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let gameActive = false, score = 0, gameMinutes = 540;
-let playerHolding = null, tvActive = false, radioActive = false;
+let playerHolding = null;
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png';
 
-const player = { x: 200, y: 300, speed: 5, facing: 1, baseFacing: 1, traits: { patienceBonus: 0, tipBonus: 0 } };
+const player = { x: 200, y: 350, speed: 5, facing: 1, baseFacing: 1, traits: { patienceBonus: 0, tipBonus: 0 } };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 const keys = { up: false, down: false, left: false, right: false };
 
@@ -134,7 +134,10 @@ window.startGame = function(catId) {
     player.traits.patienceBonus = (catId === 'mochi') ? 30 : 0;
     player.cookTime = (catId === 'mochi') ? 40 : 80;
 
-    const midY = 160 + (canvas.height - 320)/2 + 15;
+    const floorTop = 165; 
+    const floorBottom = canvas.height - 180;
+    const midY = floorTop + (floorBottom - floorTop) / 2;
+
     furniture = [
         {x: 80, y: 200, type: "STATION", item: "☕", e: "☕"},
         {x: 160, y: 200, type: "STATION", item: "🍪", e: "🍪"},
@@ -160,10 +163,7 @@ function interact() {
     furniture.forEach(f => {
         if (Math.hypot(player.x - f.x, player.y - f.y) < 70) {
             if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
-            if (f.type === "TRASH") playerHolding = null;
-            if (f.type === "TV") tvActive = !tvActive;
-            if (f.type === "RADIO") radioActive = !radioActive;
-            document.getElementById('holdingTxt').innerText = playerHolding || "🐾 Empty";
+            if (f.type === "TRASH") { playerHolding = null; document.getElementById('holdingTxt').innerText = "🐾 Empty"; }
         }
     });
 
@@ -173,7 +173,11 @@ function interact() {
             score += gain; triggerPopup(gain);
             playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
-            if (score > highScore) { highScore = score; document.getElementById('highVal').innerText = highScore; }
+            if (score > highScore) { 
+                highScore = score; 
+                document.getElementById('highVal').innerText = highScore;
+                localStorage.setItem("whiskerBytesHigh", highScore);
+            }
             document.getElementById('holdingTxt').innerText = "🐾 Empty";
         }
     });
@@ -209,7 +213,8 @@ function update() {
     customers.forEach(c => { c.patience -= 0.05; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 
-    player.y = Math.max(180, Math.min(canvas.height - 160, player.y));
+    // STRICT WALL LIMITS
+    player.y = Math.max(220, Math.min(canvas.height - 200, player.y));
     player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
 }
 
