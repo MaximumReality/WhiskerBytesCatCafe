@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: FULL RESTORATION</title>
+<title>WHISKER BYTES: COZY TV EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <style>
-    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; }
+    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --tv-glow: rgba(255, 255, 0, 0.4); }
     * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
     canvas { display: block; background: #3d2b1f; width: 100vw; height: 100vh; }
@@ -16,15 +16,6 @@
     .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; z-index: 6000; margin-bottom: 20px; }
     .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 8px; color: #333; font-weight: bold; width: 100px; text-transform: lowercase; }
     .btn-select img { width: 40px; height: 40px; display: block; margin: 0 auto; }
-
-    .menu-capsule-container { display: flex; gap: 10px; z-index: 6000; margin-bottom: 10px; }
-    .capsule-btn { background: rgba(255,255,255,0.95); border: 2px solid var(--wood); border-radius: 20px; padding: 6px 15px; color: var(--wood); font-weight: bold; font-size: 13px; text-transform: lowercase; }
-
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
-    .scroll-box { background: #fff8f2; border: 4px solid var(--wood); border-radius: 18px; width: 85%; max-width: 320px; height: 380px; text-align: center; color: #4a2c2a; position: relative; overflow: hidden; }
-    .scroll-content { position: absolute; left: 0; width: 100%; bottom: -120%; padding: 0 20px; box-sizing: border-box; text-transform: lowercase; line-height: 1.4; }
-    @keyframes scrollText { 0% { bottom: -120%; } 100% { bottom: 100%; } }
-    .close-btn { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
 
     #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 8px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; text-transform: lowercase; font-size: 13px; }
     #day-over { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 25px; border: 4px solid var(--gold); border-radius: 20px; z-index: 8000; display: none; text-align: center; text-transform: lowercase; width: 220px; }
@@ -44,17 +35,6 @@
         <div onpointerdown="startGame('gingerella')" class="btn-select"><img src="gingerella_idle.png">ginger</div>
         <div onpointerdown="startGame('luna')" class="btn-select"><img src="luna_idle.png">luna</div>
         <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">jinx</div>
-    </div>
-    <div class="menu-capsule-container">
-        <div class="capsule-btn" onclick="openModal('manual')">📖 manual</div>
-        <div class="capsule-btn" onclick="openModal('credits')">🐾 credits</div>
-    </div>
-</div>
-
-<div id="modal-ui" class="modal-overlay">
-    <div class="scroll-box">
-        <button class="close-btn" onclick="closeModal()">✕</button>
-        <div class="scroll-content" id="modal-scroller"></div>
     </div>
 </div>
 
@@ -85,9 +65,10 @@
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
-let playerHolding = null, trashLevel = 0, radioActive = false, tvActive = false, sparkleAlpha = 0;
-let musicNotes = [], floatingTips = [];
+let gameActive = false, score = 0, gameMinutes = 540;
+let playerHolding = null, trashLevel = 0, tvActive = false, sparkleAlpha = 0;
+let floatingTips = [];
+
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), f3 = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'friend3.png';
@@ -97,18 +78,6 @@ let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: n
 
 let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
 document.getElementById('highVal').innerText = highScore;
-
-function openModal(type) {
-    const scroller = document.getElementById('modal-scroller');
-    if(type === 'manual') {
-        scroller.innerHTML = `<h2>📖 manual</h2><p>deliver orders to get 💵 paid!</p><p>empty 🗑️ trash at the 🪟 window!</p><p>mochi: fast cook | luna: fast walk | ginger: big tips | jinx: patient customers.</p>`;
-    } else {
-        scroller.innerHTML = `<h2>🐾 credits</h2><p>Maximum Reality by Lori Kaye Sifuentes</p><p>Inspired by Luna & Stella 💖</p><p>One human race. Many stories. 🐾</p>`;
-    }
-    document.getElementById('modal-ui').style.display = 'flex';
-    scroller.style.animation = "scrollText 15s linear forwards";
-}
-function closeModal() { document.getElementById('modal-ui').style.display = 'none'; }
 
 window.startGame = function(catId) {
     catImg.src = catId + '_idle.png';
@@ -124,7 +93,6 @@ window.startGame = function(catId) {
         {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
         {x: 320, y: 200, type: "TRASH", e: "🗑️"},
         {x: 40, y: 200, type: "WINDOW", e: "🪟"},
-        {x: 50, y: midY, type: "RADIO", e: "📻"},
         {x: canvas.width - 50, y: midY, type: "TV", e: "📺"},
         {x: canvas.width / 2, y: midY, type: "TABLE", e: "🟫"},
         {x: canvas.width / 2 - 65, y: midY, type: "CHAIR", e: "🪑", occupied: false},
@@ -144,7 +112,6 @@ function interact() {
             if (f.type === "STATION" && !playerHolding && trashLevel < 100) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
             if (f.type === "TRASH" && playerHolding) { playerHolding = null; trashLevel += 25; }
             if (f.type === "WINDOW" && trashLevel >= 100) { trashLevel = 0; }
-            if (f.type === "RADIO") radioActive = !radioActive;
             if (f.type === "TV") tvActive = !tvActive;
         }
     });
@@ -155,7 +122,6 @@ function interact() {
             floatingTips.push({x: c.x, y: c.y, text: "💵 +" + tip, life: 60});
             customers = customers.filter(cust => cust !== c);
             if(score > highScore) { highScore = score; localStorage.setItem("whiskerBytesHigh", score); }
-            if(score >= 300 && !unlockedCake) { furniture.push({x: 400, y: 200, type: "STATION", item: "🍰", e: "🍰"}); unlockedCake = true; }
         }
     });
     document.getElementById('holdingTxt').innerText = playerHolding || "🐾 empty";
@@ -167,8 +133,7 @@ function update() {
         if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
         if (keys.left) { player.x -= player.speed; } if (keys.right) { player.x += player.speed; }
     } else {
-        kitchen.timer--; 
-        if (kitchen.timer <= 0) { kitchen.active = false; playerHolding = kitchen.item; player.readyTimer = 30; }
+        kitchen.timer--; if (kitchen.timer <= 0) { kitchen.active = false; playerHolding = kitchen.item; player.readyTimer = 30; }
     }
     
     player.y = Math.max(225, Math.min(canvas.height - 210, player.y));
@@ -178,12 +143,12 @@ function update() {
     gameMinutes += 0.15;
     if (gameMinutes >= 1260) { gameActive = false; document.getElementById('finalScore').innerText = score; document.getElementById('day-over').style.display = 'block'; }
 
-    if (Math.random() < (gameMinutes > 1100 ? 0.02 : 0.008)) {
+    if (Math.random() < 0.008) {
         let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
         if (chair) {
             chair.occupied = true;
             let isC = Math.random() < 0.15;
-            customers.push({ x: chair.x, y: chair.y, chair, order: isC ? "🍰" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)], isCritic: isC, img: isC ? f3 : (Math.random()>0.5?f1:f2), patience: (player.power === 'jinx' ? 1500 : 1000) });
+            customers.push({ x: chair.x, y: chair.y, chair, order: isC ? "🍪" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)], isCritic: isC, img: isC ? f3 : (Math.random()>0.5?f1:f2), patience: (player.power === 'jinx' ? 1500 : 1000) });
         }
     }
 
@@ -193,53 +158,56 @@ function update() {
     });
 
     if (trashLevel >= 100) sparkleAlpha = (Math.sin(Date.now()/100) + 1) / 2;
-    if (radioActive && Math.random() < 0.03) musicNotes.push({ x: 60, y: 300, vx: Math.random()-0.5, vy: -1, life: 100 });
-    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i,1); });
     floatingTips.forEach((t, i) => { t.y -= 1; t.life--; if(t.life <= 0) floatingTips.splice(i,1); });
 }
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    // 1. Draw Background Image (Ceiling/Wall)
     if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
     
-    // 2. Draw Floor Tiling
+    // Draw Floor Tiles
     const ts = 60;
     for(let x=0; x<canvas.width; x+=ts) {
         for(let y=160; y<canvas.height; y+=ts) {
             ctx.fillStyle = (x+y)/ts%2===0 ? "#d2b48c" : "#c1a37b";
             ctx.fillRect(x, y, ts, ts);
-            ctx.strokeStyle = "rgba(0,0,0,0.03)";
-            ctx.strokeRect(x,y,ts,ts);
         }
     }
 
-    // 3. Draw Furniture/Counter
+    // Draw Furniture
     furniture.forEach(f => {
-        if(f.type === "STATION") {
-            ctx.fillStyle = "#5d4037"; // Dark wood counter
-            ctx.fillRect(f.x-40, f.y+20, 80, 15);
-        }
+        if(f.type === "STATION") { ctx.fillStyle = "#5d4037"; ctx.fillRect(f.x-40, f.y+20, 80, 15); }
+        
+        // Cozy TV Logic
         if(f.type === "TV" && tvActive) {
-            ctx.fillStyle = "rgba(0, 255, 255, 0.15)";
-            ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x-100, canvas.height); ctx.lineTo(f.x+100, canvas.height); ctx.fill();
+            ctx.shadowBlur = 15; ctx.shadowColor = "yellow";
+            ctx.fillStyle = "black"; ctx.fillRect(f.x-25, f.y-20, 50, 40);
+            ctx.shadowBlur = 0;
+            ctx.font = "20px Arial"; ctx.fillText("🐱", f.x-11, f.y+8);
+        } else if (f.type === "TV") {
+            ctx.font = "35px Arial"; ctx.fillText(f.e, f.x-17, f.y+15);
+        } else {
+            ctx.font = "35px Arial"; ctx.fillText(f.e, f.x-17, f.y+15);
         }
+
         if(f.type === "WINDOW" && trashLevel >= 100) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${sparkleAlpha})`;
-            ctx.fillRect(f.x-25, f.y-25, 50, 50);
+            ctx.fillStyle = `rgba(255, 255, 255, ${sparkleAlpha})`; ctx.fillRect(f.x-25, f.y-25, 50, 50);
         }
-        ctx.font = "35px Arial"; ctx.fillText(f.e, f.x-17, f.y+15);
     });
 
-    // 4. Draw Customers/Speech Bubbles
+    // Draw Customers
     customers.forEach(c => {
-        if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
+        if(c.img.complete && c.img.naturalWidth > 0) {
+            ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
+        } else {
+            ctx.fillStyle = c.isCritic ? "gold" : "#888";
+            ctx.beginPath(); ctx.arc(c.x, c.y, 25, 0, Math.PI*2); ctx.fill();
+        }
         ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(c.x+25, c.y-35, 18, 0, Math.PI*2); ctx.fill();
         ctx.font = "16px Arial"; ctx.fillText(c.order, c.x+17, c.y-30);
         ctx.fillStyle = "red"; ctx.fillRect(c.x-20, c.y+35, (c.patience/(player.power==='jinx'?1500:1000))*40, 5);
     });
 
-    // 5. Draw Player & Effects
     ctx.drawImage(catImg, player.x-35, player.y-35, 70, 70);
     if(kitchen.active) { 
         ctx.fillStyle="lime"; ctx.fillRect(player.x-30, player.y-50, (kitchen.timer/player.cookTime)*60, 6); 
@@ -247,7 +215,6 @@ function draw() {
         ctx.fillStyle="yellow"; ctx.font="bold 18px Arial"; ctx.fillText("✨ READY!", player.x-35, player.y-55);
     }
     
-    musicNotes.forEach(n => { ctx.fillStyle="black"; ctx.fillText("♪", n.x, n.y); });
     floatingTips.forEach(t => { ctx.fillStyle="green"; ctx.font="bold 16px Arial"; ctx.fillText(t.text, t.x-15, t.y); });
 
     document.getElementById('scoreVal').innerText = score;
