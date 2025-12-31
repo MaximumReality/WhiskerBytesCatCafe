@@ -1,183 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Whisker Bytes Cat Cafe</title>
-  <style>
-    /* General Styles */
-    body {
-      background-color: #f7d2c4;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whisker Bytes Cat Cafe</title>
+<style>
+/* --- General Styles --- */
+body {
+  background-color: #f7d2c4;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+header {
+  background-color: #964b00;
+  color: #ffffff;
+  padding: 20px;
+  text-align: center;
+  font-size: 2em;
+}
+section {
+  margin: 40px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
-    header {
-      background-color: #964b00;
-      color: #ffffff;
-      padding: 20px;
-      text-align: center;
-    }
+/* --- Cat Interaction --- */
+#cat-interaction button, #cat-actions button, #cat-selection button, #feed-btn, #hide-seek-btn {
+  margin: 5px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f9a825;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.2s;
+}
+#cat-interaction button:hover, #cat-actions button:hover, #cat-selection button:hover {
+  background-color: #ffb74d;
+  transform: scale(1.05);
+}
+#cat-image {
+  transition: transform 0.3s;
+}
+#cat-image.happy { transform: rotate(-10deg) scale(1.1); }
+#cat-image.sleepy { transform: rotate(10deg) scale(0.9); }
+#cat-image.playful { transform: rotate(-5deg) scale(1.2); }
 
-    section {
-      margin: 40px;
-      padding: 20px;
-      background-color: #ffffff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      color: #964b00;
-    }
-
-    button {
-      background-color: #ffcc66;
-      border: none;
-      padding: 10px 20px;
-      margin: 10px 0;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #ffaa33;
-    }
-
-    /* Cat Lounge List */
-    ul li {
-      margin-bottom: 10px;
-    }
-
-    /* Interactive Animations */
-    #cat-feeder-animation img,
-    #hide-seek-game img {
-      display: block;
-      margin: 10px auto;
-    }
-
-    /* Contact form */
-    input[type="text"],
-    input[type="email"] {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0 15px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    #submission-message {
-      color: green;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-  </style>
+/* --- Responsive Design --- */
+@media only screen and (max-width: 768px) {
+  body { font-size: 14px; }
+  header { padding: 10px; }
+  section { margin: 20px; padding: 10px; }
+}
+@media only screen and (max-width: 480px) {
+  body { font-size: 12px; }
+  header { padding: 5px; }
+  section { margin: 10px; padding: 5px; }
+}
+</style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <h1>Welcome to Whisker Bytes Cat Cafe!</h1>
-  </header>
+<header>Welcome to Whisker Bytes Cat Cafe</header>
 
-  <!-- Cat Lounge -->
-  <section id="cat-lounge">
-    <h2>Cat Lounge Area Residents:</h2>
-    <ul>
-      <li><strong>Mochi</strong> - Sphynx, 2 yrs, Playful & cuddly, loves laser pointers <!-- expert laser chaser --></li>
-      <li><strong>Luna</strong> - British Shorthair, 5 yrs, Calm & gentle, loves tuna <!-- nap enthusiast --></li>
-      <li><strong>Jinx</strong> - Maine Coon, 3 yrs, Mischievous & adventurous, loves hide-and-seek <!-- hide-and-seek champ --></li>
-      <li><strong>Gingerella</strong> - Domestic Longhair, 12 yrs, Sweet & affectionate, adoption fee $25 <!-- senior sweetheart, gentle pets --></li>
-    </ul>
-  </section>
-
-  <!-- Cafe Menu -->
-  <section id="cafe-menu">
-    <h2>Café Menu</h2>
-    <ul>
-      <li>Coffee Latte</li>
-      <li>Catnip Tea</li>
-      <li>Tuna Cupcake</li>
-      <li>Salmon Snack</li>
-      <li>Milkshake (cat-friendly)</li>
-    </ul>
-  </section>
-
-  <!-- Cat Adoptions -->
-  <section id="cat-adoptions">
-    <h2>Cat Adoptions:</h2>
-    <ul>
-      <li><strong>Whiskers</strong> - Tabby, 1 yr, Curious & playful, adoption fee $75 <!-- loves cuddles --></li>
-      <li><strong>Fluffy</strong> - Persian, 3 yrs, Gentle & laid-back, adoption fee $50 <!-- needs regular grooming --></li>
-      <li><strong>Simba</strong> - Orange Tabby, 2 yrs, Adventurous & loyal, adoption fee $60 <!-- plays fetch --></li>
-      <li><strong>Gingerella</strong> - Domestic Longhair, 12 yrs, Sweet & affectionate, adoption fee $25 <!-- senior sweetheart --></li>
-    </ul>
-    <button id="adopt-btn">Learn More About Adoption</button>
-    <div id="adoption-info" style="display:none;">
-      Adoption process details...
-      <form id="adoption-form">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name"><br><br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email"><br><br>
-        <label for="cat-interest">Cat(s) you're interested in:</label>
-        <input type="text" id="cat-interest" name="cat-interest"><br><br>
-        <button id="submit-adoption">Submit Inquiry</button>
-      </form>
-      <div id="submission-message" style="display:none;">Thank you for your inquiry!</div>
+<!-- --- Cat Lounge / Interaction --- -->
+<section id="cat-interaction">
+  <h2>Interact with Our Cats!</h2>
+  <div id="cat-selection">
+    <p>Select a cat:</p>
+    <button class="cat-btn" data-cat="mochi">Mochi</button>
+    <button class="cat-btn" data-cat="luna">Luna</button>
+    <button class="cat-btn" data-cat="jinx">Jinx</button>
+    <button class="cat-btn" data-cat="gingerella">Gingerella</button>
+  </div>
+  <div id="cat-status" style="display:none;">
+    <h3 id="cat-name"></h3>
+    <img id="cat-image" src="" alt="Cat Image" width="150px">
+    <p>Hunger: <span id="cat-hunger">0</span></p>
+    <p>Happiness: <span id="cat-happiness">0</span></p>
+    <p>Energy: <span id="cat-energy">0</span></p>
+    <p id="cat-personality"></p>
+    <div id="cat-actions">
+      <button id="feed-btn">Feed</button>
+      <button id="pet-btn">Pet</button>
+      <button id="play-btn">Play</button>
     </div>
-  </section>
+    <div id="cat-reaction" style="margin-top:10px; font-weight:bold;"></div>
+  </div>
+</section>
 
-  <!-- Virtual Cat Feeder -->
-  <section id="cat-feeder">
-    <h2>Feed Our Feline Friends!</h2>
-    <button id="feed-btn">Dispense Treats</button>
-    <div id="cat-feeder-animation"></div>
-  </section>
+<!-- --- Cat Feeder --- -->
+<section id="cat-feeder">
+  <h2>Feed Our Feline Friends!</h2>
+  <button id="feed-btn">Dispense Treats</button>
+  <div id="cat-feeder-animation"></div>
+</section>
 
-  <!-- Cat Lounge Games -->
-  <section id="cat-lounge-games">
-    <h2>Play with Our Cats!</h2>
-    <button id="hide-seek-btn">Play Hide-and-Seek</button>
-    <div id="hide-seek-game"></div>
-  </section>
+<!-- --- Cat Lounge Games --- -->
+<section id="cat-lounge-games">
+  <h2>Play with Our Cats!</h2>
+  <button id="hide-seek-btn">Play Hide-and-Seek</button>
+  <div id="hide-seek-game"></div>
+</section>
 
-  <footer>Thanks for visiting!</footer>
+<!-- --- Cat Adoptions --- -->
+<section id="cat-adoptions">
+  <h2>Cat Adoptions:</h2>
+  <ul>
+    <li><strong>Whiskers</strong> - Tabby, 1 yr, Curious & playful, $75</li>
+    <li><strong>Fluffy</strong> - Persian, 3 yrs, Gentle & laid-back, $50</li>
+    <li><strong>Simba</strong> - Orange Tabby, 2 yrs, Adventurous & loyal, $60</li>
+    <li><strong>Gingerella</strong> - Domestic Longhair, 12 yrs, Sweet & affectionate, $25</li>
+  </ul>
+  <button id="adopt-btn">Learn More About Adoption</button>
+  <div id="adoption-info" style="display:none;">
+    Adoption process details...
+    <form id="adoption-form">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name"><br><br>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email"><br><br>
+      <label for="cat-interest">Cat(s) you're interested in:</label>
+      <input type="text" id="cat-interest" name="cat-interest"><br><br>
+      <button id="submit-adoption">Submit Inquiry</button>
+    </form>
+    <div id="submission-message" style="display:none;">Thank you for your inquiry!</div>
+  </div>
+</section>
 
-  <!-- JavaScript -->
-  <script>
-    // Adoption toggle
-    document.getElementById("adopt-btn").addEventListener("click", function() {
-      var adoptionInfo = document.getElementById("adoption-info");
-      adoptionInfo.style.display = adoptionInfo.style.display === "none" ? "block" : "none";
-    });
+<script>
+// --- Cat Interaction Logic ---
+const cats = {
+  mochi: { name: "Mochi", hunger: 50, happiness: 50, energy: 50, personality: "Playful & mischievous", img: "mochi.png" },
+  luna: { name: "Luna", hunger: 50, happiness: 50, energy: 50, personality: "Calm & gentle", img: "luna.png" },
+  jinx: { name: "Jinx", hunger: 50, happiness: 50, energy: 50, personality: "Adventurous & curious", img: "jinx.png" },
+  gingerella: { name: "Gingerella", hunger: 50, happiness: 50, energy: 50, personality: "Senior sweetheart, affectionate", img: "gingerella.png" }
+};
 
-    // Adoption form submission
-    document.getElementById("submit-adoption").addEventListener("click", function(event) {
-      event.preventDefault();
-      document.getElementById("submission-message").style.display = "block";
-      // TO DO: integrate email functionality
-    });
+let currentCat = null;
+for (let cat in cats) {
+  if(localStorage.getItem(cat)) {
+    cats[cat] = JSON.parse(localStorage.getItem(cat));
+  }
+}
 
-    // Cat feeder animation
-    document.getElementById("feed-btn").addEventListener("click", function() {
-      var feederAnim = document.getElementById("cat-feeder-animation");
-      feederAnim.innerHTML = "<img src='treats.gif' width='100px'>";
-      setTimeout(function() {
-        feederAnim.innerHTML = "";
-      }, 2000);
-    });
+document.querySelectorAll(".cat-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    const catId = button.getAttribute("data-cat");
+    currentCat = cats[catId];
+    document.getElementById("cat-status").style.display = "block";
+    updateCatStatus();
+  });
+});
 
-    // Hide-and-seek game
-    document.getElementById("hide-seek-btn").addEventListener("click", function() {
-      var gameDiv = document.getElementById("hide-seek-game");
-      gameDiv.innerHTML = "<img src='hiding-cat.gif' width='100px'>";
-      setTimeout(function() {
-        gameDiv.innerHTML = "<img src='found-cat.gif' width='100px'>";
-      }, 3000);
-    });
-  </script>
+function updateCatStatus() {
+  document.getElementById("cat-name").innerText = currentCat.name;
+  document.getElementById("cat-image").src = currentCat.img;
+  document.getElementById("cat-personality").innerText = currentCat.personality;
+  document.getElementById("cat-hunger").innerText = currentCat.hunger;
+  document.getElementById("cat-happiness").innerText = currentCat.happiness;
+  document.getElementById("cat-energy").innerText = currentCat.energy;
+  document.getElementById("cat-reaction").innerText = "";
+  document.getElementById("cat-image").className = "";
+}
+
+function catAction(action) {
+  let reaction = "";
+  switch(action) {
+    case "feed":
+      currentCat.hunger = Math.max(0, currentCat.hunger - 15);
+      currentCat.happiness = Math.min(100, currentCat.happiness + 5);
+      reaction = "Purrs while nibbling treats!";
+      document.getElementById("cat-image").className = "happy";
+      break;
+    case "pet":
+      currentCat.happiness = Math.min(100, currentCat.happiness + 15);
+      currentCat.energy = Math.min(100, currentCat.energy + 5);
+      reaction = "Rubs against your hand happily!";
+      document.getElementById("cat-image").className = "sleepy";
+      break;
+    case "play":
+      currentCat.energy = Math.max(0, currentCat.energy - 15);
+      currentCat.happiness = Math.min(100, currentCat.happiness + 20);
+      currentCat.hunger = Math.min(100, currentCat.hunger + 5);
+      reaction = "Jumps around excitedly!";
+      document.getElementById("cat-image").className = "playful";
+      break;
+  }
+  document.getElementById("cat-reaction").innerText = reaction;
+  updateCatStatus();
+  localStorage.setItem(currentCat.name.toLowerCase(), JSON.stringify(currentCat));
+}
+
+document.getElementById("feed-btn").addEventListener("click", () => catAction("feed"));
+document.getElementById("pet-btn").addEventListener("click", () => catAction("pet"));
+document.getElementById("play-btn").addEventListener("click", () => catAction("play"));
+
+setInterval(() => {
+  for(let cat in cats) {
+    cats[cat].hunger = Math.min(100, cats[cat].hunger + 1);
+    cats[cat].energy = Math.max(0, cats[cat].energy - 1);
+    localStorage.setItem(cat, JSON.stringify(cats[cat]));
+  }
+  if(currentCat) updateCatStatus();
+}, 60000);
+
+// --- Cat Feeder ---
+document.getElementById("feed-btn").addEventListener("click", function() {
+  var feederAnim = document.getElementById("cat-feeder-animation");
+  feederAnim.innerHTML = "<img src='treats.gif' width='100px'>";
+  setTimeout(() => { feederAnim.innerHTML = ""; }, 2000);
+});
+
+// --- Cat Lounge Games ---
+document.getElementById("hide-seek-btn").addEventListener("click", function() {
+  var gameDiv = document.getElementById("hide-seek-game");
+  gameDiv.innerHTML = "<img src='hiding-cat.gif' width='100px'>";
+  setTimeout(() => { gameDiv.innerHTML = "<img src='found-cat.gif' width='100px'>"; }, 3000);
+});
+
+// --- Adoption Section ---
+document.getElementById("adopt-btn").addEventListener("click", function() {
+  var adoptionInfo = document.getElementById("adoption-info");
+  adoptionInfo.style.display = (adoptionInfo.style.display === "none") ? "block" : "none";
+});
+
+document.getElementById("submit-adoption").addEventListener("click", function(event) {
+  event.preventDefault();
+  document.getElementById("submission-message").style.display = "block";
+});
+</script>
 
 </body>
 </html>
