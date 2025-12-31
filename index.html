@@ -2,23 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: Mission Mode</title>
+<title>WHISKER BYTES: Cafe Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; }
   html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', monospace; width: 100%; height: 100%; position: fixed; }
   canvas { display: block; touch-action: none; }
   
-  #overlay { position: fixed; inset: 0; background: rgba(74, 44, 42, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; text-align: center; }
-  #logo-img { width: 180px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--pink); }
-  .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-  .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #4a2c2a; font-weight: bold; }
-  .btn-select img { width: 60px; height: 60px; display: block; margin: 0 auto 5px; }
+  #overlay { position: fixed; inset: 0; background: rgba(74, 44, 42, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; text-align: center; padding: 20px; }
+  #logo-img { width: 150px; margin-bottom: 10px; border-radius: 10px; border: 2px solid var(--pink); }
+  .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 400px; }
+  .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #4a2c2a; font-weight: bold; font-size: 12px; }
+  .btn-select img { width: 60px; height: 60px; display: block; margin: 0 auto 5px; object-fit: contain; }
 
-  #stats { position: fixed; top: 10px; left: 10px; z-index: 100; display: none; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; border: 2px solid var(--wood); font-size: 14px; }
-  #controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 10px; z-index: 500; }
-  .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .ctrl-btn { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; touch-action: manipulation; box-shadow: 0 4px #888; }
+  #stats { position: fixed; top: 10px; left: 10px; z-index: 100; display: none; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; border: 2px solid var(--wood); font-size: 13px; }
+  #home-btn { position: fixed; top: 10px; right: 10px; z-index: 101; display: none; background: var(--pink); border: 2px solid white; border-radius: 5px; padding: 5px 10px; font-weight: bold; }
+  
+  #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 5px; z-index: 500; }
+  .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .ctrl-btn { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 20px; touch-action: manipulation; box-shadow: 0 4px #888; }
 </style>
 </head>
 <body>
@@ -28,8 +30,12 @@
   <div class="char-grid">
     <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
     <div class="btn-select" onclick="startGame('luna')"><img src="luna_idle.png">LUNA</div>
+    <div class="btn-select" onclick="startGame('jinx')"><img src="jinx_idle.png">JINX</div>
+    <div class="btn-select" onclick="startGame('gingerella')"><img src="gingerella_idle.png">GINGER</div>
   </div>
 </div>
+
+<button id="home-btn" onclick="returnHome()">🏠 HOME</button>
 
 <div id="stats">
     <b>RESOURCES: <span id="scoreVal">0</span></b><br>
@@ -54,33 +60,43 @@ const ctx = canvas.getContext("2d");
 let score = 0, gameState = "START", playerHolding = null;
 const catImg = new Image();
 const bgPattern = new Image();
+const friendImages = [new Image(), new Image()];
+friendImages[0].src = 'friend1.png'; friendImages[1].src = 'friend2.png';
 
-// Friend Assets
-const friend1 = new Image(); friend1.src = 'friend1.png';
-const friend2 = new Image(); friend2.src = 'friend2.png';
-const friendImages = [friend1, friend2];
-
-const player = { x: 0, y: 0, speed: 5, flip: false, meowing: 0 };
-let furniture = [];
-let customers = [];
+const player = { x: 0, y: 0, speed: 5, facing: 1, naturalDir: 1, meowing: 0 };
+let furniture = [], customers = [];
 const menu = ["☕", "🍪"];
 
 function startGame(cat) {
   catImg.src = cat + "_idle.png";
   bgPattern.src = 'IMG_2480.jpeg'; 
+  
+  // FIX: Mochi faces Right (1), everyone else faces Left (-1)
+  player.naturalDir = (cat === 'mochi') ? 1 : -1;
+  player.facing = player.naturalDir; 
+
   document.getElementById('overlay').style.display = 'none';
   document.getElementById('controls').style.display = 'flex';
   document.getElementById('stats').style.display = 'block';
+  document.getElementById('home-btn').style.display = 'block';
   gameState = "PLAYING";
   
   furniture = [
-    { x: 100, y: 150, type: "COUNTER", emoji: "🏪", item: "☕", label: "Coffee" },
-    { x: 200, y: 150, type: "COUNTER", emoji: "🏪", item: "🍪", label: "Cookie" },
-    { x: 300, y: 350, type: "TABLE", emoji: "🟫", solid: true },
-    { x: 230, y: 350, type: "CHAIR", emoji: "🪑" }, 
-    { x: 370, y: 350, type: "CHAIR", emoji: "🪑" }
+    { x: 80, y: 150, type: "COUNTER", emoji: "🏪", item: "☕" },
+    { x: 160, y: 150, type: "COUNTER", emoji: "🏪", item: "🍪" },
+    { x: canvas.width/2, y: canvas.height/2 + 50, type: "TABLE", emoji: "🟫", solid: true },
+    { x: canvas.width/2 - 70, y: canvas.height/2 + 50, type: "CHAIR", emoji: "🪑" }, 
+    { x: canvas.width/2 + 70, y: canvas.height/2 + 50, type: "CHAIR", emoji: "🪑" }
   ];
-  spawnCustomer();
+  if(customers.length === 0) spawnCustomer();
+}
+
+function returnHome() {
+    gameState = "START";
+    document.getElementById('overlay').style.display = 'flex';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('stats').style.display = 'none';
+    document.getElementById('home-btn').style.display = 'none';
 }
 
 function spawnCustomer() {
@@ -89,9 +105,7 @@ function spawnCustomer() {
     const chair = openChairs[Math.floor(Math.random() * openChairs.length)];
     chair.occupied = true;
     customers.push({ 
-        x: chair.x, 
-        y: chair.y - 20, 
-        chair: chair, 
+        x: chair.x, y: chair.y - 15, chair: chair, 
         img: friendImages[Math.floor(Math.random() * friendImages.length)],
         order: menu[Math.floor(Math.random() * menu.length)]
     });
@@ -102,7 +116,7 @@ function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   player.x = canvas.width / 2;
-  player.y = canvas.height / 2;
+  player.y = canvas.height - 150;
 }
 window.addEventListener("resize", resize); resize();
 
@@ -110,10 +124,9 @@ const keys = { up: false, down: false, left: false, right: false };
 function bind(id, k) {
   const btn = document.getElementById(id);
   btn.ontouchstart = (e) => { 
-    e.preventDefault(); 
-    keys[k] = true; 
-    if (k === 'left') player.flip = true;
-    if (k === 'right') player.flip = false;
+    e.preventDefault(); keys[k] = true; 
+    if (k === 'left') player.facing = -1;
+    if (k === 'right') player.facing = 1;
   };
   btn.ontouchend = () => { keys[k] = false; };
 }
@@ -121,27 +134,19 @@ bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right")
 
 function interact() {
   player.meowing = 30;
-  
-  // Check Counter Pickup
   furniture.forEach(f => {
     if(f.type === "COUNTER" && Math.abs(player.x - f.x) < 60 && Math.abs(player.y - f.y) < 60) {
       playerHolding = f.item;
       document.getElementById('holdingTxt').innerText = "Holding: " + playerHolding;
     }
   });
-
-  // Check Delivery
   customers.forEach((c, i) => {
-    if(Math.abs(player.x - c.x) < 80 && Math.abs(player.y - c.y) < 80) {
-      if(playerHolding === c.order) {
-        score += 50;
-        playerHolding = null;
+    if(Math.abs(player.x - c.x) < 70 && Math.abs(player.y - c.y) < 70 && playerHolding === c.order) {
+        score += 50; playerHolding = null;
         document.getElementById('holdingTxt').innerText = "Holding: Nothing";
         document.getElementById('scoreVal').innerText = score;
-        c.chair.occupied = false;
-        customers.splice(i, 1);
+        c.chair.occupied = false; customers.splice(i, 1);
         setTimeout(spawnCustomer, 3000);
-      }
     }
   });
 }
@@ -155,10 +160,7 @@ function update() {
   if (keys.right) nextX += player.speed;
   
   let canMove = true;
-  furniture.forEach(f => {
-    if(f.solid && Math.abs(nextX - f.x) < 50 && Math.abs(nextY - f.y) < 50) canMove = false;
-  });
-
+  furniture.forEach(f => { if(f.solid && Math.abs(nextX - f.x) < 50 && Math.abs(nextY - f.y) < 50) canMove = false; });
   if(canMove) { player.x = nextX; player.y = nextY; }
   player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
   player.y = Math.max(120, Math.min(canvas.height - 110, player.y));
@@ -166,47 +168,32 @@ function update() {
 
 function draw() {
   ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  // Floor planks
   ctx.strokeStyle = "rgba(0,0,0,0.05)";
   for(let j=0; j<canvas.height; j+=40) { ctx.strokeRect(0, j, canvas.width, 1); }
   ctx.drawImage(bgPattern, 0, 0, canvas.width, 90);
 
-  // Furniture
-  ctx.font = "45px Arial";
+  ctx.font = "40px Arial";
   furniture.forEach(f => {
-      ctx.fillText(f.emoji, f.x - 25, f.y + 15);
-      if(f.type === "COUNTER") {
-          ctx.font = "bold 12px Arial";
-          ctx.fillText(f.item, f.x - 10, f.y - 30);
-          ctx.font = "45px Arial";
-      }
+      ctx.fillText(f.emoji, f.x - 20, f.y + 15);
+      if(f.type === "COUNTER") { ctx.font = "14px Arial"; ctx.fillText(f.item, f.x - 10, f.y - 25); ctx.font = "40px Arial"; }
   });
 
-  // DRAW SPRITE CUSTOMERS & ORDER BUBBLES
   customers.forEach(c => {
     ctx.drawImage(c.img, c.x - 45, c.y - 45, 90, 90);
-    
-    // Order Bubble
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.arc(c.x + 30, c.y - 40, 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "black"; ctx.lineWidth = 1; ctx.stroke();
-    ctx.fillStyle = "black"; ctx.font = "18px Arial";
-    ctx.fillText(c.order, c.x + 20, c.y - 33);
+    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(c.x + 35, c.y - 35, 18, 0, Math.PI * 2); ctx.fill();
+    ctx.stroke(); ctx.fillStyle = "black"; ctx.font = "16px Arial"; ctx.fillText(c.order, c.x + 27, c.y - 30);
   });
 
-  // DRAW LUNA/MOCHI
   ctx.save();
   ctx.translate(player.x, player.y);
-  if (player.flip) ctx.scale(-1, 1);
+  // FLIP LOGIC: If facing opposite of natural direction, flip the sprite
+  if (player.facing !== player.naturalDir) ctx.scale(-1, 1);
   ctx.drawImage(catImg, -45, -45, 90, 90);
   ctx.restore();
 
   if(player.meowing > 0) {
-    ctx.font = "bold 16px Arial"; ctx.fillStyle = "white";
-    ctx.fillText("MEOW! 🐾", player.x - 35, player.y - 60);
+    ctx.font = "bold 14px Arial"; ctx.fillStyle = "white";
+    ctx.fillText("MEOW! 🐾", player.x - 30, player.y - 55);
     player.meowing--;
   }
 }
