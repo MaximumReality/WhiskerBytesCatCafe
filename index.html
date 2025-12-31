@@ -2,197 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Whisker Bytes: Fixed Lounge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Whisker Bytes Cafe</title>
   <style>
     :root {
-      --pink: #ffc0cb;
       --brown: #6b3e2e;
-      --mochi-blue: #00f2ff;
-      --jinx-amber: #ffaa00;
-      --shelf-color: rgba(255, 255, 255, 0.4);
+      --shelf-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Prevent scrolling/bouncing on iPhone */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
-      background-color: #f7d2c4;
-      /* Wallpaper setup */
-      background-image: url('IMG_2480.jpeg');
-      background-repeat: repeat;
-      background-size: 400px;
-      animation: backgroundScroll 60s linear infinite;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica;
+      background: #f7d2c4 url('IMG_2480.jpeg') repeat;
+      background-size: 300px;
+      animation: bgScroll 60s linear infinite;
     }
 
-    @keyframes backgroundScroll {
+    @keyframes bgScroll {
       from { background-position: 0 0; }
-      to { background-position: 400px 400px; }
+      to { background-position: 300px 300px; }
     }
 
-    /* THE STAGE: This holds everything EXCEPT the floor */
-    #game-stage {
-      position: relative;
-      flex: 1; /* Takes up all space above the floor */
+    /* The main play area */
+    #stage {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
+      height: 80%; /* Ends where floor begins */
       z-index: 10;
     }
 
-    /* THE FLOOR: Solid, fixed height, sits at the very bottom */
-    #floor-container {
-      position: relative;
-      height: 180px; /* Fixed height for the floor area */
+    /* THE FLOOR: Built as a table for perfect iPhone alignment */
+    #floor-table {
+      position: absolute;
+      bottom: 0;
       width: 100%;
-      background-color: #ffffff; /* Ensures wallpaper cannot show through */
-      border-top: 6px solid var(--brown);
-      display: flex;
-      flex-wrap: wrap;
-      z-index: 100; /* Stays on top of wallpaper */
-      overflow: hidden;
+      height: 20%;
+      border-collapse: collapse;
+      background: white; /* Blocks wallpaper */
+      border-top: 4px solid var(--brown);
+      z-index: 100;
+      table-layout: fixed;
     }
 
-    .tile {
-      width: 10%; /* 10 tiles per row */
-      height: 50%; /* 2 rows high */
+    #floor-table td {
+      padding: 0;
       background-size: cover;
       background-position: center;
-      box-sizing: border-box;
     }
 
-    /* Checkerboard Pattern Fix */
-    /* Logic: Row 1 */
-    #floor-container .tile:nth-child(-n+10):nth-child(odd) { background-image: url('tile1.png'); }
-    #floor-container .tile:nth-child(-n+10):nth-child(even) { background-image: url('tile2.png'); }
-    /* Logic: Row 2 (flipped) */
-    #floor-container .tile:nth-child(n+11):nth-child(odd) { background-image: url('tile2.png'); }
-    #floor-container .tile:nth-child(n+11):nth-child(even) { background-image: url('tile1.png'); }
+    /* Checkerboard patterns */
+    .type-a { background-image: url('tile1.png'); }
+    .type-b { background-image: url('tile2.png'); }
 
-    /* Shelves & Decor */
+    /* Interactive Elements */
     .shelf {
       position: absolute;
       background: var(--shelf-color);
-      backdrop-filter: blur(5px);
-      height: 14px;
-      border-radius: 20px;
-      border: 2px solid rgba(255,255,255,0.6);
-      cursor: pointer;
+      height: 12px;
+      border-radius: 10px;
+      border: 1px solid white;
       z-index: 20;
     }
 
-    /* Cats */
-    .cat-sprite {
+    .cat {
       position: absolute;
-      width: 110px;
-      height: 110px;
-      z-index: 150; /* Above the floor and shelves */
-      transition: left 1s ease-in-out, top 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-      cursor: pointer;
+      width: 80px; /* Smaller for iPhone screens */
+      height: 80px;
+      z-index: 150;
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    .cat-sprite img {
+    .cat img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      animation: breathe 3s infinite ease-in-out;
     }
 
-    @keyframes breathe {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    /* UI controls */
-    #ui-overlay {
-      position: fixed;
-      bottom: 200px; /* Sits just above the floor */
-      left: 50%;
-      transform: translateX(-50%);
+    #controls {
+      position: absolute;
+      bottom: 22%;
+      width: 90%;
+      left: 5%;
       background: rgba(255,255,255,0.9);
-      padding: 10px 25px;
-      border-radius: 50px;
-      border: 3px solid var(--brown);
+      padding: 10px;
+      border-radius: 20px;
       display: flex;
-      align-items: center;
-      gap: 15px;
+      justify-content: space-around;
       z-index: 200;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
-
-    .toy { font-size: 2rem; cursor: grab; }
-    .hidden { display: none; }
   </style>
 </head>
 <body>
 
-  <header style="background: var(--brown); color: white; padding: 10px; z-index: 300; display: flex; justify-content: space-between;">
-    <h2 style="margin:0;">Whisker Bytes: Tiled Lounge</h2>
-    <button onclick="togglePhoto()">📸 Photo Mode</button>
-  </header>
+  <div id="stage">
+    <div class="shelf" style="top: 20%; left: 10%; width: 100px;" onclick="jump('10%', '20%')"></div>
+    <div class="shelf" style="top: 40%; left: 45%; width: 120px;" onclick="jump('45%', '40%')"></div>
+    <div class="shelf" style="top: 60%; left: 20%; width: 100px;" onclick="jump('20%', '60%')"></div>
 
-  <div id="game-stage">
-    <div class="shelf" style="top: 20%; left: 10%; width: 150px;" onclick="moveCat(10, 20)"></div>
-    <div class="shelf" style="top: 45%; left: 40%; width: 200px;" onclick="moveCat(40, 45)"></div>
-    <div class="shelf" style="top: 25%; left: 70%; width: 170px;" onclick="moveCat(70, 25)"></div>
-
-    <div id="mochi" class="cat-sprite" style="left: 10%; top: 80%;" onclick="selectCat('mochi')">
-      <img src="mochi_idle.png" alt="Mochi">
-    </div>
-    <div id="jinx" class="cat-sprite" style="left: 30%; top: 80%;" onclick="selectCat('jinx')">
-      <img src="jinx_idle.png" alt="Jinx">
-    </div>
-    <div id="luna" class="cat-sprite" style="left: 50%; top: 80%;" onclick="selectCat('luna')">
-      <img src="luna_idle.png" alt="Luna">
-    </div>
-    <div id="gingerella" class="cat-sprite" style="left: 70%; top: 80%;" onclick="selectCat('gingerella')">
-      <img src="gingerella_idle.png" alt="Gingerella">
+    <div id="active-cat" class="cat" style="left: 10%; top: 82%;">
+      <img src="mochi_idle.png" id="cat-img">
     </div>
   </div>
 
-  <div id="floor-container">
-    </div>
+  <table id="floor-table">
+    <tr id="row1"></tr>
+    <tr id="row2"></tr>
+  </table>
 
-  <div id="ui-overlay">
-    <div class="toy" draggable="true" ondragstart="drag(event)" id="laser">🔴</div>
-    <div class="toy" draggable="true" ondragstart="drag(event)" id="fish">🐟</div>
-    <div id="status" style="font-size: 0.8rem; font-weight: bold;">Tap a cat to select!</div>
+  <div id="controls">
+    <button onclick="changeCat('mochi_idle.png')">Mochi</button>
+    <button onclick="changeCat('jinx_idle.png')">Jinx</button>
+    <button onclick="jump('10%', '82%')">Floor</button>
   </div>
 
   <script>
-    let activeCat = null;
-
-    // Build the floor tiles
-    const floor = document.getElementById('floor-container');
-    for (let i = 0; i < 20; i++) {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      floor.appendChild(tile);
+    // Build the checkerboard floor
+    const r1 = document.getElementById('row1');
+    const r2 = document.getElementById('row2');
+    
+    for(let i=0; i<6; i++) { // 6 tiles wide is better for iPhone portrait
+      r1.innerHTML += `<td class="${i%2==0 ? 'type-a' : 'type-b'}"></td>`;
+      r2.innerHTML += `<td class="${i%2==0 ? 'type-b' : 'type-a'}"></td>`;
     }
 
-    function selectCat(id) {
-      activeCat = id;
-      document.getElementById('status').innerText = id.toUpperCase() + " selected!";
-      // Little jump effect
-      const el = document.getElementById(id);
-      el.animate([{transform:'translateY(0)'},{transform:'translateY(-20px)'},{transform:'translateY(0)'}], 300);
+    function jump(x, y) {
+      const cat = document.getElementById('active-cat');
+      cat.style.left = x;
+      // Adjust y for cat height
+      const yVal = parseFloat(y);
+      cat.style.top = (yVal - 8) + "%";
     }
 
-    function moveCat(x, y) {
-      if (!activeCat) return;
-      const cat = document.getElementById(activeCat);
-      cat.style.left = x + "%";
-      cat.style.top = (y - 12) + "%"; 
-    }
-
-    function drag(ev) { ev.dataTransfer.setData("toy", ev.target.id); }
-
-    function togglePhoto() {
-      document.getElementById('ui-overlay').classList.toggle('hidden');
-      document.querySelectorAll('.shelf').forEach(s => s.classList.toggle('hidden'));
+    function changeCat(imgSrc) {
+      document.getElementById('cat-img').src = imgSrc;
     }
   </script>
 </body>
