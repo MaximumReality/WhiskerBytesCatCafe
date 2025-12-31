@@ -1,173 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Whisker Bytes: Sushi Lounge</title>
-  <style>
-    :root {
-      --dark-wood: #4a2c2a;
-      --floor-height: 120px;
-      --ui-height: 80px;
-    }
-
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
-      overflow: hidden; position: fixed;
-      background-color: #f7d2c4;
-    }
-
-    /* THE WORLD SCROLLER */
-    #scroller {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: calc(100% - var(--ui-height));
-      will-change: transform;
-    }
-
-    #bg-layer {
-      position: absolute;
-      width: 400%; height: 100%;
-      background: url('IMG_2480.jpeg') repeat-x;
-      background-size: contain;
-    }
-
-    /* HONEYCOMB SHELVES */
-    .honeycomb {
-      position: absolute;
-      width: 100px; height: 86px;
-      background-color: var(--dark-wood);
-      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-    }
-
-    /* THE FLOOR & SUSHI BELT */
-    #floor-layer {
-      position: absolute;
-      bottom: 0; 
-      width: 400%; 
-      height: var(--floor-height);
-      background: #fff;
-      border-top: 6px solid var(--dark-wood);
-      display: flex; /* Forces tiles to stay in a flat row */
-    }
-
-    .tile {
-      flex: 0 0 100px; /* Each tile is exactly 100px wide, no stacking */
-      height: 100%;
-      background-size: cover;
-    }
-    .tile:nth-child(odd) { background-image: url('tile1.png'); }
-    .tile:nth-child(even) { background-image: url('tile2.png'); }
-
-    /* SUSHI: Positioned exactly on top of the floor */
-    .treat {
-      position: absolute;
-      bottom: calc(var(--floor-height) + 5px);
-      font-size: 35px;
-      z-index: 110;
-    }
-
-    /* THE CAT: Centered and sitting on the floor */
-    .cat {
-      position: fixed;
-      left: 50%;
-      bottom: calc(var(--ui-height) + var(--floor-height) - 20px);
-      width: 90px; height: 90px;
-      transform: translateX(-50%);
-      transition: bottom 0.5s ease-out;
-      z-index: 200;
-    }
-    .cat img { width: 100%; height: 100%; object-fit: contain; }
-
-    /* UI: MOVED BELOW THE FLOOR */
-    #ui-bar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      height: var(--ui-height);
-      background: var(--dark-wood);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 500;
-    }
-
-    button {
-      padding: 10px 20px;
-      border-radius: 12px;
-      border: none;
-      background: white;
-      font-weight: bold;
-      font-size: 18px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>WHISKER BYTES: Cafe Mission</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #f7d2c4; font-family: 'Courier New', Courier, monospace; }
+  canvas { display: block; }
+  #overlay { position: fixed; inset: 0; background: rgba(107, 62, 46, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 20px; text-align: center; color: white; }
+  .title { font-size: 2rem; font-weight: bold; margin-bottom: 10px; color: #ffc0cb; text-shadow: 2px 2px #4a2c2a; }
+  .char-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+  .char-btn { background: #fff; border: 3px solid #6b3e2e; border-radius: 15px; padding: 10px; cursor: pointer; color: #6b3e2e; }
+  .char-btn img { width: 60px; height: 60px; object-fit: contain; }
+  #controls { position: fixed; bottom: 0; left: 0; width: 100%; height: 100px; background: #4a2c2a; display: none; justify-content: center; align-items: center; gap: 20px; z-index: 100; }
+  button { font-size: 30px; width: 70px; height: 70px; border-radius: 15px; border: none; background: white; touch-action: manipulation; }
+  #stats { position: fixed; top: 10px; left: 20px; font-size: 20px; color: #4a2c2a; font-weight: bold; z-index: 100; display: none; }
+</style>
 </head>
 <body>
 
-  <div id="scroller">
-    <div id="bg-layer"></div>
-    
-    <div id="world-content">
-      <div class="honeycomb" style="top: 20%; left: 300px;"></div>
-      <div class="honeycomb" style="top: 40%; left: 800px;"></div>
-      
-      <div class="treat" style="left: 150px;">🍣</div>
-      <div class="treat" style="left: 450px;">🍤</div>
-      <div class="treat" style="left: 750px;">🍙</div>
-      <div class="treat" style="left: 1050px;">🍣</div>
-    </div>
-
-    <div id="floor-layer">
-      </div>
+<div id="overlay">
+  <div class="title">WHISKER BYTES</div>
+  <p>SELECT YOUR CAT</p>
+  <div class="char-grid">
+    <div class="char-btn" onclick="selectChar('mochi')"><img src="mochi_idle.png"><p>Mochi</p></div>
+    <div class="char-btn" onclick="selectChar('jinx')"><img src="jinx_idle.png"><p>Jinx</p></div>
   </div>
+</div>
 
-  <div class="cat" id="player-cat">
-    <img src="mochi_idle.png" id="current-cat">
-  </div>
+<div id="stats">SUSHI COLLECTED: <span id="scoreVal">0</span></div>
+<canvas id="game"></canvas>
 
-  <div id="ui-bar">
-    <button onclick="moveWorld(-100)">⬅️</button>
-    <button onclick="jump()">🚀</button>
-    <button onclick="moveWorld(100)">➡️</button>
-    <button onclick="swap()">🔄</button>
-  </div>
+<div id="controls">
+  <button id="left">⬅️</button>
+  <button id="jump">⬆️</button>
+  <button id="right">➡️</button>
+  <button onclick="location.reload()">🎬</button>
+</div>
 
-  <script>
-    let currentPos = 0;
-    const scroller = document.getElementById('scroller');
-    const floor = document.getElementById('floor-layer');
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-    // Create 40 tiles in a flat row
-    for(let i=0; i<40; i++) {
-      const t = document.createElement('div');
-      t.className = 'tile';
-      floor.appendChild(t);
+let gameState = "START", cameraX = 0, score = 0;
+const worldWidth = 3000;
+const ROAD_H = 100; 
+let groundY;
+
+const catImg = new Image();
+function selectChar(cat) {
+  catImg.src = cat + "_idle.png";
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('stats').style.display = 'block';
+  gameState = "PLAY";
+}
+
+// Background Pattern
+const bgPattern = new Image();
+bgPattern.src = 'IMG_2480.jpeg';
+
+// Generate Designer Layout
+const honeycombs = Array.from({length: 10}, () => ({ x: Math.random() * worldWidth, y: 150 + Math.random() * 200 }));
+const sushi = Array.from({length: 15}, () => ({ x: Math.random() * worldWidth, type: ["🍣","🍤","🍙"][Math.floor(Math.random()*3)], collected: false }));
+
+const player = { x: 500, y: 0, vy: 0, jumping: false, dir: 1, speed: 6 };
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  groundY = canvas.height - ROAD_H - 100;
+  player.y = groundY;
+}
+window.addEventListener("resize", resize); resize();
+
+let keys = { left: false, right: false, jump: false };
+function bind(id, k) {
+  const btn = document.getElementById(id);
+  btn.ontouchstart = (e) => { e.preventDefault(); keys[k] = true; };
+  btn.ontouchend = (e) => { e.preventDefault(); keys[k] = false; };
+}
+bind("left", "left"); bind("right", "right"); bind("jump", "jump");
+
+function update() {
+  if (gameState !== "PLAY") return;
+
+  if (keys.left) { player.x -= player.speed; player.dir = -1; }
+  if (keys.right) { player.x += player.speed; player.dir = 1; }
+  
+  // Jump logic
+  if (keys.jump && !player.jumping) { player.vy = -18; player.jumping = true; }
+  player.vy += 0.8; 
+  player.y += player.vy;
+
+  if (player.y > groundY) { player.y = groundY; player.vy = 0; player.jumping = false; }
+
+  // Loop world
+  if (player.x < 0) player.x = worldWidth;
+  if (player.x > worldWidth) player.x = 0;
+
+  // Sushi collection
+  sushi.forEach(s => {
+    if(!s.collected && Math.abs(player.x - s.x) < 40 && Math.abs(player.y - groundY) < 50) {
+      s.collected = true; score++;
+      document.getElementById('scoreVal').innerText = score;
     }
+  });
 
-    function moveWorld(delta) {
-      currentPos += delta;
-      // Loop after 2000px of scrolling
-      if (currentPos > 2000) currentPos = 0;
-      if (currentPos < 0) currentPos = 2000;
-      
-      scroller.style.transform = `translateX(-${currentPos}px)`;
-    }
+  cameraX = player.x - canvas.width / 2;
+}
 
-    function jump() {
-      const cat = document.getElementById('player-cat');
-      const ground = 180; // Total height of UI + Floor
-      cat.style.bottom = (ground + 150) + "px";
-      setTimeout(() => {
-        cat.style.bottom = (ground - 20) + "px";
-      }, 500);
-    }
+function drawHex(x, y) {
+  ctx.fillStyle = "#4a2c2a";
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    ctx.lineTo(x + 50 * Math.cos(i * Math.PI / 3), y + 50 * Math.sin(i * Math.PI / 3));
+  }
+  ctx.closePath(); ctx.fill();
+}
 
-    let isMochi = true;
-    function swap() {
-      isMochi = !isMochi;
-      document.getElementById('current-cat').src = isMochi ? "mochi_idle.png" : "jinx_idle.png";
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (gameState === "START") return;
+
+  // Draw Background (Seamless Loop)
+  const bgX = -(cameraX * 0.5) % canvas.width;
+  ctx.drawImage(bgPattern, bgX, 0, canvas.width, canvas.height);
+  ctx.drawImage(bgPattern, bgX + canvas.width, 0, canvas.width, canvas.height);
+
+  // Draw Floor
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, groundY + 80, canvas.width, 200);
+  ctx.strokeStyle = "#4a2c2a"; ctx.lineWidth = 5;
+  ctx.strokeRect(-10, groundY + 80, canvas.width + 20, 5);
+
+  // Draw Items (relative to camera)
+  honeycombs.forEach(h => drawHex(h.x - cameraX, h.y));
+  sushi.forEach(s => {
+    if(!s.collected) {
+      ctx.font = "30px serif";
+      ctx.fillText(s.type, s.x - cameraX, groundY + 70);
     }
-  </script>
+  });
+
+  // Draw Player
+  ctx.save();
+  if (player.dir === -1) { ctx.translate(player.x - cameraX + 40, 0); ctx.scale(-1, 1); ctx.drawImage(catImg, 0, player.y, 80, 80); }
+  else { ctx.drawImage(catImg, player.x - cameraX - 40, player.y, 80, 80); }
+  ctx.restore();
+}
+
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+loop();
+</script>
 </body>
 </html>
