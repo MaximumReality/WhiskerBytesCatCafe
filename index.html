@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Whisker Bytes: Endless Sushi Lounge</title>
+  <title>Whisker Bytes: Sushi Lounge</title>
   <style>
     :root {
       --dark-wood: #4a2c2a;
-      --belt-color: #333;
+      --floor-height: 120px;
+      --ui-height: 80px;
     }
 
     html, body {
@@ -17,75 +18,88 @@
       background-color: #f7d2c4;
     }
 
-    /* THE WORLD WRAPPER */
+    /* THE WORLD SCROLLER */
     #scroller {
       position: absolute;
-      width: 100%; height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: calc(100% - var(--ui-height));
       will-change: transform;
     }
 
-    /* ENDLESS WALLPAPER */
     #bg-layer {
       position: absolute;
-      width: 300%; height: 100%;
+      width: 400%; height: 100%;
       background: url('IMG_2480.jpeg') repeat-x;
       background-size: contain;
-      z-index: 1;
     }
 
-    /* HONEYCOMB SHELVES (Repeated) */
+    /* HONEYCOMB SHELVES */
     .honeycomb {
       position: absolute;
-      width: 110px; height: 95px;
+      width: 100px; height: 86px;
       background-color: var(--dark-wood);
       clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-      z-index: 50;
     }
 
-    /* SUSHI BELT & FLOOR */
+    /* THE FLOOR & SUSHI BELT */
     #floor-layer {
       position: absolute;
-      bottom: 0; width: 300%; height: 20%;
-      background: #fff; border-top: 6px solid var(--dark-wood);
-      display: flex; z-index: 100;
+      bottom: 0; 
+      width: 400%; 
+      height: var(--floor-height);
+      background: #fff;
+      border-top: 6px solid var(--dark-wood);
+      display: flex; /* Forces tiles to stay in a flat row */
     }
 
-    .tile { flex: 0 0 3.333%; height: 100%; background-size: cover; }
+    .tile {
+      flex: 0 0 100px; /* Each tile is exactly 100px wide, no stacking */
+      height: 100%;
+      background-size: cover;
+    }
     .tile:nth-child(odd) { background-image: url('tile1.png'); }
     .tile:nth-child(even) { background-image: url('tile2.png'); }
 
-    /* FLOATING TREATS ON THE BELT */
+    /* SUSHI: Positioned exactly on top of the floor */
     .treat {
       position: absolute;
-      bottom: 12%; font-size: 30px;
+      bottom: calc(var(--floor-height) + 5px);
+      font-size: 35px;
       z-index: 110;
     }
 
-    /* THE CAT */
+    /* THE CAT: Centered and sitting on the floor */
     .cat {
-      position: fixed; /* Fixed to screen so world moves behind it */
-      left: 50%; bottom: 20%;
-      width: 100px; height: 100px;
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--ui-height) + var(--floor-height) - 20px);
+      width: 90px; height: 90px;
       transform: translateX(-50%);
-      transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: bottom 0.5s ease-out;
       z-index: 200;
-      pointer-events: none;
     }
     .cat img { width: 100%; height: 100%; object-fit: contain; }
 
-    /* CONTROLS */
-    #ui {
-      position: fixed; top: 20px; right: 20px;
-      display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+    /* UI: MOVED BELOW THE FLOOR */
+    #ui-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: var(--ui-height);
+      background: var(--dark-wood);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 500;
     }
-    #move-controls {
-      position: fixed; bottom: 25%; width: 100%;
-      display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box;
-      z-index: 1000;
-    }
+
     button {
-      padding: 15px; border-radius: 50%; border: 2px solid var(--dark-wood);
-      background: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: none;
+      background: white;
+      font-weight: bold;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -94,72 +108,65 @@
   <div id="scroller">
     <div id="bg-layer"></div>
     
-    <div id="items">
-      <div class="honeycomb" style="top: 20%; left: 20%;"></div>
-      <div class="honeycomb" style="top: 45%; left: 80%;"></div>
-      <div class="honeycomb" style="top: 20%; left: 120%;"></div>
-      <div class="honeycomb" style="top: 45%; left: 180%;"></div>
-      <div class="honeycomb" style="top: 20%; left: 220%;"></div>
-      <div class="honeycomb" style="top: 45%; left: 280%;"></div>
+    <div id="world-content">
+      <div class="honeycomb" style="top: 20%; left: 300px;"></div>
+      <div class="honeycomb" style="top: 40%; left: 800px;"></div>
+      
+      <div class="treat" style="left: 150px;">🍣</div>
+      <div class="treat" style="left: 450px;">🍤</div>
+      <div class="treat" style="left: 750px;">🍙</div>
+      <div class="treat" style="left: 1050px;">🍣</div>
     </div>
 
-    <div class="treat" style="left: 15%;">🍣</div>
-    <div class="treat" style="left: 45%;">🍤</div>
-    <div class="treat" style="left: 75%;">🍙</div>
-    <div class="treat" style="left: 115%;">🍣</div>
-    <div class="treat" style="left: 145%;">🍤</div>
-    <div class="treat" style="left: 175%;">🍙</div>
-
-    <div id="floor-layer"></div>
+    <div id="floor-layer">
+      </div>
   </div>
 
   <div class="cat" id="player-cat">
     <img src="mochi_idle.png" id="current-cat">
   </div>
 
-  <div id="ui">
-    <button onclick="swap('mochi_idle.png')">🐱</button>
-    <button onclick="swap('jinx_idle.png')">🐈</button>
-  </div>
-
-  <div id="move-controls">
-    <button onclick="scrollWorld(-15)">⬅️</button>
+  <div id="ui-bar">
+    <button onclick="moveWorld(-100)">⬅️</button>
     <button onclick="jump()">🚀</button>
-    <button onclick="scrollWorld(15)">➡️</button>
+    <button onclick="moveWorld(100)">➡️</button>
+    <button onclick="swap()">🔄</button>
   </div>
 
   <script>
-    let pos = 0;
+    let currentPos = 0;
     const scroller = document.getElementById('scroller');
     const floor = document.getElementById('floor-layer');
 
-    // Populate Floor
-    for(let i=0; i<30; i++) {
+    // Create 40 tiles in a flat row
+    for(let i=0; i<40; i++) {
       const t = document.createElement('div');
       t.className = 'tile';
       floor.appendChild(t);
     }
 
-    function scrollWorld(delta) {
-      pos += delta;
+    function moveWorld(delta) {
+      currentPos += delta;
+      // Loop after 2000px of scrolling
+      if (currentPos > 2000) currentPos = 0;
+      if (currentPos < 0) currentPos = 2000;
       
-      // Loop Logic: Reset after 100vw to create infinite effect
-      if (pos > 100) pos = 0;
-      if (pos < 0) pos = 100;
-
-      scroller.style.transform = `translateX(-${pos}vw)`;
+      scroller.style.transform = `translateX(-${currentPos}px)`;
     }
 
     function jump() {
       const cat = document.getElementById('player-cat');
-      cat.style.bottom = "50%";
+      const ground = 180; // Total height of UI + Floor
+      cat.style.bottom = (ground + 150) + "px";
       setTimeout(() => {
-        cat.style.bottom = "20%";
-      }, 600);
+        cat.style.bottom = (ground - 20) + "px";
+      }, 500);
     }
 
-    function swap(img) {
-      document.getElementById('current-cat').src = img;
+    let isMochi = true;
+    function swap() {
+      isMochi = !isMochi;
+      document.getElementById('current-cat').src = isMochi ? "mochi_idle.png" : "jinx_idle.png";
     }
   </script>
 </body>
