@@ -1,250 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>WHISKER BYTES: STABILITY FIX</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-<style>
-    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; --rush: #ff007f; }
-    * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
-    body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
-    canvas { display: block; background: #3d2b1f; width: 100vw; height: 100vh; }
-    
-    #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 5000; color: white; text-align: center; padding-bottom: 50px; }
-    #logo-header { position: absolute; top: 0; left: 0; width: 100%; height: 45%; background: url('whiskerbytes.png') center/contain no-repeat; z-index: 5001; pointer-events: none; }
-    
-    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; z-index: 6000; margin-bottom: 20px; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; font-weight: bold; width: 110px; text-transform: lowercase; }
-    .btn-select img { width: 45px; height: 45px; display: block; margin: 0 auto; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Whisker Bytes Cafe</title>
+  <style>
+    :root {
+      --brown: #6b3e2e;
+      --shelf-color: rgba(255, 255, 255, 0.5);
+    }
 
-    .menu-capsule-container { display: flex; gap: 10px; z-index: 6000; margin-bottom: 10px; }
-    .capsule-btn { background: rgba(255,255,255,0.9); border: 2px solid var(--wood); border-radius: 20px; padding: 8px 15px; color: var(--wood); font-weight: bold; font-size: 14px; text-transform: lowercase; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+    /* Prevent scrolling/bouncing on iPhone */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
+    }
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
-    .scroll-box { background: #fff8f2; border: 4px solid var(--wood); border-radius: 18px; width: 85%; max-width: 320px; height: 350px; text-align: center; color: #4a2c2a; position: relative; overflow: hidden; }
-    .scroll-content { position: absolute; left: 0; width: 100%; bottom: -110%; padding: 0 20px; box-sizing: border-box; text-transform: lowercase; }
-    @keyframes scrollText { 0% { bottom: -110%; } 100% { bottom: 100%; } }
-    .close-btn { position: absolute; top: 10px; right: 10px; background: white; border: 2px solid var(--wood); border-radius: 50%; width: 30px; height: 30px; z-index: 10001; font-weight: bold; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica;
+      background: #f7d2c4 url('IMG_2480.jpeg') repeat;
+      background-size: 300px;
+      animation: bgScroll 60s linear infinite;
+    }
 
-    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; text-transform: lowercase; }
-    #day-over { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 20px 40px; border: 4px solid var(--gold); border-radius: 20px; font-size: 24px; font-weight: bold; z-index: 8000; display: none; text-align: center; text-transform: lowercase; }
+    @keyframes bgScroll {
+      from { background-position: 0 0; }
+      to { background-position: 300px 300px; }
+    }
 
-    #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 5px; z-index: 1000; }
-    .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-    .ctrl-btn { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 24px; display: flex; align-items: center; justify-content: center; opacity: 0.9; }
-</style>
+    /* The main play area */
+    #stage {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80%; /* Ends where floor begins */
+      z-index: 10;
+    }
+
+    /* THE FLOOR: Built as a table for perfect iPhone alignment */
+    #floor-table {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 20%;
+      border-collapse: collapse;
+      background: white; /* Blocks wallpaper */
+      border-top: 4px solid var(--brown);
+      z-index: 100;
+      table-layout: fixed;
+    }
+
+    #floor-table td {
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Checkerboard patterns */
+    .type-a { background-image: url('tile1.png'); }
+    .type-b { background-image: url('tile2.png'); }
+
+    /* Interactive Elements */
+    .shelf {
+      position: absolute;
+      background: var(--shelf-color);
+      height: 12px;
+      border-radius: 10px;
+      border: 1px solid white;
+      z-index: 20;
+    }
+
+    .cat {
+      position: absolute;
+      width: 80px; /* Smaller for iPhone screens */
+      height: 80px;
+      z-index: 150;
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .cat img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    #controls {
+      position: absolute;
+      bottom: 22%;
+      width: 90%;
+      left: 5%;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-around;
+      z-index: 200;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
 <body>
 
-<div id="overlay">
-    <div id="logo-header"></div> 
-    <div class="char-grid">
-        <div onpointerdown="startGame('mochi')" class="btn-select"><img src="mochi_idle.png">mochi</div>
-        <div onpointerdown="startGame('gingerella')" class="btn-select"><img src="gingerella_idle.png">ginger</div>
-        <div onpointerdown="startGame('luna')" class="btn-select"><img src="luna_idle.png">luna</div>
-        <div onpointerdown="startGame('jinx')" class="btn-select"><img src="jinx_idle.png">jinx</div>
+  <div id="stage">
+    <div class="shelf" style="top: 20%; left: 10%; width: 100px;" onclick="jump('10%', '20%')"></div>
+    <div class="shelf" style="top: 40%; left: 45%; width: 120px;" onclick="jump('45%', '40%')"></div>
+    <div class="shelf" style="top: 60%; left: 20%; width: 100px;" onclick="jump('20%', '60%')"></div>
+
+    <div id="active-cat" class="cat" style="left: 10%; top: 82%;">
+      <img src="mochi_idle.png" id="cat-img">
     </div>
-    <div class="menu-capsule-container">
-        <div class="capsule-btn" onclick="openModal('manual')">📖 manual</div>
-        <div class="capsule-btn" onclick="openModal('credits')">🐾 credits</div>
-    </div>
-</div>
+  </div>
 
-<div id="modal-ui" class="modal-overlay">
-    <div class="scroll-box">
-        <button class="close-btn" onclick="closeModal()">✕</button>
-        <div class="scroll-content" id="modal-scroller"></div>
-    </div>
-</div>
+  <table id="floor-table">
+    <tr id="row1"></tr>
+    <tr id="row2"></tr>
+  </table>
 
-<div id="day-over">🎆 shift over! 🎆<br><span style="font-size:16px;">happy new year!</span></div>
+  <div id="controls">
+    <button onclick="changeCat('mochi_idle.png')">Mochi</button>
+    <button onclick="changeCat('jinx_idle.png')">Jinx</button>
+    <button onclick="jump('10%', '82%')">Floor</button>
+  </div>
 
-<div id="stats">
-    ⭐ <span id="scoreVal">0</span> | 🏆 best: <span id="highVal">0</span><br>
-    🕒 <span id="timeVal">9:00 am</span><br>
-    <span id="holdingTxt" style="color: #8b4513;">🐾 empty</span>
-</div>
-
-<canvas id="game"></canvas>
-
-<div id="controls">
-    <div class="d-pad">
-        <div></div><button class="ctrl-btn" id="up">⬆️</button><div></div>
-        <button class="ctrl-btn" id="left">⬅️</button>
-        <button class="ctrl-btn" id="down">⬇️</button>
-        <button class="ctrl-btn" id="right">➡️</button>
-    </div>
-    <button class="ctrl-btn" id="action-btn" style="width:140px; border-radius: 35px; background:var(--pink); text-transform: lowercase;" onpointerdown="interact()">📢 meow</button>
-</div>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-let gameActive = false, score = 0, gameMinutes = 540, unlockedCake = false;
-let playerHolding = null, tvActive = false, radioActive = false, isRushHour = false;
-let musicNotes = [];
-
-const keys = { up: false, down: false, left: false, right: false };
-const catImg = new Image(), bgImg = new Image();
-const f1 = new Image(), f2 = new Image(), f3 = new Image();
-f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'friend3.png';
-
-const player = { x: 200, y: 350, speed: 5, facing: 1, baseFacing: 1, cookTime: 60 };
-let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
-
-let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
-document.getElementById('highVal').innerText = highScore;
-
-function openModal(type) {
-    const scroller = document.getElementById('modal-scroller');
-    if(type === 'manual') {
-        scroller.innerHTML = `<h2>📖 staff manual</h2><p>1. move with arrows.</p><p>2. meow at stations to prep food.</p><p>3. 300 points unlocks cake!</p><p>4. 8pm is rush hour.</p>`;
-    } else {
-        scroller.innerHTML = `<h2>🐾 credits</h2><p>created by lori kaye sifuentes</p><p>inspired by luna & stella 💖</p><p>happy new year 2025! 🐾</p>`;
-    }
-    document.getElementById('modal-ui').style.display = 'flex';
-    scroller.style.animation = "scrollText 12s linear forwards";
-}
-function closeModal() { document.getElementById('modal-ui').style.display = 'none'; }
-
-window.startGame = function(catId) {
-    catImg.src = catId + '_idle.png';
-    bgImg.src = 'IMG_2480.jpeg'; 
-    player.baseFacing = (catId === 'mochi') ? 1 : -1;
-    player.speed = (catId === 'luna') ? 8 : 5;
-    player.cookTime = (catId === 'mochi') ? 40 : 80;
-
-    const midY = 160 + (canvas.height - 160 - 160) / 2;
-    furniture = [
-        {x: 80, y: 200, type: "STATION", item: "☕", e: "☕"},
-        {x: 160, y: 200, type: "STATION", item: "🍪", e: "🍪"},
-        {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
-        {x: 320, y: 200, type: "TRASH", e: "🗑️"},
-        {x: 50, y: midY, type: "RADIO", e: "📻"},
-        {x: canvas.width - 50, y: midY, type: "TV", e: "📺"},
-        {x: canvas.width / 2, y: midY, type: "TABLE", e: "🟫"},
-        {x: canvas.width / 2 - 65, y: midY, type: "CHAIR", e: "🪑", occupied: false},
-        {x: canvas.width / 2 + 65, y: midY, type: "CHAIR", e: "🪑", occupied: false}
-    ];
-
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('stats').style.display = 'block';
-    document.getElementById('controls').style.display = 'flex';
-    gameActive = true;
-    requestAnimationFrame(loop);
-};
-
-function interact() {
-    furniture.forEach(f => {
-        if (Math.hypot(player.x - f.x, player.y - f.y) < 75) {
-            if (f.type === "STATION" && !playerHolding) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
-            if (f.type === "TRASH") { playerHolding = null; document.getElementById('holdingTxt').innerText = "🐾 empty"; }
-            if (f.type === "RADIO") radioActive = !radioActive;
-            if (f.type === "TV") tvActive = !tvActive;
-        }
-    });
-    customers.forEach(c => {
-        if (Math.hypot(player.x - c.x, player.y - c.y) < 85 && playerHolding === c.order) {
-            score += c.isCritic ? 500 : 75; playerHolding = null; c.chair.occupied = false;
-            customers = customers.filter(cust => cust !== c);
-            if(score > highScore) { highScore = score; localStorage.setItem("whiskerBytesHigh", score); }
-            if(score >= 300 && !unlockedCake) { furniture.push({x: 400, y: 200, type: "STATION", item: "🍰", e: "🍰"}); unlockedCake = true; }
-            document.getElementById('holdingTxt').innerText = "🐾 empty";
-        }
-    });
-}
-
-function update() {
-    if (!gameActive) return;
-    if (!kitchen.active) {
-        if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
-        if (keys.left) { player.x -= player.speed; player.facing = -1; } if (keys.right) { player.x += player.speed; player.facing = 1; }
-    }
-    player.y = Math.max(225, Math.min(canvas.height - 210, player.y));
-    player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
-
-    if (kitchen.active) { kitchen.timer--; if (kitchen.timer <= 0) { kitchen.active = false; playerHolding = kitchen.item; document.getElementById('holdingTxt').innerText = playerHolding; }}
-
-    gameMinutes += 0.15;
-    if (gameMinutes >= 1200) isRushHour = true;
-    if (gameMinutes >= 1260) { gameActive = false; document.getElementById('day-over').style.display = 'block'; }
-
-    if (Math.random() < (isRushHour ? 0.02 : 0.007)) {
-        let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
-        if (chair) {
-            chair.occupied = true;
-            let isC = Math.random() < 0.15;
-            customers.push({ 
-                x: chair.x, y: chair.y, chair, 
-                order: isC ? (unlockedCake ? "🍰" : "☕") : (unlockedCake && Math.random() > 0.7 ? "🍰" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)]), 
-                isCritic: isC, 
-                img: isC ? f3 : (Math.random()>0.5?f1:f2) 
-            });
-        }
-    }
-
-    if (radioActive && Math.random() < 0.03) {
-        musicNotes.push({ x: 60, y: 300, vx: (Math.random()-0.5), vy: -0.5 - Math.random(), life: 150 });
-    }
-    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i,1); });
-}
-
-function draw() {
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
+  <script>
+    // Build the checkerboard floor
+    const r1 = document.getElementById('row1');
+    const r2 = document.getElementById('row2');
     
-    const tileSize = 60;
-    for(let x=0; x<canvas.width; x+=tileSize) {
-        for(let y=160; y<canvas.height; y+=tileSize) {
-            ctx.fillStyle = (x+y)/tileSize%2===0 ? "#d2b48c" : "#c1a37b";
-            ctx.fillRect(x, y, tileSize, tileSize);
-            ctx.strokeStyle = "rgba(0,0,0,0.05)"; ctx.strokeRect(x,y,tileSize,tileSize);
-        }
+    for(let i=0; i<6; i++) { // 6 tiles wide is better for iPhone portrait
+      r1.innerHTML += `<td class="${i%2==0 ? 'type-a' : 'type-b'}"></td>`;
+      r2.innerHTML += `<td class="${i%2==0 ? 'type-b' : 'type-a'}"></td>`;
     }
 
-    furniture.forEach(f => {
-        if(f.type === "STATION") { ctx.fillStyle="#5d4037"; ctx.fillRect(f.x-40, f.y+22, 80, 10); }
-        ctx.font = "38px Arial"; ctx.fillText(f.e, f.x-19, f.y+15);
-        if(f.type === "TV" && tvActive) { ctx.fillStyle = "rgba(0, 255, 255, 0.1)"; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x-60, canvas.height); ctx.lineTo(f.x+60, canvas.height); ctx.fill(); }
-    });
-
-    musicNotes.forEach(n => { ctx.fillStyle=`rgba(0,0,0,${n.life/150})`; ctx.font="20px Arial"; ctx.fillText("♪", n.x, n.y); });
-    
-    customers.forEach(c => { 
-        if(c.img.complete && c.img.width > 0) {
-            ctx.drawImage(c.img, c.x-35, c.y-35, 70, 70); 
-        } else {
-            // Safety fallback shadow if image flickers
-            ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.beginPath(); ctx.ellipse(c.x, c.y+30, 20, 10, 0, 0, Math.PI*2); ctx.fill();
-        }
-        ctx.fillStyle="white"; ctx.font="bold 18px Arial"; ctx.fillText(c.order, c.x-10, c.y-45);
-    });
-
-    ctx.save(); ctx.translate(player.x, player.y);
-    if(player.facing !== player.baseFacing) ctx.scale(-1, 1);
-    if(catImg.complete && catImg.width > 0) {
-        ctx.drawImage(catImg, -35, -35, 70, 70);
+    function jump(x, y) {
+      const cat = document.getElementById('active-cat');
+      cat.style.left = x;
+      // Adjust y for cat height
+      const yVal = parseFloat(y);
+      cat.style.top = (yVal - 8) + "%";
     }
-    ctx.restore();
 
-    if(kitchen.active) { ctx.fillStyle="lime"; ctx.fillRect(player.x-30, player.y-55, (kitchen.timer/player.cookTime)*60, 8); }
-    document.getElementById('scoreVal').innerText = score;
-    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
-    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' pm':' am');
-}
-
-function loop() { update(); draw(); requestAnimationFrame(loop); }
-
-window.onload = () => {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    ["up","down","left","right"].forEach(id => {
-        let b = document.getElementById(id);
-        if(b) {
-            b.addEventListener('pointerdown', (e) => { e.preventDefault(); keys[id] = true; });
-            b.addEventListener('pointerup', (e) => { e.preventDefault(); keys[id] = false; });
-        }
-    });
-};
-</script>
+    function changeCat(imgSrc) {
+      document.getElementById('cat-img').src = imgSrc;
+    }
+  </script>
 </body>
 </html>
