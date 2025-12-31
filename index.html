@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: CAKE UPDATE</title>
+<title>WHISKER BYTES: JINX EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; }
@@ -12,7 +12,7 @@
     #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 5000; color: white; text-align: center; padding-bottom: 50px; }
     #logo-header { position: absolute; top: 0; left: 0; width: 100%; height: 45%; background: url('whiskerbytes.png') center/contain no-repeat; z-index: 5001; pointer-events: none; }
     .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 6000; margin-top: 20px; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; font-size: 14px; font-weight: bold; }
     .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
     #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; }
     #ui-right { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
@@ -27,10 +27,10 @@
 <div id="overlay">
     <div id="logo-header"></div> 
     <div class="char-grid">
-        <div class="btn-select" onpointerdown="startGame('mochi')"><img src="mochi_idle.png">MOCHI<br><small>Patience+</small></div>
-        <div class="btn-select" onpointerdown="startGame('gingerella')"><img src="gingerella_idle.png">GINGER<br><small>Tips+</small></div>
-        <div class="btn-select" onpointerdown="startGame('luna')"><img src="luna_idle.png">LUNA<br><small>Speed+</small></div>
-        <div class="btn-select" onpointerdown="startGame('jinx')"><img src="jinx_idle.png">JINX<br><small>Luck+</small></div>
+        <div class="btn-select" onpointerdown="startGame('mochi')"><img src="mochi_idle.png">MOCHI<br>Patience+</div>
+        <div class="btn-select" onpointerdown="startGame('gingerella')"><img src="gingerella_idle.png">GINGER<br>Tips+</div>
+        <div class="btn-select" onpointerdown="startGame('luna')"><img src="luna_idle.png">LUNA<br>Speed+</div>
+        <div class="btn-select" onpointerdown="startGame('jinx')"><img src="jinx_idle.png">JINX<br>Luck+</div>
     </div>
 </div>
 
@@ -61,7 +61,7 @@ const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), criticImg = new Image();
 f1.src = 'friend1.png'; f2.src = 'friend2.png'; criticImg.src = 'critic.png';
 
-const player = { x: 200, y: 400, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0 } };
+const player = { x: 200, y: 450, speed: 5, facing: 1, traits: { patienceBonus: 0, tipBonus: 0, luckBonus: 0 } };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
 
 window.startGame = function(catId) {
@@ -69,24 +69,25 @@ window.startGame = function(catId) {
     catImg.src = catId + '_idle.png';
     bgImg.src = 'IMG_2480.jpeg'; 
     
-    // SETUP TRAITS
     player.speed = (catId === 'luna') ? 8 : 5;
     player.traits.tipBonus = (catId === 'gingerella') ? 20 : 0;
     player.traits.patienceBonus = (catId === 'mochi') ? 30 : 0;
+    player.traits.luckBonus = (catId === 'jinx') ? 0.15 : 0; // Jinx Luck Logic
     player.cookTime = (catId === 'mochi') ? 40 : 80;
 
+    // STATION POSITION (y: 320) - Moved down so cat can walk around/to them
     furniture = [
-        {x: 100, y: 180, type: "STATION", item: "☕", e: "☕"},
-        {x: 180, y: 180, type: "STATION", item: "🍪", e: "🍪"},
-        {x: 260, y: 180, type: "STATION", item: "🍼", e: "🍼"},
-        {x: 340, y: 180, type: "TRASH", e: "🗑️"},
-        {x: 50,  y: 180, type: "WINDOW", e: "🪟"}, 
-        {x: canvas.width - 50, y: 180, type: "RADIO", e: "📻"},
-        {x: canvas.width / 2, y: 140, type: "TV", e: "📺"},
+        {x: 100, y: 320, type: "STATION", item: "☕", e: "☕"},
+        {x: 180, y: 320, type: "STATION", item: "🍪", e: "🍪"},
+        {x: 260, y: 320, type: "STATION", item: "🍼", e: "🍼"},
+        {x: 340, y: 320, type: "TRASH", e: "🗑️"},
+        {x: 50,  y: 320, type: "WINDOW", e: "🪟"}, 
+        {x: canvas.width - 50, y: 320, type: "RADIO", e: "📻"},
+        {x: canvas.width / 2, y: 140, type: "TV", e: "📺"}, // Stays on wall
         {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
-        {x: canvas.width / 2, y: 450, type: "TABLE", e: "🟫"},
-        {x: canvas.width / 2 - 65, y: 450, type: "CHAIR", e: "🪑", occupied: false},
-        {x: canvas.width / 2 + 65, y: 450, type: "CHAIR", e: "🪑", occupied: false}
+        {x: canvas.width / 2, y: 550, type: "TABLE", e: "🟫"},
+        {x: canvas.width / 2 - 65, y: 550, type: "CHAIR", e: "🪑", occupied: false},
+        {x: canvas.width / 2 + 65, y: 550, type: "CHAIR", e: "🪑", occupied: false}
     ];
 
     document.getElementById('overlay').style.display = 'none';
@@ -115,16 +116,14 @@ function interact() {
 
     customers.forEach(c => {
         if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
-            // APPLY YOUR NEW TRAIT LOGIC HERE!
             score += (c.isCritic ? 500 : 60) + player.traits.tipBonus;
             playerHolding = null; c.chair.occupied = false;
             customers = customers.filter(cust => cust !== c);
             if(c.isCritic) criticActive = false;
             document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
 
-            // CHECK CAKE UNLOCK
             if(score >= 300 && !unlockedCake) {
-                furniture.push({x: 420, y: 180, type: "STATION", item: "🍰", e: "🍰"});
+                furniture.push({x: 420, y: 320, type: "STATION", item: "🍰", e: "🍰"});
                 unlockedCake = true;
             }
         }
@@ -151,10 +150,16 @@ function update() {
     }
 
     gameMinutes += 0.1;
+
+    // DAY COMPLETE LOGIC (18:00 = 6:00 PM)
+    if(gameMinutes >= 1080) {
+        gameActive = false;
+        alert("Day Complete! 🐾 Final Score: " + score);
+        location.reload();
+    }
+
     if (Math.random() < 0.005) spawnCustomer();
-    customers.forEach(c => { 
-        c.patience -= tvActive ? 0.03 : 0.07; 
-    });
+    customers.forEach(c => { c.patience -= tvActive ? 0.03 : 0.07; });
     customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
 }
 
@@ -164,9 +169,8 @@ function draw() {
     ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 280, canvas.width, canvas.height-280);
     ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 275, canvas.width, 10);
 
-    // CRITIC RED GLOW
     if(criticActive) {
-        ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
+        ctx.fillStyle = "rgba(255, 0, 0, 0.05)";
         ctx.fillRect(0,0,canvas.width, canvas.height);
     }
 
@@ -206,12 +210,17 @@ function spawnCustomer() {
     let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
     if (chair) {
         chair.occupied = true;
-        let isC = !criticActive && Math.random() < 0.2;
+        // JINX LUCK BONUS
+        let isC = !criticActive && Math.random() < (0.2 + player.traits.luckBonus);
         if (isC) criticActive = true;
-        // APPLY PATIENCE TRAIT
+        
+        // DYNAMIC MENU
+        let menu = ["☕", "🍪", "🍼"];
+        if(unlockedCake) menu.push("🍰");
+        
         customers.push({ 
             x: chair.x, y: chair.y, chair: chair, 
-            order: ["☕", "🍪", "🍼", unlockedCake ? "🍰" : "☕"][Math.floor(Math.random()*4)], 
+            order: menu[Math.floor(Math.random() * menu.length)], 
             patience: 100 + player.traits.patienceBonus, 
             isCritic: isC, 
             img: isC ? criticImg : (Math.random()>0.5?f1:f2) 
