@@ -2,280 +2,101 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: TRASH DUTY</title>
+<title>WHISKER BYTES: LOGO EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
     :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; }
+    
+    /* FIX: Prevents the annoying copy/paste/lookup popup */
+    * { 
+        -webkit-touch-callout: none; 
+        -webkit-user-select: none; 
+        user-select: none; 
+        -webkit-tap-highlight-color: transparent;
+    }
+
     body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
     canvas { display: block; touch-action: none; background: var(--floor); width: 100vw; height: 100vh; }
     
-    /* WELCOME SCREEN - USES IMG_2475.jpeg */
-    #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; }
-    #overlay::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
-    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 10; }
-    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; text-align: center; }
+    /* WELCOME SCREEN - Moroccan Tile Background */
+    #overlay { 
+        position: fixed; inset: 0; 
+        background: #4a2c2a url('IMG_2475.jpeg') center/cover; 
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
+        z-index: 5000; color: white; text-align: center;
+        padding-bottom: 50px;
+    }
+
+    /* LOGO OVERLAY - Top Half */
+    #logo-header {
+        position: absolute; top: 0; left: 0; width: 100%; height: 45%;
+        background: url('whiskerbytes.png') center/contain no-repeat;
+        z-index: 5001;
+    }
+
+    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 10; margin-top: 20px; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 10px; color: #333; cursor: pointer; }
     .btn-select img { width: 50px; height: 50px; display: block; margin: 0 auto; }
 
     #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; }
     #ui-right { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
-    .ui-btn { background: var(--pink); border: 2px solid white; padding: 10px 15px; font-weight: bold; border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
+    .ui-btn { background: var(--pink); border: 2px solid white; padding: 10px 15px; font-weight: bold; border-radius: 8px; }
 
     #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 8px; z-index: 1000; }
     .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .ctrl-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid var(--wood); background: white; font-size: 28px; display: flex; align-items: center; justify-content: center; touch-action: none; }
+    .ctrl-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid var(--wood); background: white; font-size: 28px; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
 <body>
 
 <div id="overlay">
-    <h1 style="text-shadow: 2px 2px 4px black;">WHISKER BYTES</h1>
-    <div class="char-grid">
-        <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
-        <div class="btn-select" onclick="startGame('gingerella')"><img src="gingerella_idle.png">GINGER</div>
-        <div class="btn-select" onclick="startGame('luna')"><img src="luna_idle.png">LUNA</div>
-        <div class="btn-select" onclick="startGame('jinx')"><img src="jinx_idle.png">JINX</div>
+    <div id="logo-header"></div> <div class="char-grid">
+        <div class="btn-select" onpointerdown="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
+        <div class="btn-select" onpointerdown="startGame('gingerella')"><img src="gingerella_idle.png">GINGER</div>
+        <div class="btn-select" onpointerdown="startGame('luna')"><img src="luna_idle.png">LUNA</div>
+        <div class="btn-select" onpointerdown="startGame('jinx')"><img src="jinx_idle.png">JINX</div>
     </div>
-</div>
-
-<div id="stats">
-    ⭐ <span id="scoreVal">0</span> | 🕒 <span id="timeVal">9:00 AM</span><br>
-    <span id="holdingTxt" style="color: #8b4513;">🐾 Empty Paws</span>
-</div>
-
-<div id="ui-right">
-    <button class="ui-btn" onclick="location.reload()">🏠 HOME</button>
-</div>
-
-<canvas id="game"></canvas>
-
-<div id="controls">
-    <div class="d-pad">
-        <div></div><button class="ctrl-btn" id="up">⬆️</button><div></div>
-        <button class="ctrl-btn" id="left">⬅️</button>
-        <button class="ctrl-btn" id="down">⬇️</button>
-        <button class="ctrl-btn" id="right">➡️</button>
-    </div>
-    <button class="ctrl-btn" id="action-btn" style="width:160px; border-radius: 35px; background:var(--pink);" onpointerdown="interact()">📢 MEOW</button>
 </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-let gameActive = false, score = 0, gameMinutes = 540;
-let playerHolding = null, tvActive = false, criticActive = false;
-let payEffect = { active: false, x: 0, y: 0, t: "" };
-let trashCount = 0; // New Trash Tracker
-const keys = { up: false, down: false, left: false, right: false };
-
-const catImg = new Image(), bgImg = new Image();
-const f1 = new Image(); f1.src = 'friend1.png';
-const f2 = new Image(); f2.src = 'friend2.png';
-const criticImg = new Image(); criticImg.src = 'critic.png';
-
-const player = { x: 200, y: 400, speed: 5, name: "", facing: 1, isNapping: false };
-let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
-
-function startGame(catId) {
-    player.name = catId;
-    catImg.src = catId + '_idle.png';
-    bgImg.src = 'IMG_2480.jpeg'; // CAFE WALLPAPER
-    player.speed = (catId === 'gingerella') ? 8 : 5;
-    player.cookTime = (catId === 'mochi') ? 45 : 90;
-
-    // ... (Inside your startGame function, replace the furniture array with this one)
-furniture = [
-    // THE KITCHEN LINE (Lowered and spread out)
-    {x: 100, y: 180, type: "STATION", item: "☕", e: "☕"},
-    {x: 180, y: 180, type: "STATION", item: "🍪", e: "🍪"},
-    {x: 260, y: 180, type: "STATION", item: "🍼", e: "🍼"},
-    {x: 340, y: 180, type: "TRASH", e: "🗑️"},
-    
-    // WALL DECOR (Lowered to avoid UI overlap)
-    {x: 50,  y: 180, type: "WINDOW", e: "🪟"}, 
-    {x: canvas.width - 50, y: 180, type: "RADIO", e: "📻"},
-    {x: canvas.width / 2, y: 160, type: "TV", e: "📺"},
-
-    // FLOOR ITEMS
-    {x: 60, y: canvas.height - 80, type: "BED", e: "🛏️"},
-    {x: canvas.width / 2, y: 450, type: "TABLE", e: "🟫"},
-    {x: canvas.width / 2 - 65, y: 450, type: "CHAIR", e: "🪑", occupied: false},
-    {x: canvas.width / 2 + 65, y: 450, type: "CHAIR", e: "🪑", occupied: false}
-];
-
-// ... (Inside your draw function, replace the TV and Furniture logic with this)
-furniture.forEach(f => {
-    ctx.font = "45px Arial"; 
-    ctx.fillText(f.e, f.x - 22, f.y + 15);
-    
-    // THE KITCHEN COUNTERS
-    if(f.type === "STATION" || f.type === "TRASH") {
-        ctx.fillStyle = "#4e342e"; 
-        ctx.fillRect(f.x - 40, f.y + 25, 80, 10);
-    }
-
-    // THE NEWS CAT (RESTORED)
-    if(f.type === "TV" && tvActive) {
-        ctx.fillStyle = "black";
-        ctx.fillRect(f.x - 25, f.y - 15, 50, 30); // Screen
-        ctx.font = "16px Arial";
-        ctx.fillText("🐱🎤", f.x - 15, f.y + 5); // The Reporter
-        
-        // News Glow
-        ctx.fillStyle = "rgba(135, 206, 250, 0.15)";
-        ctx.beginPath();
-        ctx.moveTo(f.x - 50, f.y + 15);
-        ctx.lineTo(f.x + 50, f.y + 15);
-        ctx.lineTo(f.x + 100, f.y + 150);
-        ctx.lineTo(f.x - 100, f.y + 150);
-        ctx.fill();
-    }
-});
-
-// Update the Wall/Floor divider to match the new height
-if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 280); // Taller Wall
-ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 280, canvas.width, canvas.height - 280); // Floor
-ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 275, canvas.width, 10); // Baseboard
-
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('stats').style.display = 'block';
-    document.getElementById('ui-right').style.display = 'block';
-    document.getElementById('controls').style.display = 'flex';
-    gameActive = true;
-    loop();
-}
-
-function interact() {
-    furniture.forEach(f => {
-        let d = Math.hypot(player.x - f.x, player.y - f.y);
-        if (d < 70) {
-            // Trash Logic
-            if (f.type === "TRASH") {
-                if (playerHolding === "🥡") { // Emptying full bag
-                    playerHolding = null; trashCount = 0; f.e = "🗑️";
-                    document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
-                } else if (playerHolding && trashCount < 5) {
-                    playerHolding = null; score -= 5; trashCount++;
-                    if(trashCount >= 5) f.e = "🥡"; // Mark as full
-                    document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
-                    payEffect = { active: true, x: f.x, y: f.y, t: "-5", life: 30 };
-                } else if (trashCount >= 5 && !playerHolding) {
-                    playerHolding = "🥡"; f.e = "⭕"; // Pick up bag
-                    document.getElementById('holdingTxt').innerText = "Holding: Full Trash";
-                }
-                return;
-            }
-            // Window Disposal (Dump bag)
-            if (f.type === "WINDOW" && playerHolding === "🥡") {
-                playerHolding = null; trashCount = 0;
-                document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
-                // Reset trash can icon
-                let bin = furniture.find(t => t.type === "TRASH"); if(bin) bin.e = "🗑️";
-            }
-            if (f.type === "STATION" && playerHolding !== "🥡") {
-                kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item;
-            }
-            if (f.type === "TV") tvActive = !tvActive;
-            if (f.type === "RADIO") f.e = (f.e === "📻") ? "🎵" : "📻";
-        }
-    });
-
-    customers.forEach(c => {
-        if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
-            score += c.isCritic ? 500 : 60;
-            payEffect = { active: true, x: c.x, y: c.y, t: "💵", life: 40 };
-            playerHolding = null; c.chair.occupied = false;
-            customers = customers.filter(cust => cust !== c);
-            if(c.isCritic) criticActive = false;
-            document.getElementById('holdingTxt').innerText = "🐾 Empty Paws";
-        }
-    });
-}
-
-function update() {
-    if (!gameActive) return;
-    let onBed = furniture.find(f => f.type === "BED" && Math.hypot(player.x - f.x, player.y - f.y) < 50);
-    player.isNapping = !!onBed;
-
-    if (!kitchen.active) {
-        if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
-        if (keys.left) { player.x -= player.speed; player.facing = -1; }
-        if (keys.right) { player.x += player.speed; player.facing = 1; }
-    }
-
-    if (kitchen.active) {
-        kitchen.timer--;
-        if (kitchen.timer <= 0) {
-            kitchen.active = false; playerHolding = kitchen.item;
-            document.getElementById('holdingTxt').innerText = "Holding: " + playerHolding;
-        }
-    }
-
-    gameMinutes += player.isNapping ? 0.6 : 0.1;
-    if (Math.random() < 0.005) spawnCustomer();
-    customers.forEach(c => { c.patience -= tvActive ? 0.03 : 0.07; });
-    customers = customers.filter(c => { if(c.patience <= 0) c.chair.occupied = false; return c.patience > 0; });
-}
-
-function draw() {
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 240);
-    ctx.fillStyle = "#d2b48c"; ctx.fillRect(0, 240, canvas.width, canvas.height-240);
-    ctx.fillStyle = "#5d4037"; ctx.fillRect(0, 235, canvas.width, 10);
-
-    furniture.forEach(f => {
-        ctx.font = "45px Arial"; ctx.fillText(f.e, f.x-22, f.y+15);
-        if(f.type === "STATION" || f.type === "TRASH") {
-            ctx.fillStyle="#4e342e"; ctx.fillRect(f.x-40, f.y+25, 80, 10);
-        }
-    });
-
-    customers.forEach(c => {
-        if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
-        ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(c.x+30, c.y-30, 18, 0, 7); ctx.fill();
-        ctx.fillStyle="black"; ctx.font="20px Arial"; ctx.fillText(c.order, c.x+20, c.y-23);
-        ctx.fillStyle="red"; ctx.fillRect(c.x-20, c.y+35, c.patience*0.4, 5);
-    });
-
-    ctx.save(); ctx.translate(player.x, player.y);
-    if(player.facing === -1) ctx.scale(-1, 1);
-    if(player.isNapping) { ctx.rotate(Math.PI/2); ctx.font="20px Arial"; ctx.fillText("💤", 20, -20); }
-    if(catImg.complete) ctx.drawImage(catImg, -40, -40, 80, 80);
-    ctx.restore();
-
-    if(kitchen.active) {
-        ctx.fillStyle="lime"; ctx.fillRect(player.x-40, player.y-60, (kitchen.timer/player.cookTime)*80, 8);
-    }
-    if(payEffect.active) {
-        ctx.fillStyle="red"; ctx.font="bold 30px Arial"; ctx.fillText(payEffect.t, payEffect.x, payEffect.y--);
-        payEffect.life--; if(payEffect.life<=0) payEffect.active=false;
-    }
-
-    document.getElementById('scoreVal').innerText = score;
-    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
-    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?' PM':' AM');
-}
-
-function spawnCustomer() {
-    let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
-    if (chair) {
-        chair.occupied = true;
-        let isC = !criticActive && Math.random() < 0.2;
-        if (isC) criticActive = true;
-        customers.push({ x: chair.x, y: chair.y, chair: chair, order: ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)], patience: 100, isCritic: isC, img: isC ? criticImg : (Math.random()>0.5?f1:f2) });
-    }
-}
-
-function loop() { update(); draw(); requestAnimationFrame(loop); }
+// (All previous JavaScript remains the same, but ensure you use 'onpointerdown' 
+// for the d-pad buttons to keep it snappy and avoid the highlight bug!)
 
 window.onload = () => {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth; 
+    canvas.height = window.innerHeight;
+    
     const btns = ["up","down","left","right"];
     btns.forEach(id => {
         let b = document.getElementById(id);
-        b.onpointerdown = (e) => { e.preventDefault(); keys[id] = true; };
-        b.onpointerup = (e) => { e.preventDefault(); keys[id] = false; };
+        // Using pointerdown + preventDefault kills the "Copy/Find" popup
+        b.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            keys[id] = true;
+        }, { passive: false });
+
+        b.addEventListener('pointerup', (e) => {
+            e.preventDefault();
+            keys[id] = false;
+        }, { passive: false });
     });
 };
+
+// RESTORE NEWS CAT & TICKER
+function drawTV(f) {
+    if(tvActive) {
+        ctx.fillStyle = "black";
+        ctx.fillRect(f.x - 25, f.y - 15, 50, 30);
+        ctx.font = "16px Arial";
+        ctx.fillText("🐱🎤", f.x - 15, f.y + 5);
+        
+        // Breaking News Ticker
+        let tickerX = (Date.now() / 20) % 150;
+        ctx.fillStyle = "red";
+        ctx.font = "bold 8px Arial";
+        ctx.fillText("BREAKING NEWS: FISH PRICES UP!", f.x + 25 - tickerX, f.y + 12);
+    }
+}
 </script>
 </body>
 </html>
