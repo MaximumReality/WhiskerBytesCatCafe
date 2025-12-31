@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WHISKER BYTES: Luna's Cafe</title>
+<title>WHISKER BYTES</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   :root { --wood: #8b5a2b; --floor: #d2b48c; --pink: #ffc0cb; }
@@ -25,7 +25,6 @@
 
 <div id="overlay">
   <img src="whiskerbytes.png" id="logo-img">
-  <p>WELCOME TO THE CAFE</p>
   <div class="char-grid">
     <div class="btn-select" onclick="startGame('mochi')"><img src="mochi_idle.png">MOCHI</div>
     <div class="btn-select" onclick="startGame('luna')"><img src="luna_idle.png">LUNA</div>
@@ -53,38 +52,39 @@ let score = 0, gameState = "START";
 const catImg = new Image();
 const bgPattern = new Image();
 
-// DIRECTION FIX: Set to 1 if your PNG faces Right, -1 if it faces Left
-let spriteFacing = 1; 
-
-const player = { x: 0, y: 0, speed: 5, dir: 1, meowing: 0 };
+const player = { x: 0, y: 0, speed: 5, isFlipped: false, meowing: 0 };
 let furniture = [];
 let customers = [];
+const customerEmojis = ["🧎🏻‍♀️‍➡️", "🧎🏻‍♂️", "🧎🏿", "🧎🏽‍♀️"];
 
 function startGame(cat) {
   catImg.src = cat + "_idle.png";
   bgPattern.src = 'IMG_2480.jpeg'; 
-  
-  // Custom fix: if Luna faces left in your drawing, we adjust her here
-  if(cat === 'luna') spriteFacing = 1; 
-  
   document.getElementById('overlay').style.display = 'none';
   document.getElementById('controls').style.display = 'flex';
   document.getElementById('stats').style.display = 'block';
   gameState = "PLAYING";
   
+  // Table in the middle, chairs around it
   furniture = [
-    { x: 200, y: 200, type: "TABLE", emoji: "🟫" },
-    { x: 160, y: 200, type: "CHAIR", emoji: "🪑", attached: true },
-    { x: 240, y: 200, type: "CHAIR", emoji: "🪑", attached: true }
+    { x: 250, y: 250, type: "TABLE", emoji: "🟫" },
+    { x: 210, y: 250, type: "CHAIR", emoji: "🪑" }, // Left chair
+    { x: 290, y: 250, type: "CHAIR", emoji: "🪑" }  // Right chair
   ];
   spawnCustomer();
 }
 
 function spawnCustomer() {
-  const chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
-  if (chair) {
+  const openChairs = furniture.filter(f => f.type === "CHAIR" && !f.occupied);
+  if (openChairs.length > 0) {
+    const chair = openChairs[Math.floor(Math.random() * openChairs.length)];
     chair.occupied = true;
-    customers.push({ x: chair.x, y: chair.y, chair: chair });
+    customers.push({ 
+      x: chair.x, 
+      y: chair.y, 
+      chair: chair, 
+      emoji: customerEmojis[Math.floor(Math.random() * customerEmojis.length)] 
+    });
   }
 }
 
@@ -99,7 +99,12 @@ window.addEventListener("resize", resize); resize();
 const keys = { up: false, down: false, left: false, right: false };
 function bind(id, k) {
   const btn = document.getElementById(id);
-  btn.ontouchstart = (e) => { e.preventDefault(); keys[k] = true; };
+  btn.ontouchstart = (e) => { 
+    e.preventDefault(); 
+    keys[k] = true; 
+    if (k === 'left') player.isFlipped = true;
+    if (k === 'right') player.isFlipped = false;
+  };
   btn.ontouchend = () => { keys[k] = false; };
 }
 bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right");
@@ -107,7 +112,7 @@ bind("up","up"); bind("down","down"); bind("left","left"); bind("right","right")
 function meow() {
   player.meowing = 30;
   customers.forEach((c, i) => {
-    if(Math.abs(player.x - c.x) < 70 && Math.abs(player.y - c.y) < 70) {
+    if(Math.abs(player.x - c.x) < 60 && Math.abs(player.y - c.y) < 60) {
       score += 10;
       document.getElementById('scoreVal').innerText = score;
       c.chair.occupied = false;
@@ -121,11 +126,11 @@ function update() {
   if (gameState !== "PLAYING") return;
   if (keys.up) player.y -= player.speed;
   if (keys.down) player.y += player.speed;
-  if (keys.left) { player.x -= player.speed; player.dir = -1; }
-  if (keys.right) { player.x += player.speed; player.dir = 1; }
+  if (keys.left) player.x -= player.speed;
+  if (keys.right) player.x += player.speed;
   
-  player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
-  player.y = Math.max(120, Math.min(canvas.height - 100, player.y));
+  player.x = Math.max(30, Math.min(canvas.width - 30, player.x));
+  player.y = Math.max(120, Math.min(canvas.height - 110, player.y));
 }
 
 function draw() {
@@ -135,17 +140,22 @@ function draw() {
   ctx.strokeStyle = "rgba(0,0,0,0.05)";
   for(let j=0; j<canvas.height; j+=40) { ctx.strokeRect(0, j, canvas.width, 1); }
 
-  // Draw Furniture and Customers
+  // Wallpaper Border
+  ctx.drawImage(bgPattern, 0, 0, canvas.width, 90);
+
+  // Furniture (Tables/Chairs)
   ctx.font = "40px Arial";
   furniture.forEach(f => ctx.fillText(f.emoji, f.x - 20, f.y + 10));
-  customers.forEach(c => ctx.fillText("👩‍🦱👗", c.x - 20, c.y));
 
-  // DRAW LUNA / MOCHI
+  // SEATED CUSTOMERS (Using your new emojis!)
+  customers.forEach(c => ctx.fillText(c.emoji, c.x - 20, c.y + 10));
+
+  // DRAW LUNA (Direction Logic Overhauled)
   ctx.save();
   ctx.translate(player.x, player.y);
   
-  // Final Sprite Logic: Checks which way the cat is moving vs which way the PNG faces
-  if (player.dir !== spriteFacing) {
+  // If moving left, we flip the cat image
+  if (player.isFlipped) {
     ctx.scale(-1, 1);
   }
   
