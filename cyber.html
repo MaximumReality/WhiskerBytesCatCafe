@@ -57,6 +57,19 @@
     0% { transform: translate(0, 0); }
     100% { transform: translate(-100%, 0); }
 }
+  canvas {
+  display: block;
+  background: #3d2b1f;
+  width: 100vw;
+  height: 100vh;
+  /* Adds a subtle 'dollhouse' vignette */
+  mask-image: linear-gradient(to bottom, 
+    transparent 0%, 
+    black 15%, 
+    black 85%, 
+    transparent 100%);
+}
+
 
 </style>
 </head>
@@ -138,7 +151,7 @@ let floatingTips = [], musicNotes = [];
 
 const keys = { up: false, down: false, left: false, right: false };
 const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), f3 = new Image();
-f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'critic.png';
+f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'critic2.png';
 
 const player = { x: 200, y: 350, speed: 5, cookTime: 60, power: "", readyTimer: 0 };
 let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
@@ -199,14 +212,38 @@ function interact() {
         }
     });
     customers.forEach(c => {
-        if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
-            let tip = (player.power === 'gingerella') ? 100 : 50;
-            score += tip; playerHolding = null; c.chair.occupied = false;
-            floatingTips.push({x: c.x, y: c.y, text: "💵 +" + tip, life: 60});
-            customers = customers.filter(cust => cust !== c);
-            if(score > highScore) { highScore = score; localStorage.setItem("whiskerBytesHigh", score); }
+    // Check if player is close enough AND holding the correct order
+    if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
+        
+        // --- PERSONALIZED TIP LOGIC ---
+        let tip = 50; // Base tip
+        
+        if (player.power === 'mochkil') {
+            tip = 150; // Chef's Michelin-star bonus (+100)
+        } else if (player.power === 'azul') {
+            tip = 75;  // Hacker's efficiency fee (+25)
         }
-    });
+
+        // Apply score and reset hands
+        score += tip; 
+        playerHolding = null; 
+        c.chair.occupied = false;
+        
+        // Visual feedback
+        let particleText = (player.power === 'mochkil') ? "⭐⭐ +" + tip : "💾 +" + tip;
+        floatingTips.push({x: c.x, y: c.y, text: particleText, life: 60});
+        
+        // Remove customer from the array
+        customers = customers.filter(cust => cust !== c);
+        
+        // Update High Score
+        if(score > highScore) { 
+            highScore = score; 
+            localStorage.setItem("whiskerBytesHigh", score); 
+        }
+    }
+});
+
     document.getElementById('holdingTxt').innerText = playerHolding || "🐾 empty";
 }
 
