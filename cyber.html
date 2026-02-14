@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <script>!function(){const e=["maximumreality.github.io","maximumreality.xyz"];e.includes(window.location.hostname)||window.location.hostname.includes("localhost")||(document.documentElement.innerHTML='<body style="background:#000;color:#f0f;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:monospace;margin:0;"><h1 style="text-shadow:2px 2px #0ff">ACCESS DENIED</h1><p style="color:#0ff">[ REALITY COMPROMISED ]</p><p>Locked to MaximumReality.xyz</p><p style="font-size:.8rem;margin-top:20px">Ticket #404-POO: Unauthorized Mirror.</p></body>',window.stop())}();</script>
+<meta charset="UTF-8">
+<title>WHISKER BYTES: Cafe Fun</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+
+<!-- Open Graph for social media previews -->
+<meta property="og:title" content="Whisker Bytes: Cat Café Fun 🐾☕🍪">
+<meta property="og:description" content="Choose your cat — Mochi, Ginger, Luna, or Jinx — and serve tips, treats, and cozy chaos in the cutest café ever!">
+<meta property="og:url" content="https://maximumreality.github.io/WhiskerBytesCatCafe/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://maximumreality.github.io/WhiskerBytesCatCafe/whiskerbytes.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+
+ <style>
+    :root { --wood: #5d4037; --floor: #d2b48c; --pink: #ffc0cb; --gold: #d4af37; }
+    * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+    body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
+    canvas { display: block; background: #3d2b1f; width: 100vw; height: 100vh; }
+    
+    #overlay { position: fixed; inset: 0; background: #4a2c2a url('IMG_2475.jpeg') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 5000; color: white; text-align: center; padding-bottom: 40px; }
+    #logo-header { position: absolute; top: 0; left: 0; width: 100%; height: 40%; background: url('whiskerbytes.png') center/contain no-repeat; z-index: 5001; }
+    
+    .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; z-index: 6000; margin-bottom: 20px; }
+    .btn-select { background: white; border: 3px solid var(--pink); border-radius: 15px; padding: 8px; color: #333; font-weight: bold; width: 100px; text-transform: lowercase; }
+    .btn-select img { width: 40px; height: 40px; display: block; margin: 0 auto; }
+
+    #stats { position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.95); padding: 8px; border-radius: 12px; border: 3px solid var(--wood); z-index: 100; font-weight: bold; display: none; text-transform: lowercase; font-size: 13px; }
+    #day-over { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--wood); color: white; padding: 25px; border: 4px solid var(--gold); border-radius: 20px; z-index: 8000; display: none; text-align: center; text-transform: lowercase; width: 220px; }
+    .home-btn { background: var(--pink); border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; margin-top: 15px; color: #333; }
+
+    #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; gap: 5px; z-index: 1000; }
+    .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .ctrl-btn { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--wood); background: white; font-size: 22px; display: flex; align-items: center; justify-content: center; opacity: 0.9; }
+
+   #news-ticker {
+    position: fixed;
+    top: 60px; /* Below the stats */
+    width: 100%;
+    background: rgba(0, 255, 255, 0.2);
+    color: #0ff;
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    z-index: 100;
+}
+.ticker-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker 15s linear infinite;
+}
+@keyframes ticker {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+</style>
+</head>
+<body>
+<!-- Home Button -->
+<a href="https://maximumreality.xyz/" class="home-btn" title="Go to Maximum Reality Home">🏠 Home</a>
+
+<style>
+.home-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2000;
+  background: rgba(255, 0, 255, 0.8);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.home-btn:hover {
+  transform: scale(1.05);
+  background: rgba(255, 0, 255, 1);
+}
+</style>
+<div id="overlay">
+    <div id="logo-header"></div> 
+    <div class="char-grid">
+    <div onpointerdown="startGame('azul')" class="btn-select">
+        <img src="azul_idle.png">azul
+    </div>
+    <div onpointerdown="startGame('mochkil')" class="btn-select">
+        <img src="mochkil_idle.png">mochkil
+    </div>
+</div>
+
+</div>
+
+<div id="day-over">
+    🎆 shift over! 🎆<br>
+    score: <span id="finalScore">0</span><br>
+    <button class="home-btn" onclick="location.reload()">🏠 go home</button>
+</div>
+
+<div id="stats">
+    ⭐ <span id="scoreVal">0</span> | 🏆 <span id="highVal">0</span><br>
+    🕒 <span id="timeVal">9:00 am</span> | 🗑️ <span id="trashVal">0</span>%<br>
+    <span id="holdingTxt" style="color: #8b4513;">🐾 empty</span>
+</div>
+
+  <div id="news-ticker">
+    <div class="ticker-text" id="ticker-content">
+        BREAKING: Azul detects glitch in the espresso matrix... Mochkil claims "Chaos is the secret ingredient"...
+    </div>
+</div>
+
+
+<canvas id="game"></canvas>
+
+<div id="controls">
+    <div class="d-pad">
+        <div></div><button class="ctrl-btn" id="up">⬆️</button><div></div>
+        <button class="ctrl-btn" id="left">⬅️</button>
+        <button class="ctrl-btn" id="down">⬇️</button>
+        <button class="ctrl-btn" id="right">➡️</button>
+    </div>
+    <button class="ctrl-btn" id="action-btn" style="width:140px; border-radius: 35px; background:var(--pink); text-transform: lowercase;" onpointerdown="interact()">📢 meow</button>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+let gameActive = false, score = 0, gameMinutes = 540;
+let playerHolding = null, trashLevel = 0, tvActive = false, radioActive = false, sparkleAlpha = 0;
+let floatingTips = [], musicNotes = [];
+
+const keys = { up: false, down: false, left: false, right: false };
+const catImg = new Image(), bgImg = new Image(), f1 = new Image(), f2 = new Image(), f3 = new Image();
+f1.src = 'friend1.png'; f2.src = 'friend2.png'; f3.src = 'critic.png';
+
+const player = { x: 200, y: 350, speed: 5, cookTime: 60, power: "", readyTimer: 0 };
+let furniture = [], customers = [], kitchen = { active: false, timer: 0, item: null };
+
+let highScore = localStorage.getItem("whiskerBytesHigh") || 0;
+document.getElementById('highVal').innerText = highScore;
+
+window.startGame = function(catId) {
+    catImg.src = catId + '_idle.png';
+    bgImg.src = 'IMG_2480.jpeg'; 
+    player.power = catId;
+
+    // Azul is high-speed (Quantum Physicist/Hacker)
+    if (catId === 'azul') {
+        player.speed = 9; 
+        player.cookTime = 50;
+    } 
+    // Mochkil is a Chef (Michelin meals = better tips/scores)
+    else if (catId === 'mochkil') {
+        player.speed = 5;
+        player.cookTime = 30; // He's a pro in the kitchen!
+    }
+
+if (player.power === 'mochkil') {
+    tip = Math.floor(tip * 1.5); // Chef's premium!
+}
+
+
+    const midY = 160 + (canvas.height - 160 - 160) / 2;
+    furniture = [
+        {x: 80, y: 200, type: "STATION", item: "☕", e: "☕"},
+        {x: 160, y: 200, type: "STATION", item: "🍪", e: "🍪"},
+        {x: 240, y: 200, type: "STATION", item: "🍼", e: "🍼"},
+        {x: 320, y: 200, type: "TRASH", e: "🗑️"},
+        {x: 40, y: 200, type: "WINDOW", e: "🪟"},
+        {x: 50, y: midY, type: "RADIO", e: "📻"},
+        {x: canvas.width - 50, y: midY, type: "TV", e: "📺"},
+        {x: canvas.width / 2, y: midY, type: "TABLE", e: "🟫"},
+        {x: canvas.width / 2 - 65, y: midY, type: "CHAIR", e: "🪑", occupied: false},
+        {x: canvas.width / 2 + 65, y: midY, type: "CHAIR", e: "🪑", occupied: false}
+    ];
+
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('stats').style.display = 'block';
+    document.getElementById('controls').style.display = 'flex';
+    gameActive = true;
+    requestAnimationFrame(loop);
+};
+
+function interact() {
+    furniture.forEach(f => {
+        if (Math.hypot(player.x - f.x, player.y - f.y) < 70) {
+            if (f.type === "STATION" && !playerHolding && trashLevel < 100) { kitchen.active = true; kitchen.timer = player.cookTime; kitchen.item = f.item; }
+            if (f.type === "TRASH" && playerHolding) { playerHolding = null; trashLevel += 25; }
+            if (f.type === "WINDOW" && trashLevel >= 100) { trashLevel = 0; }
+            if (f.type === "TV") tvActive = !tvActive;
+            if (f.type === "RADIO") radioActive = !radioActive;
+        }
+    });
+    customers.forEach(c => {
+        if (Math.hypot(player.x - c.x, player.y - c.y) < 80 && playerHolding === c.order) {
+            let tip = (player.power === 'gingerella') ? 100 : 50;
+            score += tip; playerHolding = null; c.chair.occupied = false;
+            floatingTips.push({x: c.x, y: c.y, text: "💵 +" + tip, life: 60});
+            customers = customers.filter(cust => cust !== c);
+            if(score > highScore) { highScore = score; localStorage.setItem("whiskerBytesHigh", score); }
+        }
+    });
+    document.getElementById('holdingTxt').innerText = playerHolding || "🐾 empty";
+}
+
+function update() {
+    if (!gameActive) return;
+    if (!kitchen.active) {
+        if (keys.up) player.y -= player.speed; if (keys.down) player.y += player.speed;
+        if (keys.left) { player.x -= player.speed; } if (keys.right) { player.x += player.speed; }
+    } else {
+        kitchen.timer--; if (kitchen.timer <= 0) { kitchen.active = false; playerHolding = kitchen.item; player.readyTimer = 30; }
+    }
+    
+    player.y = Math.max(225, Math.min(canvas.height - 210, player.y));
+    player.x = Math.max(40, Math.min(canvas.width - 40, player.x));
+    if(player.readyTimer > 0) player.readyTimer--;
+
+    gameMinutes += 0.15;
+    if (gameMinutes >= 1260) { gameActive = false; document.getElementById('finalScore').innerText = score; document.getElementById('day-over').style.display = 'block'; }
+
+    if (Math.random() < 0.008) {
+        let chair = furniture.find(f => f.type === "CHAIR" && !f.occupied);
+        if (chair) {
+            chair.occupied = true;
+            let isC = Math.random() < 0.15;
+            customers.push({ x: chair.x, y: chair.y, chair, order: isC ? "🍪" : ["☕", "🍪", "🍼"][Math.floor(Math.random()*3)], isCritic: isC, img: isC ? f3 : (Math.random()>0.5?f1:f2), patience: (player.power === 'jinx' ? 1500 : 1000) });
+        }
+    }
+
+    customers.forEach((c, i) => {
+        c.patience--;
+        if(c.patience <= 0) { c.chair.occupied = false; customers.splice(i, 1); score = Math.max(0, score - 50); }
+    });
+
+    if (trashLevel >= 100) sparkleAlpha = (Math.sin(Date.now()/100) + 1) / 2;
+    if (radioActive && Math.random() < 0.03) musicNotes.push({ x: 60, y: 300, vx: Math.random()-0.5, vy: -1, life: 100 });
+    musicNotes.forEach((n, i) => { n.x += n.vx; n.y += n.vy; n.life--; if(n.life <= 0) musicNotes.splice(i,1); });
+    floatingTips.forEach((t, i) => { t.y -= 1; t.life--; if(t.life <= 0) floatingTips.splice(i,1); });
+}
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
+    
+    // RESTORED: DUAL TONE FLOOR
+    const ts = 60;
+    for(let x=0; x<canvas.width; x+=ts) {
+        for(let y=160; y<canvas.height; y+=ts) {
+            ctx.fillStyle = (Math.floor(x/ts) + Math.floor(y/ts)) % 2 === 0 ? "#d2b48c" : "#c1a37b";
+            ctx.fillRect(x, y, ts, ts);
+        }
+    }
+
+    // DRAW FURNITURE
+    furniture.forEach(f => {
+        if(f.type === "STATION") { ctx.fillStyle = "#5d4037"; ctx.fillRect(f.x-40, f.y+20, 80, 15); }
+        
+        if(f.type === "TV" && tvActive) {
+            ctx.shadowBlur = 15; ctx.shadowColor = "yellow";
+            ctx.fillStyle = "black"; ctx.fillRect(f.x-25, f.y-20, 50, 40);
+            ctx.shadowBlur = 0;
+            ctx.font = "20px Arial"; ctx.fillText("🐱", f.x-11, f.y+8);
+        } else if (f.type === "WINDOW" && trashLevel >= 100) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${sparkleAlpha})`; ctx.fillRect(f.x-25, f.y-25, 50, 50);
+            ctx.font = "35px Arial"; ctx.fillText(f.e, f.x-17, f.y+15);
+        } else {
+            ctx.font = "35px Arial"; ctx.fillText(f.e, f.x-17, f.y+15);
+        }
+    });
+
+    // DRAW CUSTOMERS
+    customers.forEach(c => {
+        if(c.img.complete && c.img.naturalWidth > 0) { ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60); }
+        else { ctx.fillStyle = c.isCritic ? "gold" : "#888"; ctx.beginPath(); ctx.arc(c.x, c.y, 25, 0, Math.PI*2); ctx.fill(); }
+        // Thought Bubbles
+        ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(c.x+25, c.y-35, 18, 0, Math.PI*2); ctx.fill();
+        ctx.font = "16px Arial"; ctx.fillText(c.order, c.x+17, c.y-30);
+        // Patience Bar
+        ctx.fillStyle = "red"; ctx.fillRect(c.x-20, c.y+35, (c.patience/(player.power==='jinx'?1500:1000))*40, 5);
+    });
+
+    ctx.drawImage(catImg, player.x-35, player.y-35, 70, 70);
+    if(kitchen.active) { 
+        ctx.fillStyle="lime"; ctx.fillRect(player.x-30, player.y-50, (kitchen.timer/player.cookTime)*60, 6); 
+    } else if (player.readyTimer > 0) {
+        ctx.fillStyle="yellow"; ctx.font="bold 18px Arial"; ctx.fillText("✨ READY!", player.x-35, player.y-55);
+    }
+    
+    musicNotes.forEach(n => { ctx.fillStyle="black"; ctx.fillText("♪", n.x, n.y); });
+    floatingTips.forEach(t => { ctx.fillStyle="green"; ctx.font="bold 16px Arial"; ctx.fillText(t.text, t.x-15, t.y); });
+
+    document.getElementById('scoreVal').innerText = score;
+    document.getElementById('trashVal').innerText = trashLevel;
+    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
+    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?'pm':'am');
+}
+
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+
+window.onload = () => {
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    ["up","down","left","right"].forEach(id => {
+        let b = document.getElementById(id);
+        b.addEventListener('pointerdown', (e) => { e.preventDefault(); keys[id] = true; });
+        b.addEventListener('pointerup', (e) => { e.preventDefault(); keys[id] = false; });
+    });
+};
+</script>
+</body>
+</html>
