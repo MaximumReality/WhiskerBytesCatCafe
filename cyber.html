@@ -19,6 +19,11 @@
 </head>
 <body>
 
+    <div onpointerdown="window.location.href='cyber.html'" class="btn-select" style="border-color: #0ff;">
+    <img src="azul_idle.png">azul (v2)
+</div>
+
+
 <div id="stats">
     [SCORE]: <span id="scoreVal">0</span> | [HIGH]: <span id="highVal">0</span><br>
     [TIME]: <span id="timeVal">9:00 am</span> | [TRASH]: <span id="trashVal">0</span>%<br>
@@ -58,6 +63,8 @@ f1.src = 'friend1.png'; // Stella
 f2.src = 'friend2.png'; // Luna
 f3.src = 'critic2.png'; // You
 catImg.src = 'mochkil_idle.png'; // Start as the Chef
+// Add this near your other image sources
+bgImg.src = 'IMG_2480.jpeg'; 
 
 const bgMusic = new Audio('firemansuperhero-with-lowercase-f.mp3'); 
 bgMusic.loop = true;
@@ -106,6 +113,107 @@ function interact() {
         }
     });
     document.getElementById('holdingTxt').innerText = playerHolding || "empty";
+}
+function draw() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    
+    // 1. DRAW WALLPAPER (Top Section)
+    if(bgImg.complete) {
+        ctx.drawImage(bgImg, 0, 0, canvas.width, 160);
+    } else {
+        ctx.fillStyle = "#222"; // Fallback if image fails
+        ctx.fillRect(0, 0, canvas.width, 160);
+    }
+
+    // 2. DRAW CYBER-TILE FLOOR (Bottom Section)
+    const ts = 60; // Tile size
+    for(let x=0; x<canvas.width; x+=ts) {
+        for(let y=160; y<canvas.height; y+=ts) {
+            // Alternating neon-tinted wood colors
+            ctx.fillStyle = (Math.floor(x/ts) + Math.floor(y/ts)) % 2 === 0 ? "#2d1b10" : "#3d2b1f";
+            ctx.fillRect(x, y, ts, ts);
+            
+            // Add a subtle neon grid line
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.05)";
+            ctx.strokeRect(x, y, ts, ts);
+        }
+    }
+
+    // 3. DRAW FURNITURE
+    furniture.forEach(f => {
+        // Draw a small shadow/base for the stations
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fillRect(f.x-30, f.y+10, 60, 10);
+        
+        ctx.font = "40px Arial";
+        ctx.fillText(f.e, f.x-20, f.y+15);
+        
+        // TV Glow Effect
+        if(f.type === "TV" && tvActive) {
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "cyan";
+            ctx.fillStyle = "rgba(0, 255, 255, 0.2)";
+            ctx.fillRect(f.x-25, f.y-25, 50, 50);
+            ctx.font = "20px Arial"; 
+            ctx.fillText("🎤🐱", f.x-15, f.y+10);
+            ctx.shadowBlur = 0;
+        }
+        
+        // Radio Glow Effect
+        if(f.type === "RADIO" && radioActive) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "magenta";
+            ctx.font = "30px Arial";
+            ctx.fillText("📻", f.x-15, f.y+10);
+            ctx.shadowBlur = 0;
+        }
+    });
+
+    // 4. DRAW MUSIC NOTES
+    musicNotes.forEach((n, i) => {
+        ctx.fillStyle = "#f0f";
+        ctx.font = "20px Arial";
+        ctx.fillText("🎶", n.x, n.y); 
+        n.y--; n.life--;
+        if(n.life <= 0) musicNotes.splice(i, 1);
+    });
+
+    // 5. DRAW CUSTOMERS (Stella, Luna, & Critic)
+    customers.forEach(c => {
+        if(c.img.complete) ctx.drawImage(c.img, c.x-30, c.y-30, 60, 60);
+        
+        // Thought Bubble
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(c.x+25, c.y-35, 18, 0, Math.PI*2);
+        ctx.fill();
+        ctx.font = "16px Arial"; 
+        ctx.fillStyle = "black";
+        ctx.fillText(c.order, c.x+17, c.y-30);
+        
+        // Patience Bar
+        ctx.fillStyle = "#333";
+        ctx.fillRect(c.x-20, c.y+35, 40, 6);
+        ctx.fillStyle = c.patience > 500 ? "lime" : "red";
+        ctx.fillRect(c.x-20, c.y+35, (c.patience/1500)*40, 6);
+    });
+
+    // 6. DRAW PLAYER
+    ctx.drawImage(catImg, player.x-35, player.y-35, 70, 70);
+    
+    // 7. DRAW FLOATING TIPS
+    floatingTips.forEach((t, i) => {
+        ctx.fillStyle = "cyan"; 
+        ctx.font = "bold 20px monospace";
+        ctx.fillText(t.text, t.x, t.y);
+        t.y--; t.life--; 
+        if(t.life <= 0) floatingTips.splice(i, 1);
+    });
+
+    // Update Stats
+    document.getElementById('scoreVal').innerText = score;
+    let h = Math.floor(gameMinutes/60), m = Math.floor(gameMinutes%60);
+    document.getElementById('timeVal').innerText = (h%12||12)+":"+(m<10?'0':'')+m+(h>=12?'pm':'am');
 }
 
 function update() {
