@@ -464,11 +464,13 @@ window.startGame = function(catId) {
   const midX = canvas.width / 2;
 
   furniture = [
-    { x: 80,  y: 220, type: 'STATION', item: '☕', e: '☕', label: 'Coffee' },
-    { x: 160, y: 220, type: 'STATION', item: '🍪', e: '🍪', label: 'Cookie' },
-    { x: 240, y: 220, type: 'STATION', item: '🍼', e: '🍼', label: 'Milk' },
-    { x: 320, y: 220, type: 'TRASH',   e: '🗑️' },
-    { x: 40,  y: 220, type: 'WINDOW',  e: '🪟' },
+
+{ x: 80,  y: 180, type: 'STATION', item: '☕', e: '☕', label: 'Coffee' },
+{ x: 160, y: 180, type: 'STATION', item: '🍪', e: '🍪', label: 'Cookie' },
+{ x: 240, y: 180, type: 'STATION', item: '🍼', e: '🍼', label: 'Milk' },
+{ x: 320, y: 180, type: 'TRASH',   e: '🗑️' },
+{ x: 40,  y: 180, type: 'WINDOW',  e: '🪟' },
+
     { x: 50,  y: midY, type: 'RADIO', e: '📻' },
     { x: canvas.width - 50, y: midY, type: 'TV',    e: '📺' },
     { x: midX,      y: midY, type: 'TABLE', e: '🟫' },
@@ -497,19 +499,26 @@ window.interact = function() {
     const dist = Math.hypot(player.x - f.x, player.y - f.y);
     if (dist > 72) continue;
 
-    if (f.type === 'STATION' && !playerHolding && !kitchen.active) {
-      if (trashLevel >= 100) {
-        showToast('🗑️ Too messy! Clean up first!');
-        return;
-      }
-      kitchen.active   = true;
-      kitchen.timer    = player.cookTime;
-      kitchen.maxTimer = player.cookTime;
-      kitchen.item     = f.item;
-      document.getElementById('cookBar').style.display = 'block';
-      showToast('Preparing ' + f.item + '...');
-      return;
-    }
+    if (f.type === 'STATION') {
+  // Draw counter shelf FIRST (behind emoji)
+  ctx.save();
+  ctx.fillStyle = '#6d4c3d';
+  ctx.shadowColor = 'rgba(0,0,0,0.3)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 4;
+  ctx.beginPath();
+  ctx.roundRect(f.x - 42, f.y + 8, 84, 18, 4);  // shifted up: +8 not +18
+  ctx.fill();
+  ctx.restore();
+
+  // Draw emoji ON TOP of shelf
+  withShadow(() => {
+    ctx.font = '36px serif';
+    ctx.fillText(f.e, f.x - 18, f.y + 6);  // emoji sits above shelf edge
+  });
+  return; // skip the generic emoji draw below
+}
+
 
     if (f.type === 'TRASH' && playerHolding) {
       playerHolding = null;
