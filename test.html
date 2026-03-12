@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <title>WHISKER BYTES: Cat Café</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,7 +11,6 @@
 <meta property="og:image" content="https://maximumreality.github.io/WhiskerBytesCatCafe/whiskerbytes.png">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-/* ===== RESET ===== */
 *, *::before, *::after {
   margin: 0; padding: 0; box-sizing: border-box;
   -webkit-touch-callout: none; -webkit-user-select: none;
@@ -21,249 +19,127 @@
 }
 html, body { overflow: hidden; width: 100vw; height: 100vh; background: #2c1810; }
 canvas { display: block; }
-
-/* ===== CSS VARIABLES ===== */
 :root {
-  --wood:       #6d4c3d;
-  --wood-light: #8d6550;
-  --wood-dark:  #4a3028;
-  --cream:      #fdf6e3;
-  --pink:       #ffb5c8;
-  --pink-dark:  #e8829a;
-  --gold:       #d4a843;
-  --gold-light: #f0cc6a;
-  --warm-white: rgba(255,248,230,0.95);
-  --shadow:     rgba(60,30,10,0.35);
-  --font-main:  'Nunito', 'Fredoka One', sans-serif;
+  --wood: #6d4c3d; --wood-dark: #4a3028;
+  --pink: #ffb5c8; --pink-dark: #e8829a; --gold: #d4a843;
+  --warm-white: rgba(255,248,230,0.95); --shadow: rgba(60,30,10,0.35);
+  --font-main: 'Nunito','Fredoka One',sans-serif;
 }
-
-/* ===== TITLE / SELECT SCREEN ===== */
 #overlay {
   position: fixed; inset: 0; z-index: 5000;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-end;
-  padding-bottom: 32px;
+  align-items: center; justify-content: flex-end; padding-bottom: 32px;
   background: #4a2c2a url('IMG_2475.jpeg') center/cover no-repeat;
 }
 #overlay::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(30,10,5,0.2) 0%, rgba(30,10,5,0.55) 100%);
-  pointer-events: none;
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(to bottom,rgba(30,10,5,0.2),rgba(30,10,5,0.55));
+  pointer-events:none;
 }
 #overlay.hidden { display: none; }
-
 #logo-header {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 42%;
+  position:absolute; top:0; left:0; width:100%; height:42%;
   background: url('whiskerbytes.png') center/contain no-repeat;
   filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
 }
-
 .select-panel {
-  position: relative; z-index: 6000;
-  background: var(--warm-white);
-  border-radius: 20px;
-  border: 3px solid var(--gold);
-  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px rgba(255,255,255,0.5) inset;
-  padding: 16px;
-  width: min(340px, 90vw);
+  position:relative; z-index:6000; background:var(--warm-white);
+  border-radius:20px; border:3px solid var(--gold);
+  box-shadow:0 8px 32px var(--shadow); padding:16px; width:min(340px,90vw);
 }
 .select-title {
-  font-family: var(--font-main);
-  font-size: 13px; font-weight: 900;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--wood-dark); text-align: center;
-  margin-bottom: 12px;
+  font-family:var(--font-main); font-size:13px; font-weight:900;
+  letter-spacing:3px; text-transform:uppercase; color:var(--wood-dark);
+  text-align:center; margin-bottom:12px;
 }
-
-.char-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
+.char-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .btn-select {
-  background: white;
-  border: 2.5px solid var(--pink);
-  border-radius: 14px;
-  padding: 10px 8px 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  background:white; border:2.5px solid var(--pink); border-radius:14px;
+  padding:10px 8px 8px; cursor:pointer; text-align:center;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
 }
-.btn-select:hover, .btn-select:active {
-  border-color: var(--pink-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-.btn-select img {
-  width: 48px; height: 48px;
-  display: block; margin: 0 auto 4px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
-}
+.btn-select:active { border-color:var(--pink-dark); }
+.btn-select img { width:48px; height:48px; display:block; margin:0 auto 4px; }
 .btn-select .cat-name {
-  font-family: var(--font-main);
-  font-size: 11px; font-weight: 900;
-  text-transform: uppercase; letter-spacing: 2px;
-  color: var(--wood-dark);
-  margin-bottom: 2px;
+  font-family:var(--font-main); font-size:11px; font-weight:900;
+  text-transform:uppercase; letter-spacing:2px; color:var(--wood-dark);
 }
-.btn-select .cat-power {
-  font-size: 9px; color: #888;
-  letter-spacing: 1px;
-}
-
-/* ===== HUD ===== */
+.btn-select .cat-power { font-size:9px; color:#888; }
 #hud {
-  position: fixed; top: 10px; left: 10px;
-  display: none; z-index: 200;
-  background: var(--warm-white);
-  border: 2.5px solid var(--wood);
-  border-radius: 14px;
-  padding: 8px 12px;
-  box-shadow: 0 4px 12px var(--shadow);
-  font-family: var(--font-main);
-  font-size: 12px; font-weight: 700;
-  color: var(--wood-dark); line-height: 1.7;
-  min-width: 140px;
+  position:fixed; top:10px; left:10px; display:none; z-index:200;
+  background:var(--warm-white); border:2.5px solid var(--wood); border-radius:14px;
+  padding:8px 12px; box-shadow:0 4px 12px var(--shadow);
+  font-family:var(--font-main); font-size:12px; font-weight:700;
+  color:var(--wood-dark); line-height:1.7; min-width:140px;
 }
-#hud .hud-row { display: flex; align-items: center; gap: 6px; }
-#hud .hud-val { color: var(--wood-dark); font-weight: 900; }
-#hud .hud-warn { color: #e05050; }
-
-/* Kitchen progress bar (shown in HUD) */
+#hud .hud-row { display:flex; align-items:center; gap:6px; }
+#hud .hud-val { color:var(--wood-dark); font-weight:900; }
+#hud .hud-warn { color:#e05050; font-weight:900; }
 #cookBar {
-  width: 100%; height: 6px;
-  background: rgba(0,0,0,0.08);
-  border-radius: 99px; overflow: hidden;
-  margin-top: 4px; display: none;
+  width:100%; height:6px; background:rgba(0,0,0,0.08);
+  border-radius:99px; overflow:hidden; margin-top:4px; display:none;
 }
 #cookFill {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--pink), var(--gold));
-  border-radius: 99px;
-  transition: width 0.05s linear;
+  height:100%; width:0%;
+  background:linear-gradient(90deg,var(--pink),var(--gold));
+  border-radius:99px; transition:width 0.05s linear;
 }
-
-/* ===== HOME BUTTON ===== */
 .home-btn {
-  position: fixed; top: 12px; right: 12px; z-index: 2000;
-  background: var(--pink);
-  border: 2px solid var(--pink-dark);
-  color: var(--wood-dark);
-  padding: 7px 14px;
-  border-radius: 20px;
-  font-family: var(--font-main);
-  font-size: 11px; font-weight: 900;
-  text-decoration: none; letter-spacing: 1px;
-  box-shadow: 0 3px 8px var(--shadow);
-  transition: all 0.15s;
+  position:fixed; top:12px; right:12px; z-index:2000;
+  background:var(--pink); border:2px solid var(--pink-dark); color:var(--wood-dark);
+  padding:7px 14px; border-radius:20px; font-family:var(--font-main);
+  font-size:11px; font-weight:900; text-decoration:none; letter-spacing:1px;
+  box-shadow:0 3px 8px var(--shadow);
 }
-.home-btn:hover { transform: scale(1.05); background: var(--pink-dark); color: white; }
-
-/* ===== DAY OVER SCREEN ===== */
 #day-over {
-  position: fixed; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--warm-white);
-  border: 3px solid var(--gold);
-  border-radius: 20px;
-  padding: 28px 32px;
-  box-shadow: 0 8px 40px var(--shadow);
-  z-index: 8000; display: none;
-  text-align: center;
-  font-family: var(--font-main);
-  min-width: 220px;
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:var(--warm-white); border:3px solid var(--gold); border-radius:20px;
+  padding:28px 32px; box-shadow:0 8px 40px var(--shadow);
+  z-index:8000; display:none; text-align:center;
+  font-family:var(--font-main); min-width:220px;
 }
-#day-over .over-title {
-  font-size: 22px; font-weight: 900;
-  color: var(--wood-dark); margin-bottom: 8px;
-}
-#day-over .over-score {
-  font-size: 14px; color: #888;
-  margin-bottom: 4px; letter-spacing: 1px;
-}
-#day-over .over-num {
-  font-size: 42px; font-weight: 900;
-  color: var(--gold); line-height: 1;
-  margin-bottom: 16px;
-  text-shadow: 0 2px 8px rgba(212,168,67,0.3);
-}
-#day-over .over-best { font-size: 11px; color: #aaa; margin-bottom: 16px; letter-spacing: 1px; }
+#day-over .over-title { font-size:22px; font-weight:900; color:var(--wood-dark); margin-bottom:8px; }
+#day-over .over-score { font-size:14px; color:#888; margin-bottom:4px; }
+#day-over .over-num { font-size:42px; font-weight:900; color:var(--gold); line-height:1; margin-bottom:16px; }
+#day-over .over-best { font-size:11px; color:#aaa; margin-bottom:16px; }
 .over-btn {
-  background: var(--pink); border: 2px solid var(--pink-dark);
-  color: var(--wood-dark); padding: 10px 24px;
-  border-radius: 20px; font-family: var(--font-main);
-  font-size: 12px; font-weight: 900; letter-spacing: 1px;
-  cursor: pointer; transition: all 0.15s;
-  box-shadow: 0 3px 8px var(--shadow);
+  background:var(--pink); border:2px solid var(--pink-dark); color:var(--wood-dark);
+  padding:10px 24px; border-radius:20px; font-family:var(--font-main);
+  font-size:12px; font-weight:900; cursor:pointer; box-shadow:0 3px 8px var(--shadow);
 }
-.over-btn:hover { transform: scale(1.05); background: var(--pink-dark); color: white; }
-
-/* ===== D-PAD CONTROLS ===== */
 #controls {
-  position: fixed; bottom: 12px; left: 50%;
-  transform: translateX(-50%);
-  display: none; flex-direction: column;
-  align-items: center; gap: 6px; z-index: 1000;
+  position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
+  display:none; flex-direction:column; align-items:center; gap:6px; z-index:1000;
 }
-.d-pad {
-  display: grid;
-  grid-template-columns: repeat(3, 54px);
-  grid-template-rows: repeat(3, 54px);
-  gap: 4px;
-}
+.d-pad { display:grid; grid-template-columns:repeat(3,54px); grid-template-rows:repeat(3,54px); gap:4px; }
 .ctrl-btn {
-  width: 54px; height: 54px; border-radius: 50%;
-  border: 2.5px solid var(--wood);
-  background: var(--warm-white);
-  font-size: 20px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 8px var(--shadow);
-  cursor: pointer;
-  transition: all 0.1s;
-  -webkit-tap-highlight-color: transparent;
+  width:54px; height:54px; border-radius:50%; border:2.5px solid var(--wood);
+  background:var(--warm-white); font-size:20px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 8px var(--shadow); cursor:pointer;
 }
-.ctrl-btn:active { transform: scale(0.92); background: var(--pink); }
-
+.ctrl-btn:active { transform:scale(0.92); background:var(--pink); }
 #action-btn {
-  width: 160px; height: 48px; border-radius: 24px;
-  border: 2.5px solid var(--pink-dark);
-  background: var(--pink);
-  font-family: var(--font-main);
-  font-size: 13px; font-weight: 900;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--wood-dark);
-  box-shadow: 0 3px 8px var(--shadow);
-  cursor: pointer; transition: all 0.1s;
+  width:160px; height:48px; border-radius:24px; border:2.5px solid var(--pink-dark);
+  background:var(--pink); font-family:var(--font-main); font-size:13px; font-weight:900;
+  letter-spacing:2px; text-transform:uppercase; color:var(--wood-dark);
+  box-shadow:0 3px 8px var(--shadow); cursor:pointer;
 }
-#action-btn:active { transform: scale(0.95); background: var(--pink-dark); color: white; }
-
-/* ===== TOAST NOTIFICATIONS ===== */
+#action-btn:active { transform:scale(0.95); background:var(--pink-dark); color:white; }
 #toast {
-  position: fixed; top: 70px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--warm-white);
-  border: 2px solid var(--gold);
-  border-radius: 20px;
-  padding: 6px 18px;
-  font-family: var(--font-main);
-  font-size: 12px; font-weight: 700;
-  color: var(--wood-dark);
-  box-shadow: 0 4px 12px var(--shadow);
-  z-index: 300; pointer-events: none;
-  opacity: 0; transition: opacity 0.2s;
-  white-space: nowrap;
+  position:fixed; top:70px; left:50%; transform:translateX(-50%);
+  background:var(--warm-white); border:2px solid var(--gold); border-radius:20px;
+  padding:6px 18px; font-family:var(--font-main); font-size:12px; font-weight:700;
+  color:var(--wood-dark); box-shadow:0 4px 12px var(--shadow);
+  z-index:300; pointer-events:none; opacity:0; transition:opacity 0.2s; white-space:nowrap;
 }
-#toast.show { opacity: 1; }
+#toast.show { opacity:1; }
 </style>
 </head>
 <body>
 
 <a href="https://maximumreality.xyz/" class="home-btn">🏠 Home</a>
 
-<!-- TITLE SCREEN -->
 <div id="overlay">
   <div id="logo-header"></div>
   <div class="select-panel">
@@ -271,29 +147,24 @@ canvas { display: block; }
     <div class="char-grid">
       <div class="btn-select" onpointerdown="startGame('mochi')">
         <img src="mochi_idle.png" alt="Mochi">
-        <div class="cat-name">Mochi</div>
-        <div class="cat-power">⚡ fast cook</div>
+        <div class="cat-name">Mochi</div><div class="cat-power">⚡ fast cook</div>
       </div>
       <div class="btn-select" onpointerdown="startGame('gingerella')">
         <img src="gingerella_idle.png" alt="Ginger">
-        <div class="cat-name">Ginger</div>
-        <div class="cat-power">💵 double tips</div>
+        <div class="cat-name">Ginger</div><div class="cat-power">💵 double tips</div>
       </div>
       <div class="btn-select" onpointerdown="startGame('luna')">
         <img src="luna_idle.png" alt="Luna">
-        <div class="cat-name">Luna</div>
-        <div class="cat-power">💨 speedy</div>
+        <div class="cat-name">Luna</div><div class="cat-power">💨 speedy</div>
       </div>
       <div class="btn-select" onpointerdown="startGame('jinx')">
         <img src="jinx_idle.png" alt="Jinx">
-        <div class="cat-name">Jinx</div>
-        <div class="cat-power">⏳ patient crowd</div>
+        <div class="cat-name">Jinx</div><div class="cat-power">⏳ patient crowd</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- HUD -->
 <div id="hud">
   <div class="hud-row">⭐ <span class="hud-val" id="scoreVal">0</span> &nbsp; 🏆 <span class="hud-val" id="highVal">0</span></div>
   <div class="hud-row">🕒 <span class="hud-val" id="timeVal">9:00 am</span></div>
@@ -301,10 +172,8 @@ canvas { display: block; }
   <div id="cookBar"><div id="cookFill"></div></div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- DAY OVER -->
 <div id="day-over">
   <div class="over-title">🎆 Shift Over! 🎆</div>
   <div class="over-score">FINAL SCORE</div>
@@ -315,7 +184,6 @@ canvas { display: block; }
 
 <canvas id="game"></canvas>
 
-<!-- CONTROLS -->
 <div id="controls">
   <div class="d-pad">
     <div></div>
@@ -330,733 +198,400 @@ canvas { display: block; }
 </div>
 
 <script>
-// =====================================================
-// WHISKER BYTES: CAT CAFÉ — v2.1
-// Fixed: z-layering, furniture positions, counter shelf
-// =====================================================
-
 const canvas = document.getElementById('game');
 const ctx    = canvas.getContext('2d');
 
-// ==================== CONSTANTS ====================
-const TILE_SIZE      = 60;
-const FLOOR_TOP      = 160;   // where the floor starts (below background strip)
-const COUNTER_Y      = FLOOR_TOP + 20; // Y position of the counter shelf row
-const CUSTOMER_BASE_PATIENCE = 1100;
-const TRASH_PER_DUMP = 22;
-const TRASH_WARN     = 75;
-const DAY_START      = 540;   // 9:00am in minutes
-const DAY_END        = 1260;  // 9:00pm
-const CUSTOMER_RATE  = 0.007;
+// These two constants mirror the original exactly
+const BG_H   = 160;  // height of background strip
+const ITEM_Y = 200;  // y position of all counter items (same as original {y:200})
 
-// ==================== ASSET LOADING ====================
-const catImg = new Image();
-const bgImg  = new Image();
-const f1     = new Image();
-const f2     = new Image();
-const f3     = new Image();
-f1.src = 'friend1.png';
-f2.src = 'friend2.png';
-f3.src = 'critic.png';
+const catImg = new Image(), bgImg = new Image();
+const f1 = new Image(), f2 = new Image(), f3 = new Image();
+f1.src='friend1.png'; f2.src='friend2.png'; f3.src='critic.png';
 
-// ==================== GAME STATE ====================
-let gameActive    = false;
-let score         = 0;
-let gameMinutes   = DAY_START;
-let playerHolding = null;
-let trashLevel    = 0;
-let tvActive      = false;
-let radioActive   = false;
-let sparkleAlpha  = 0;
+let gameActive=false, score=0, gameMinutes=540;
+let playerHolding=null, trashLevel=0;
+let tvActive=false, radioActive=false, sparkleAlpha=0;
+let floatingTips=[], musicNotes=[], particles=[];
+let furniture=[], customers=[];
 
-let floatingTips = [];
-let musicNotes   = [];
-let particles    = [];
-
-// ==================== HIGH SCORE ====================
-let highScore = parseInt(localStorage.getItem('whiskerBytesHigh') || '0');
+let highScore = parseInt(localStorage.getItem('whiskerBytesHigh')||'0');
 document.getElementById('highVal').textContent = highScore;
 
-// ==================== PLAYER ====================
-const player = {
-  x: 200, y: 350,
-  speed: 5,
-  cookTime: 60,
-  power: '',
-  readyTimer: 0,
-  bobTimer: 0,
-  facing: 'right',
-};
-
-// ==================== KITCHEN ====================
-const kitchen = {
-  active: false,
-  timer: 0,
-  maxTimer: 0,
-  item: null,
-};
-
-// ==================== FURNITURE & CUSTOMERS ====================
-let furniture = [];
-let customers  = [];
-
-// ==================== INPUT ====================
-const keys = { up: false, down: false, left: false, right: false };
+const player  = { x:200, y:350, speed:5, cookTime:60, power:'', readyTimer:0, bobTimer:0, facing:'right' };
+const kitchen = { active:false, timer:0, maxTimer:0, item:null };
+const keys    = { up:false, down:false, left:false, right:false };
 
 ['up','down','left','right'].forEach(id => {
-  const btn = document.getElementById(id);
-  btn.addEventListener('pointerdown', e => { e.preventDefault(); keys[id] = true; });
-  btn.addEventListener('pointerup',   e => { e.preventDefault(); keys[id] = false; });
-  btn.addEventListener('pointerleave',e => { keys[id] = false; });
+  const b = document.getElementById(id);
+  b.addEventListener('pointerdown',e=>{ e.preventDefault(); keys[id]=true; });
+  b.addEventListener('pointerup',  e=>{ e.preventDefault(); keys[id]=false; });
+  b.addEventListener('pointerleave',()=>{ keys[id]=false; });
+});
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowUp'   ||e.key==='w') keys.up=true;
+  if(e.key==='ArrowDown' ||e.key==='s') keys.down=true;
+  if(e.key==='ArrowLeft' ||e.key==='a') keys.left=true;
+  if(e.key==='ArrowRight'||e.key==='d') keys.right=true;
+  if(e.key===' '||e.key==='Enter') interact();
+});
+window.addEventListener('keyup',e=>{
+  if(e.key==='ArrowUp'   ||e.key==='w') keys.up=false;
+  if(e.key==='ArrowDown' ||e.key==='s') keys.down=false;
+  if(e.key==='ArrowLeft' ||e.key==='a') keys.left=false;
+  if(e.key==='ArrowRight'||e.key==='d') keys.right=false;
 });
 
-window.addEventListener('keydown', e => {
-  if (e.key === 'ArrowUp'    || e.key === 'w') keys.up    = true;
-  if (e.key === 'ArrowDown'  || e.key === 's') keys.down  = true;
-  if (e.key === 'ArrowLeft'  || e.key === 'a') keys.left  = true;
-  if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-  if (e.key === ' ' || e.key === 'Enter') interact();
-});
-window.addEventListener('keyup', e => {
-  if (e.key === 'ArrowUp'    || e.key === 'w') keys.up    = false;
-  if (e.key === 'ArrowDown'  || e.key === 's') keys.down  = false;
-  if (e.key === 'ArrowLeft'  || e.key === 'a') keys.left  = false;
-  if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-});
-
-// ==================== TOAST ====================
-let toastTimer = null;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+let toastTimer=null;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
 }
 
-// ==================== PARTICLES ====================
-function spawnParticles(x, y, color, count) {
-  count = count || 8;
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 1 + Math.random() * 3;
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 1,
-      life: 1,
-      decay: 0.03 + Math.random() * 0.03,
-      color,
-      size: 4 + Math.random() * 6,
-    });
+function spawnParticles(x,y,color,count){
+  for(let i=0;i<(count||8);i++){
+    const a=Math.random()*Math.PI*2, sp=1+Math.random()*3;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1,
+      life:1,decay:0.03+Math.random()*0.03,color,size:4+Math.random()*6});
   }
 }
 
-// ==================== GAME START ====================
+// ── START GAME ──
 window.startGame = function(catId) {
-  catImg.src = catId + '_idle.png';
-  bgImg.src  = 'IMG_2480.jpeg';
+  catImg.src=catId+'_idle.png';
+  bgImg.src='IMG_2480.jpeg';
+  player.power   =catId;
+  player.speed   =catId==='luna'  ? 8 : 5;
+  player.cookTime=catId==='mochi' ? 35 : 60;
+  player.x=canvas.width/2;
+  player.y=canvas.height/2;
 
-  player.power    = catId;
-  player.speed    = catId === 'luna'  ? 8 : 5;
-  player.cookTime = catId === 'mochi' ? 35 : 60;
-  player.x = canvas.width  / 2;
-  player.y = canvas.height / 2;
-
-  // ---- LAYOUT POSITIONS ----
-  // Counter items sit ON the counter bar (FLOOR_TOP is 160, counter bar is at 160-188)
-  // We place the emoji centre at FLOOR_TOP + 14 so it sits visibly on the shelf
-  const counterItemY = FLOOR_TOP + 14;
-
-  // Floor area mid-point for tables/chairs/radio/tv
-  // Subtract ~180px for the controls area at the bottom
-  const floorH = canvas.height - FLOOR_TOP - 180;
-  const midY   = FLOOR_TOP + 60 + floorH / 2;
-  const midX   = canvas.width / 2;
+  // midY formula taken verbatim from original source
+  const midY = BG_H + (canvas.height - BG_H - 160) / 2;
+  const midX = canvas.width / 2;
 
   furniture = [
-    // --- Counter row (sits on the shelf bar) ---
-    { x: 40,  y: counterItemY, type: 'WINDOW',  e: '🪟' },
-    { x: 100, y: counterItemY, type: 'STATION', item: '☕', e: '☕', label: 'Coffee' },
-    { x: 180, y: counterItemY, type: 'STATION', item: '🍪', e: '🍪', label: 'Cookie' },
-    { x: 260, y: counterItemY, type: 'STATION', item: '🍼', e: '🍼', label: 'Milk'   },
-    { x: 340, y: counterItemY, type: 'TRASH',   e: '🗑️' },
-
-    // --- Floor items ---
-    { x: 50,              y: midY, type: 'RADIO', e: '📻' },
-    { x: canvas.width-50, y: midY, type: 'TV',    e: '📺' },
-    { x: midX,            y: midY, type: 'TABLE', e: '🟫' },
-    { x: midX - 70,       y: midY, type: 'CHAIR', e: '🪑', occupied: false },
-    { x: midX + 70,       y: midY, type: 'CHAIR', e: '🪑', occupied: false },
+    { x:40,      y:ITEM_Y, type:'WINDOW',  e:'🪟' },
+    { x:80,      y:ITEM_Y, type:'STATION', item:'☕', e:'☕', label:'Coffee' },
+    { x:160,     y:ITEM_Y, type:'STATION', item:'🍪', e:'🍪', label:'Cookie' },
+    { x:240,     y:ITEM_Y, type:'STATION', item:'🍼', e:'🍼', label:'Milk'   },
+    { x:320,     y:ITEM_Y, type:'TRASH',   e:'🗑️' },
+    { x:50,             y:midY, type:'RADIO', e:'📻' },
+    { x:canvas.width-50,y:midY, type:'TV',    e:'📺' },
+    { x:midX,           y:midY, type:'TABLE', e:'🟫' },
+    { x:midX-65,        y:midY, type:'CHAIR', e:'🪑', occupied:false },
+    { x:midX+65,        y:midY, type:'CHAIR', e:'🪑', occupied:false },
   ];
 
-  // Reset all state
-  score = 0; gameMinutes = DAY_START; trashLevel = 0;
-  playerHolding = null; kitchen.active = false;
-  customers = []; floatingTips = []; musicNotes = []; particles = [];
-  tvActive = false; radioActive = false;
+  score=0; gameMinutes=540; trashLevel=0;
+  playerHolding=null; kitchen.active=false;
+  customers=[]; floatingTips=[]; musicNotes=[]; particles=[];
+  tvActive=false; radioActive=false;
 
   document.getElementById('overlay').classList.add('hidden');
-  document.getElementById('hud').style.display    = 'block';
-  document.getElementById('controls').style.display = 'flex';
-  gameActive = true;
+  document.getElementById('hud').style.display='block';
+  document.getElementById('controls').style.display='flex';
+  gameActive=true;
 };
 
-// ==================== INTERACT ====================
-window.interact = function() {
-  if (!gameActive) return;
-
-  // --- Furniture interactions ---
-  for (const f of furniture) {
-    const dist = Math.hypot(player.x - f.x, player.y - f.y);
-    if (dist > 72) continue;
-
-    if (f.type === 'STATION' && !playerHolding && !kitchen.active) {
-      if (trashLevel >= 100) {
-        showToast('🗑️ Too messy! Clean up first!');
-        return;
-      }
-      kitchen.active   = true;
-      kitchen.timer    = player.cookTime;
-      kitchen.maxTimer = player.cookTime;
-      kitchen.item     = f.item;
-      document.getElementById('cookBar').style.display = 'block';
-      showToast('Preparing ' + f.item + '...');
-      return;
+// ── INTERACT ──
+window.interact = function(){
+  if(!gameActive) return;
+  for(const f of furniture){
+    if(Math.hypot(player.x-f.x,player.y-f.y)>72) continue;
+    if(f.type==='STATION'&&!playerHolding&&!kitchen.active){
+      if(trashLevel>=100){showToast('🗑️ Too messy!');return;}
+      kitchen.active=true; kitchen.timer=player.cookTime;
+      kitchen.maxTimer=player.cookTime; kitchen.item=f.item;
+      document.getElementById('cookBar').style.display='block';
+      showToast('Preparing '+f.item+'...'); return;
     }
-
-    if (f.type === 'TRASH' && playerHolding) {
-      playerHolding = null;
-      trashLevel = Math.min(100, trashLevel + TRASH_PER_DUMP);
-      spawnParticles(f.x, f.y, '#888', 6);
-      showToast('🗑️ Tossed!');
-      updateHoldingDisplay();
-      return;
+    if(f.type==='TRASH'&&playerHolding){
+      playerHolding=null; trashLevel=Math.min(100,trashLevel+22);
+      spawnParticles(f.x,f.y,'#888',6); showToast('🗑️ Tossed!');
+      updateHolding(); return;
     }
-
-    if (f.type === 'WINDOW' && trashLevel >= 100) {
-      trashLevel = 0;
-      spawnParticles(f.x, f.y, '#a8e6cf', 12);
-      showToast('✨ Café cleaned up!');
-      return;
+    if(f.type==='WINDOW'&&trashLevel>=100){
+      trashLevel=0; spawnParticles(f.x,f.y,'#a8e6cf',12);
+      showToast('✨ Cleaned up!'); return;
     }
-
-    if (f.type === 'TV') {
-      tvActive = !tvActive;
-      showToast(tvActive ? '📺 TV on!' : '📺 TV off');
-      return;
-    }
-
-    if (f.type === 'RADIO') {
-      radioActive = !radioActive;
-      showToast(radioActive ? '📻 Music on!' : '📻 Music off');
-      return;
-    }
+    if(f.type==='TV'){tvActive=!tvActive;showToast(tvActive?'📺 TV on!':'📺 TV off');return;}
+    if(f.type==='RADIO'){radioActive=!radioActive;showToast(radioActive?'📻 Music on!':'📻 Music off');return;}
   }
-
-  // --- Serve customers ---
-  for (const c of customers) {
-    const dist = Math.hypot(player.x - c.x, player.y - c.y);
-    if (dist > 82) continue;
-    if (playerHolding !== c.order) continue;
-
-    const baseT      = player.power === 'gingerella' ? 100 : 50;
-    const bonusT     = c.isCritic ? 150 : 0;
-    const tip        = baseT + bonusT;
-    const pctLeft    = c.patience / c.maxPatience;
-    const speedBonus = pctLeft > 0.7 ? 20 : 0;
-    const total      = tip + speedBonus;
-
-    score += total;
-    if (score > highScore) {
-      highScore = score;
-      localStorage.setItem('whiskerBytesHigh', highScore);
-    }
-
-    floatingTips.push({ x: c.x, y: c.y - 30, text: '💵 +' + total, life: 70, maxLife: 70 });
-    spawnParticles(c.x, c.y, '#ffd700', 12);
-    if (speedBonus > 0) showToast('⚡ Speed bonus! +' + speedBonus);
-
-    c.chair.occupied = false;
-    customers = customers.filter(cu => cu !== c);
-    playerHolding = null;
-    updateHoldingDisplay();
-    return;
+  for(const c of customers){
+    if(Math.hypot(player.x-c.x,player.y-c.y)>82) continue;
+    if(playerHolding!==c.order) continue;
+    const base=player.power==='gingerella'?100:50;
+    const bonus=c.isCritic?150:0;
+    const speed=(c.patience/c.maxPatience)>0.7?20:0;
+    const total=base+bonus+speed;
+    score+=total;
+    if(score>highScore){highScore=score;localStorage.setItem('whiskerBytesHigh',highScore);}
+    floatingTips.push({x:c.x,y:c.y-30,text:'💵 +'+total,life:70,maxLife:70});
+    spawnParticles(c.x,c.y,'#ffd700',12);
+    if(speed>0) showToast('⚡ Speed bonus! +'+speed);
+    c.chair.occupied=false;
+    customers=customers.filter(cu=>cu!==c);
+    playerHolding=null; updateHolding(); return;
   }
 };
 
-// ==================== HUD UPDATE ====================
-function updateHoldingDisplay() {
-  const el = document.getElementById('holdingTxt');
-  el.textContent = playerHolding ? '🐾 ' + playerHolding : '🐾 empty';
-  el.style.color = playerHolding ? '#8b4513' : '#bbb';
+function updateHolding(){
+  const el=document.getElementById('holdingTxt');
+  el.textContent=playerHolding?'🐾 '+playerHolding:'🐾 empty';
+  el.style.color=playerHolding?'#8b4513':'#bbb';
 }
 
-function updateHUD() {
-  document.getElementById('scoreVal').textContent = score;
-  document.getElementById('highVal').textContent  = highScore;
-  document.getElementById('trashVal').textContent = trashLevel;
-
-  const trashEl = document.getElementById('trashVal');
-  trashEl.className = trashLevel >= TRASH_WARN ? 'hud-warn' : 'hud-val';
-
-  const h    = Math.floor(gameMinutes / 60);
-  const m    = Math.floor(gameMinutes % 60);
-  const ampm = h >= 12 ? 'pm' : 'am';
-  document.getElementById('timeVal').textContent =
-    (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
-
-  if (kitchen.active) {
-    const pct = ((kitchen.maxTimer - kitchen.timer) / kitchen.maxTimer) * 100;
-    document.getElementById('cookFill').style.width = pct + '%';
-  }
-
-  updateHoldingDisplay();
-}
-
-// ==================== UPDATE ====================
-function update() {
-  if (!gameActive) return;
-
-  if (!kitchen.active) {
-    let dx = 0, dy = 0;
-    if (keys.up)    dy -= 1;
-    if (keys.down)  dy += 1;
-    if (keys.left)  dx -= 1;
-    if (keys.right) dx += 1;
-    if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
-    player.x += dx * player.speed;
-    player.y += dy * player.speed;
-    if (dx !== 0) player.facing = dx > 0 ? 'right' : 'left';
-    if (dx !== 0 || dy !== 0) player.bobTimer += 0.2;
-  }
-
-  // Keep player on the floor (can reach counter at top, stops above controls)
-  player.x = Math.max(40, Math.min(canvas.width  - 40,  player.x));
-  player.y = Math.max(FLOOR_TOP + 30, Math.min(canvas.height - 180, player.y));
-
-  // Kitchen timer
-  if (kitchen.active) {
-    kitchen.timer--;
-    if (kitchen.timer <= 0) {
-      kitchen.active = false;
-      playerHolding  = kitchen.item;
-      player.readyTimer = 45;
-      document.getElementById('cookBar').style.display = 'none';
-      spawnParticles(player.x, player.y - 40, '#ffb5c8', 10);
-      showToast(kitchen.item + ' Ready!');
-      updateHoldingDisplay();
-    }
-  }
-  if (player.readyTimer > 0) player.readyTimer--;
-
-  // Game clock
-  gameMinutes += 0.15;
-  if (gameMinutes >= DAY_END) { endDay(); return; }
-
-  // Spawn customers
-  if (Math.random() < CUSTOMER_RATE) {
-    const chair = furniture.find(f => f.type === 'CHAIR' && !f.occupied);
-    if (chair) {
-      chair.occupied = true;
-      const isCritic = Math.random() < 0.12;
-      const patience = (player.power === 'jinx' ? 1500 : CUSTOMER_BASE_PATIENCE) + Math.random() * 200;
-      const orders   = ['☕', '🍪', '🍼'];
-      customers.push({
-        x: chair.x, y: chair.y, chair,
-        order:       isCritic ? '🍪' : orders[Math.floor(Math.random() * orders.length)],
-        isCritic,
-        img:         isCritic ? f3 : (Math.random() > 0.5 ? f1 : f2),
-        patience,
-        maxPatience: patience,
-        arrivalScale: 0.1,
-      });
-    }
-  }
-
-  // Customer patience
-  customers.forEach((c, i) => {
-    if (c.arrivalScale < 1) c.arrivalScale = Math.min(1, c.arrivalScale + 0.06);
-    c.patience--;
-    if (c.patience <= 0) {
-      c.chair.occupied = false;
-      customers.splice(i, 1);
-      score = Math.max(0, score - 50);
-      showToast('😾 Customer left! -50');
-      spawnParticles(c.x, c.y, '#ff6666', 8);
-    }
-  });
-
-  if (trashLevel >= 100) sparkleAlpha = (Math.sin(Date.now() / 100) + 1) / 2;
-
-  // Music notes
-  if (radioActive && Math.random() < 0.04) {
-    musicNotes.push({
-      x: 58, y: FLOOR_TOP + 140,
-      vx: (Math.random() - 0.5) * 1.2,
-      vy: -(0.6 + Math.random() * 0.8),
-      life: 1, decay: 0.015,
-    });
-  }
-  musicNotes.forEach((n, i) => {
-    n.x += n.vx; n.y += n.vy;
-    n.life -= n.decay;
-    if (n.life <= 0) musicNotes.splice(i, 1);
-  });
-
-  floatingTips.forEach((t, i) => {
-    t.y -= 1.2; t.life--;
-    if (t.life <= 0) floatingTips.splice(i, 1);
-  });
-
-  particles.forEach((p, i) => {
-    p.x += p.vx; p.y += p.vy;
-    p.vy += 0.1;
-    p.vx *= 0.95; p.vy *= 0.95;
-    p.life -= p.decay;
-    if (p.life <= 0) particles.splice(i, 1);
-  });
-
-  updateHUD();
-}
-
-// ==================== END DAY ====================
-function endDay() {
-  gameActive = false;
-  document.getElementById('finalScore').textContent = score;
-  const best  = parseInt(localStorage.getItem('whiskerBytesHigh') || '0');
-  const isNew = score >= best;
-  if (isNew) localStorage.setItem('whiskerBytesHigh', score);
-  document.getElementById('finalBest').textContent = isNew ? '🏆 New Best Score!' : 'Best: ' + best;
-  document.getElementById('day-over').style.display = 'block';
-}
-
-// ==================== DRAW HELPERS ====================
-function withShadow(fn, color, blur, ox, oy) {
-  color = color || 'rgba(80,40,10,0.25)';
-  blur  = blur  || 8;
-  ox    = ox    || 0;
-  oy    = oy    || 3;
-  ctx.save();
-  ctx.shadowColor   = color;
-  ctx.shadowBlur    = blur;
-  ctx.shadowOffsetX = ox;
-  ctx.shadowOffsetY = oy;
-  fn();
-  ctx.restore();
-}
-
-// ==================== DRAW ====================
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBackground();   // 1. background image strip
-  drawCounter();      // 2. counter shelf bar (behind everything on floor)
-  drawFloorTiles();   // 3. checkerboard floor tiles
-  drawFurniture();    // 4. furniture emojis (on top of floor, below characters)
-  drawCustomers();    // 5. customers
-  drawPlayer();       // 6. player (topmost game element)
-  drawEffects();      // 7. particles / floaters
-}
-
-// ===== 1. BACKGROUND STRIP =====
-function drawBackground() {
-  if (bgImg.complete && bgImg.naturalWidth > 0) {
-    ctx.drawImage(bgImg, 0, 0, canvas.width, FLOOR_TOP);
+// ── UPDATE ──
+function update(){
+  if(!gameActive) return;
+  if(!kitchen.active){
+    let dx=0,dy=0;
+    if(keys.up)    dy-=1;
+    if(keys.down)  dy+=1;
+    if(keys.left)  dx-=1;
+    if(keys.right) dx+=1;
+    if(dx&&dy){dx*=0.707;dy*=0.707;}
+    player.x+=dx*player.speed; player.y+=dy*player.speed;
+    if(dx) player.facing=dx>0?'right':'left';
+    if(dx||dy) player.bobTimer+=0.2;
   } else {
-    ctx.fillStyle = '#3d1a0e';
-    ctx.fillRect(0, 0, canvas.width, FLOOR_TOP);
-  }
-}
-
-// ===== 2. COUNTER SHELF BAR =====
-// Drawn before floor tiles so tiles don't bleed over it,
-// but the shelf itself acts as the "back wall" of the counter.
-function drawCounter() {
-  ctx.save();
-  // Back panel of counter
-  ctx.fillStyle = '#5d4037';
-  ctx.fillRect(0, FLOOR_TOP, canvas.width, 28);
-
-  // Shelf lip (front edge highlight)
-  ctx.fillStyle = '#8d6550';
-  ctx.fillRect(0, FLOOR_TOP + 22, canvas.width, 8);
-
-  // Subtle shadow cast onto floor
-  const shadowGrad = ctx.createLinearGradient(0, FLOOR_TOP + 30, 0, FLOOR_TOP + 55);
-  shadowGrad.addColorStop(0, 'rgba(60,30,10,0.22)');
-  shadowGrad.addColorStop(1, 'rgba(60,30,10,0)');
-  ctx.fillStyle = shadowGrad;
-  ctx.fillRect(0, FLOOR_TOP + 30, canvas.width, 25);
-  ctx.restore();
-}
-
-// ===== 3. FLOOR TILES =====
-function drawFloorTiles() {
-  const lightTile = '#e8c99a';
-  const darkTile  = '#d4b080';
-  const tileStart = FLOOR_TOP + 30; // start below counter lip
-
-  for (let x = 0; x < canvas.width; x += TILE_SIZE) {
-    for (let y = tileStart; y < canvas.height; y += TILE_SIZE) {
-      const isLight = (Math.floor(x / TILE_SIZE) + Math.floor(y / TILE_SIZE)) % 2 === 0;
-      ctx.fillStyle = isLight ? lightTile : darkTile;
-      ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+    kitchen.timer--;
+    if(kitchen.timer<=0){
+      kitchen.active=false; playerHolding=kitchen.item; player.readyTimer=45;
+      document.getElementById('cookBar').style.display='none';
+      spawnParticles(player.x,player.y-40,'#ffb5c8',10);
+      showToast(kitchen.item+' Ready!'); updateHolding();
     }
   }
 
-  // Grout lines
-  ctx.strokeStyle = 'rgba(160,110,60,0.18)';
-  ctx.lineWidth   = 1;
-  for (let x = 0; x <= canvas.width; x += TILE_SIZE) {
-    ctx.beginPath(); ctx.moveTo(x, tileStart); ctx.lineTo(x, canvas.height); ctx.stroke();
-  }
-  for (let y = tileStart; y <= canvas.height; y += TILE_SIZE) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  // Clamp — original used Math.max(225,...) so player stays off the very top
+  // We use 220 so player can just reach the y=200 counter items
+  player.x=Math.max(40,   Math.min(canvas.width -40,  player.x));
+  player.y=Math.max(220,  Math.min(canvas.height-210, player.y));
+
+  if(player.readyTimer>0) player.readyTimer--;
+
+  gameMinutes+=0.15;
+  if(gameMinutes>=1260){endDay();return;}
+
+  if(Math.random()<0.007){
+    const chair=furniture.find(f=>f.type==='CHAIR'&&!f.occupied);
+    if(chair){
+      chair.occupied=true;
+      const isC=Math.random()<0.12;
+      const pat=(player.power==='jinx'?1500:1100)+Math.random()*200;
+      customers.push({x:chair.x,y:chair.y,chair,
+        order:isC?'🍪':['☕','🍪','🍼'][Math.floor(Math.random()*3)],
+        isCritic:isC, img:isC?f3:(Math.random()>0.5?f1:f2),
+        patience:pat, maxPatience:pat, arrivalScale:0.1});
+    }
   }
 
-  // Ambient light puddle
-  const ambGrad = ctx.createRadialGradient(
-    canvas.width / 2, FLOOR_TOP + 80, 0,
-    canvas.width / 2, FLOOR_TOP + 80, canvas.width * 0.6
-  );
-  ambGrad.addColorStop(0, 'rgba(255,210,140,0.10)');
-  ambGrad.addColorStop(1, 'rgba(255,210,140,0)');
-  ctx.fillStyle = ambGrad;
-  ctx.fillRect(0, tileStart, canvas.width, canvas.height - tileStart);
+  customers.forEach((c,i)=>{
+    if(c.arrivalScale<1) c.arrivalScale=Math.min(1,c.arrivalScale+0.06);
+    c.patience--;
+    if(c.patience<=0){
+      c.chair.occupied=false; customers.splice(i,1);
+      score=Math.max(0,score-50); showToast('😾 Customer left! -50');
+      spawnParticles(c.x,c.y,'#ff6666',8);
+    }
+  });
+
+  if(trashLevel>=100) sparkleAlpha=(Math.sin(Date.now()/100)+1)/2;
+  if(radioActive&&Math.random()<0.04)
+    musicNotes.push({x:58,y:BG_H+140,vx:(Math.random()-0.5)*1.2,vy:-(0.6+Math.random()*0.8),life:1,decay:0.015});
+  musicNotes.forEach((n,i)=>{n.x+=n.vx;n.y+=n.vy;n.life-=n.decay;if(n.life<=0)musicNotes.splice(i,1);});
+  floatingTips.forEach((t,i)=>{t.y-=1.2;t.life--;if(t.life<=0)floatingTips.splice(i,1);});
+  particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.vx*=0.95;p.vy*=0.95;p.life-=p.decay;if(p.life<=0)particles.splice(i,1);});
+
+  // HUD
+  document.getElementById('scoreVal').textContent=score;
+  document.getElementById('highVal').textContent=highScore;
+  const trashEl=document.getElementById('trashVal');
+  trashEl.textContent=trashLevel;
+  trashEl.className=trashLevel>=75?'hud-warn':'hud-val';
+  const h=Math.floor(gameMinutes/60),m=Math.floor(gameMinutes%60);
+  document.getElementById('timeVal').textContent=(h%12||12)+':'+(m<10?'0':'')+m+(h>=12?'pm':'am');
+  if(kitchen.active)
+    document.getElementById('cookFill').style.width=((kitchen.maxTimer-kitchen.timer)/kitchen.maxTimer*100)+'%';
+  updateHolding();
 }
 
-// ===== 4. FURNITURE =====
-function drawFurniture() {
-  furniture.forEach(f => {
-    const x = f.x, y = f.y;
+function endDay(){
+  gameActive=false;
+  document.getElementById('finalScore').textContent=score;
+  const best=parseInt(localStorage.getItem('whiskerBytesHigh')||'0');
+  const isNew=score>=best;
+  if(isNew) localStorage.setItem('whiskerBytesHigh',score);
+  document.getElementById('finalBest').textContent=isNew?'🏆 New Best Score!':'Best: '+best;
+  document.getElementById('day-over').style.display='block';
+}
 
-    // TV glow
-    if (f.type === 'TV' && tvActive) {
-      withShadow(() => {
-        ctx.fillStyle = '#111';
-        ctx.beginPath();
-        ctx.roundRect(x - 28, y - 22, 56, 44, 6);
-        ctx.fill();
-      }, '#ffee88', 20);
-      ctx.font = '22px serif';
-      ctx.fillText('🐱', x - 11, y + 10);
+// ── DRAW ──
+// Draw order mirrors the original exactly:
+// 1. bg image  2. floor tiles  3. furniture (shelf then emoji)  4. customers  5. player  6. effects
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Window sparkle when trash full
-    } else if (f.type === 'WINDOW' && trashLevel >= 100) {
-      ctx.globalAlpha = 0.4 + sparkleAlpha * 0.4;
-      ctx.fillStyle   = '#fff8dc';
-      ctx.beginPath();
-      ctx.roundRect(x - 28, y - 28, 56, 56, 8);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.font = '36px serif';
-      ctx.fillText(f.e, x - 18, y + 16);
+  // 1. Background strip — original: ctx.drawImage(bgImg,0,0,canvas.width,160)
+  if(bgImg.complete&&bgImg.naturalWidth>0)
+    ctx.drawImage(bgImg,0,0,canvas.width,BG_H);
+  else { ctx.fillStyle='#3d1a0e'; ctx.fillRect(0,0,canvas.width,BG_H); }
 
-    // All other furniture
+  // 2. Floor tiles — original started at y=160
+  const ts=60;
+  for(let x=0;x<canvas.width;x+=ts){
+    for(let y=BG_H;y<canvas.height;y+=ts){
+      ctx.fillStyle=(Math.floor(x/ts)+Math.floor(y/ts))%2===0?'#e8c99a':'#d4b080';
+      ctx.fillRect(x,y,ts,ts);
+    }
+  }
+  // Subtle grout
+  ctx.strokeStyle='rgba(160,110,60,0.15)'; ctx.lineWidth=1;
+  for(let x=0;x<=canvas.width;x+=ts){ctx.beginPath();ctx.moveTo(x,BG_H);ctx.lineTo(x,canvas.height);ctx.stroke();}
+  for(let y=BG_H;y<=canvas.height;y+=ts){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+
+  // 3. Furniture
+  // Original drew shelf THEN emoji for STATION — we keep that same order
+  furniture.forEach(f=>{
+    // Shelf bar below station items (original: ctx.fillRect(f.x-40, f.y+20, 80, 15))
+    if(f.type==='STATION'){
+      ctx.fillStyle='#5d4037';
+      ctx.shadowColor='rgba(0,0,0,0.25)'; ctx.shadowBlur=5; ctx.shadowOffsetY=3;
+      ctx.fillRect(f.x-40, f.y+20, 80, 15);
+      ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+    }
+
+    // Emoji rendering — exactly as original
+    if(f.type==='TV'&&tvActive){
+      ctx.shadowBlur=15; ctx.shadowColor='yellow';
+      ctx.fillStyle='black'; ctx.fillRect(f.x-25,f.y-20,50,40);
+      ctx.shadowBlur=0;
+      ctx.font='20px Arial'; ctx.fillText('🐱',f.x-11,f.y+8);
+    } else if(f.type==='WINDOW'&&trashLevel>=100){
+      ctx.fillStyle=`rgba(255,255,255,${sparkleAlpha})`; ctx.fillRect(f.x-25,f.y-25,50,50);
+      ctx.font='35px Arial'; ctx.fillText(f.e,f.x-17,f.y+15);
     } else {
-      withShadow(() => {
-        ctx.font = '36px serif';
-        ctx.fillText(f.e, x - 18, y + 16);
-      });
+      ctx.font='35px Arial'; ctx.fillText(f.e,f.x-17,f.y+15);
     }
 
-    // Proximity highlight glow
-    const dist = Math.hypot(player.x - x, player.y - y);
-    if (dist < 72 && gameActive) {
+    // Proximity glow (new feature, drawn after emoji so it's on top)
+    if(gameActive&&Math.hypot(player.x-f.x,player.y-f.y)<72){
       ctx.save();
-      ctx.strokeStyle = 'rgba(255,200,100,0.7)';
-      ctx.lineWidth   = 2.5;
-      ctx.shadowColor = 'rgba(255,200,100,0.5)';
-      ctx.shadowBlur  = 12;
-      ctx.beginPath();
-      ctx.arc(x, y, 38, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.strokeStyle='rgba(255,200,100,0.7)'; ctx.lineWidth=2.5;
+      ctx.shadowColor='rgba(255,200,100,0.5)'; ctx.shadowBlur=12;
+      ctx.beginPath(); ctx.arc(f.x,f.y,38,0,Math.PI*2); ctx.stroke();
       ctx.restore();
-
-      if (f.label) {
-        ctx.save();
-        ctx.font      = 'bold 10px Nunito, sans-serif';
-        ctx.fillStyle = '#6d4c3d';
-        ctx.textAlign = 'center';
-        ctx.fillText(f.label, x, y - 30);
-        ctx.restore();
+      if(f.label){
+        ctx.save(); ctx.font='bold 10px Nunito,sans-serif';
+        ctx.fillStyle='#5d4037'; ctx.textAlign='center';
+        ctx.fillText(f.label,f.x,f.y-30); ctx.restore();
       }
     }
   });
-}
 
-// ===== 5. CUSTOMERS =====
-function drawCustomers() {
-  customers.forEach(c => {
+  // 4. Customers
+  customers.forEach(c=>{
     ctx.save();
-    ctx.translate(c.x, c.y);
-    ctx.scale(c.arrivalScale, c.arrivalScale);
-    ctx.translate(-c.x, -c.y);
-
-    if (c.img.complete && c.img.naturalWidth > 0) {
-      withShadow(() => ctx.drawImage(c.img, c.x - 32, c.y - 32, 64, 64));
-    } else {
-      ctx.fillStyle = c.isCritic ? '#d4a843' : '#9b8ea0';
-      ctx.beginPath(); ctx.arc(c.x, c.y, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.translate(c.x,c.y); ctx.scale(c.arrivalScale,c.arrivalScale); ctx.translate(-c.x,-c.y);
+    if(c.img.complete&&c.img.naturalWidth>0)
+      ctx.drawImage(c.img,c.x-30,c.y-30,60,60);
+    else {
+      ctx.fillStyle=c.isCritic?'gold':'#888';
+      ctx.beginPath(); ctx.arc(c.x,c.y,25,0,Math.PI*2); ctx.fill();
     }
-
     // Thought bubble
-    ctx.fillStyle   = 'rgba(255,255,255,0.95)';
-    ctx.shadowColor = 'rgba(0,0,0,0.15)'; ctx.shadowBlur = 6;
-    ctx.beginPath(); ctx.arc(c.x + 28, c.y - 38, 20, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle  = 'rgba(255,255,255,0.9)';
-    ctx.beginPath(); ctx.arc(c.x + 18, c.y - 24, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(c.x + 12, c.y - 16, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.font = '17px serif';
-    ctx.fillText(c.order, c.x + 19, c.y - 33);
-
-    if (c.isCritic) {
-      ctx.font      = 'bold 9px Nunito, sans-serif';
-      ctx.fillStyle = '#d4a843';
-      ctx.textAlign = 'center';
-      ctx.fillText('CRITIC', c.x, c.y + 40);
+    ctx.fillStyle='white';
+    ctx.shadowColor='rgba(0,0,0,0.1)'; ctx.shadowBlur=5;
+    ctx.beginPath(); ctx.arc(c.x+25,c.y-35,18,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.shadowBlur=0;
+    ctx.beginPath(); ctx.arc(c.x+16,c.y-22,5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(c.x+10,c.y-14,3,0,Math.PI*2); ctx.fill();
+    ctx.font='16px Arial'; ctx.fillText(c.order,c.x+17,c.y-30);
+    if(c.isCritic){
+      ctx.font='bold 9px Nunito,sans-serif'; ctx.fillStyle='#d4a843'; ctx.textAlign='center';
+      ctx.fillText('CRITIC',c.x,c.y+40);
     }
-
     ctx.restore();
-
     // Patience bar (outside scale transform)
-    const pct  = c.patience / c.maxPatience;
-    const barW = 50, barH = 5;
-    const bx   = c.x - barW / 2;
-    const by   = c.y + 36;
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    ctx.beginPath(); ctx.roundRect(bx, by, barW, barH, 3); ctx.fill();
-    const r = Math.round(255 * (1 - pct));
-    const g = Math.round(200 * pct);
-    ctx.fillStyle = 'rgb(' + r + ',' + g + ',60)';
-    ctx.beginPath(); ctx.roundRect(bx, by, barW * pct, barH, 3); ctx.fill();
+    const pct=c.patience/c.maxPatience;
+    ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.fillRect(c.x-20,c.y+35,40,5);
+    ctx.fillStyle=`rgb(${Math.round(255*(1-pct))},${Math.round(200*pct)},60)`;
+    ctx.fillRect(c.x-20,c.y+35,40*pct,5);
   });
-}
 
-// ===== 6. PLAYER =====
-function drawPlayer() {
-  const bob = Math.sin(player.bobTimer) * 3;
-  const px  = player.x;
-  const py  = player.y + bob;
-
+  // 5. Player
+  const bob=Math.sin(player.bobTimer)*3;
+  const px=player.x, py=player.y+bob;
   // Floor shadow
-  ctx.save();
-  ctx.fillStyle = 'rgba(80,40,10,0.18)';
-  ctx.beginPath();
-  ctx.ellipse(px, player.y + 32, 28, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
+  ctx.fillStyle='rgba(80,40,10,0.15)';
+  ctx.beginPath(); ctx.ellipse(px,player.y+30,24,8,0,0,Math.PI*2); ctx.fill();
   // Ready glow ring
-  if (player.readyTimer > 0) {
-    const pulse = Math.sin(Date.now() * 0.015) * 0.5 + 0.5;
+  if(player.readyTimer>0){
+    const pulse=Math.sin(Date.now()*0.015)*0.5+0.5;
     ctx.save();
-    ctx.strokeStyle = 'rgba(255,215,0,' + (0.5 + pulse * 0.4) + ')';
-    ctx.lineWidth   = 3;
-    ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 16;
-    ctx.beginPath(); ctx.arc(px, py - 4, 40, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle=`rgba(255,215,0,${0.5+pulse*0.4})`; ctx.lineWidth=3;
+    ctx.shadowColor='#ffd700'; ctx.shadowBlur=16;
+    ctx.beginPath(); ctx.arc(px,py-4,40,0,Math.PI*2); ctx.stroke();
     ctx.restore();
   }
-
-  // Cooking dashed ring
-  if (kitchen.active) {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,150,150,0.5)';
-    ctx.lineWidth   = 2;
-    ctx.setLineDash([4, 6]);
-    ctx.beginPath(); ctx.arc(px, py - 4, 44, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
+  // Cooking ring
+  if(kitchen.active){
+    ctx.save(); ctx.strokeStyle='rgba(255,150,150,0.5)'; ctx.lineWidth=2;
+    ctx.setLineDash([4,6]);
+    ctx.beginPath(); ctx.arc(px,py-4,44,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
   }
-
-  // Cat sprite
-  withShadow(() => {
-    if (catImg.complete && catImg.naturalWidth > 0) {
-      ctx.save();
-      if (player.facing === 'left') {
-        ctx.translate(px, py);
-        ctx.scale(-1, 1);
-        ctx.drawImage(catImg, -36, -36 + bob, 72, 72);
-      } else {
-        ctx.drawImage(catImg, px - 36, py - 36, 72, 72);
-      }
-      ctx.restore();
+  // Cat sprite — same 70×70 as original
+  if(catImg.complete&&catImg.naturalWidth>0){
+    ctx.save();
+    ctx.shadowColor='rgba(80,40,10,0.2)'; ctx.shadowBlur=10; ctx.shadowOffsetY=4;
+    if(player.facing==='left'){
+      ctx.translate(px,py); ctx.scale(-1,1);
+      ctx.drawImage(catImg,-35,-35+bob,70,70);
+    } else {
+      ctx.drawImage(catImg,px-35,py-35,70,70);
     }
-  }, 'rgba(80,40,10,0.2)', 10, 0, 4);
-
+    ctx.restore();
+  }
   // Held item
-  if (playerHolding) {
-    withShadow(() => {
-      ctx.font = '22px serif';
-      ctx.fillText(playerHolding, px + 18, py - 30);
-    }, 'rgba(0,0,0,0.2)', 6);
-  }
-
+  if(playerHolding){ ctx.font='22px Arial'; ctx.fillText(playerHolding,px+18,py-30); }
   // Ready label
-  if (player.readyTimer > 0) {
-    ctx.save();
-    ctx.font      = 'bold 13px Nunito, sans-serif';
-    ctx.fillStyle = '#d4a843';
-    ctx.textAlign = 'center';
-    ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 8;
-    ctx.fillText('✨ Ready!', px, py - 52);
-    ctx.restore();
+  if(player.readyTimer>0){
+    ctx.save(); ctx.font='bold 13px Nunito,sans-serif'; ctx.fillStyle='#d4a843';
+    ctx.textAlign='center'; ctx.shadowColor='#ffd700'; ctx.shadowBlur=8;
+    ctx.fillText('✨ Ready!',px,py-52); ctx.restore();
   }
-}
 
-// ===== 7. EFFECTS =====
-function drawEffects() {
-  musicNotes.forEach(n => {
-    ctx.save();
-    ctx.globalAlpha = n.life;
-    ctx.font = '18px serif';
-    ctx.fillText('♪', n.x, n.y);
-    ctx.restore();
+  // 6. Effects
+  musicNotes.forEach(n=>{
+    ctx.save(); ctx.globalAlpha=n.life; ctx.font='18px Arial';
+    ctx.fillText('♪',n.x,n.y); ctx.restore();
   });
-
-  floatingTips.forEach(t => {
-    ctx.save();
-    ctx.globalAlpha = t.life / t.maxLife;
-    ctx.font        = 'bold 15px Nunito, sans-serif';
-    ctx.fillStyle   = '#2d7a2d';
-    ctx.textAlign   = 'center';
-    ctx.shadowColor = '#88ff88'; ctx.shadowBlur = 8;
-    ctx.fillText(t.text, t.x, t.y);
-    ctx.restore();
+  floatingTips.forEach(t=>{
+    ctx.save(); ctx.globalAlpha=t.life/t.maxLife;
+    ctx.font='bold 15px Nunito,sans-serif'; ctx.fillStyle='#2d7a2d';
+    ctx.textAlign='center'; ctx.shadowColor='#88ff88'; ctx.shadowBlur=8;
+    ctx.fillText(t.text,t.x,t.y); ctx.restore();
   });
-
-  particles.forEach(p => {
-    ctx.save();
-    ctx.globalAlpha = p.life;
-    ctx.fillStyle   = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-    ctx.fill();
+  particles.forEach(p=>{
+    ctx.save(); ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); ctx.fill();
     ctx.restore();
   });
 }
 
-// ==================== MAIN LOOP ====================
-function loop() {
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
+function loop(){ update(); draw(); requestAnimationFrame(loop); }
 
-// ==================== RESIZE ====================
-function resize() {
+// Match original: set canvas size on window.onload
+window.onload = function(){
   canvas.width  = window.innerWidth;
   canvas.height = window.innerHeight;
-}
-
-window.addEventListener('resize', () => {
-  resize();
-  if (gameActive && player.power) startGame(player.power);
-});
-
-resize();
-loop();
+  loop();
+};
 </script>
 </body>
 </html>
