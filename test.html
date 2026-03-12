@@ -464,16 +464,18 @@ window.startGame = function(catId) {
   player.y = canvas.height / 2;
 
   // ---- LAYOUT POSITIONS ----
-  // Counter items sit just below FLOOR_TOP so they appear ON the counter
-  const counterItemY = FLOOR_TOP + 55;  // emoji centre — above the shelf bar
+  // Counter items sit ON the counter bar (FLOOR_TOP is 160, counter bar is at 160-188)
+  // We place the emoji centre at FLOOR_TOP + 14 so it sits visibly on the shelf
+  const counterItemY = FLOOR_TOP + 14;
 
   // Floor area mid-point for tables/chairs/radio/tv
-  const floorH = canvas.height - FLOOR_TOP - 160; // 160px reserved for controls area
-  const midY   = FLOOR_TOP + floorH / 2;
+  // Subtract ~180px for the controls area at the bottom
+  const floorH = canvas.height - FLOOR_TOP - 180;
+  const midY   = FLOOR_TOP + 60 + floorH / 2;
   const midX   = canvas.width / 2;
 
   furniture = [
-    // --- Counter row (top of floor area) ---
+    // --- Counter row (sits on the shelf bar) ---
     { x: 40,  y: counterItemY, type: 'WINDOW',  e: '🪟' },
     { x: 100, y: counterItemY, type: 'STATION', item: '☕', e: '☕', label: 'Coffee' },
     { x: 180, y: counterItemY, type: 'STATION', item: '🍪', e: '🍪', label: 'Cookie' },
@@ -629,9 +631,9 @@ function update() {
     if (dx !== 0 || dy !== 0) player.bobTimer += 0.2;
   }
 
-  // Keep player on the floor (below counter, above controls)
+  // Keep player on the floor (can reach counter at top, stops above controls)
   player.x = Math.max(40, Math.min(canvas.width  - 40,  player.x));
-  player.y = Math.max(FLOOR_TOP + 80, Math.min(canvas.height - 160, player.y));
+  player.y = Math.max(FLOOR_TOP + 30, Math.min(canvas.height - 180, player.y));
 
   // Kitchen timer
   if (kitchen.active) {
